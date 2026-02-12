@@ -667,3 +667,46 @@ function renderProfile() {
 
 /* ---------- start ---------- */
 showTab("home");
+
+function renderSupport() {
+  const root = document.getElementById("supportRoot");
+  if (!root) return;
+
+  // пока без оплат — просто заглушка красиво
+  root.innerHTML = `
+    <div class="item">
+      <div>
+        <strong>Чат с наставником</strong>
+        <div class="muted small">Вопросы по работам, подбор химии, разбор ошибок</div>
+      </div>
+      <span class="badge lock">PRO</span>
+    </div>
+
+    <div class="item">
+      <div>
+        <strong>Закрытый чат учеников</strong>
+        <div class="muted small">Кейсы, разборы, советы и поддержка</div>
+      </div>
+      <span class="badge lock">PRO</span>
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="muted small">
+      Доступ: подписка на месяц (Stars) или навсегда, если куплено 3+ курсов.
+    </div>
+
+    <div class="row" style="margin-top:10px">
+      <button class="btn btn--primary" id="buySupport">Оформить подписку</button>
+      <button class="btn btn--ghost" id="howGetForever">Как получить навсегда?</button>
+    </div>
+  `;
+
+  document.getElementById("buySupport")?.addEventListener("click", () => {
+    popup("Скоро", "Следующим шагом подключим Telegram Stars и включим подписку.");
+  });
+
+  document.getElementById("howGetForever")?.addEventListener("click", () => {
+    popup("Навсегда", "Доступ навсегда будет автоматически выдаваться тем, кто купил 3+ курса.");
+  });
+}
