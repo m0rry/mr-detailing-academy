@@ -415,5 +415,14 @@
       goBtns.forEach(btn => btn.addEventListener("click", () => show(btn.dataset.go)));
     })();
   </script>
+  <script>
+  // SHOW JS ERRORS прямо в UI (чтобы понять, что ломается)
+  window.addEventListener("error", (e) => {
+    alert("JS error: " + (e?.message || "unknown"));
+  });
+  window.addEventListener("unhandledrejection", (e) => {
+    alert("Promise error: " + (e?.reason?.message || e?.reason || "unknown"));
+  });
+</script>
 </body>
 </html>
