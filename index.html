@@ -33,77 +33,159 @@
     </header>
 
     <!-- Content -->
-    <main class="content">
-      <!-- Quick row -->
-      <section class="section">
-        <div class="section__head">
-          <h2>Разделы</h2>
-          <span class="muted">scroll →</span>
-        </div>
+    <!-- SCREENS -->
+<main class="content">
+  <!-- HOME -->
+  <section class="screen is-active" id="screen-home">
+    <!-- Quick row -->
+    <section class="section">
+      <div class="section__head">
+        <h2>Разделы</h2>
+        <span class="muted">scroll →</span>
+      </div>
 
-        <div class="hscroll">
-          <button class="mini glow" type="button">
-            <div class="mini__top">
-              <span class="mini__pill">SOON</span>
+      <div class="hscroll">
+        <button class="mini glow" type="button" data-go="bonus">
+          <div class="mini__top"><span class="mini__pill">SOON</span></div>
+          <div class="mini__title">База знаний</div>
+          <div class="mini__sub muted">таблицы / шпаргалки</div>
+        </button>
+
+        <button class="mini glow" type="button" data-go="profile">
+          <div class="mini__top"><span class="mini__pill">NEW</span></div>
+          <div class="mini__title">Feedback</div>
+          <div class="mini__sub muted">пожелания / баги</div>
+        </button>
+
+        <button class="mini glow" type="button" data-go="bonus">
+          <div class="mini__top"><span class="mini__pill">PRO</span></div>
+          <div class="mini__title">Сопровождение</div>
+          <div class="mini__sub muted">чаты / помощь</div>
+        </button>
+
+        <button class="mini glow" type="button" data-go="bonus">
+          <div class="mini__top"><span class="mini__pill">HOT</span></div>
+          <div class="mini__title">Рефералы</div>
+          <div class="mini__sub muted">скидки за друзей</div>
+        </button>
+      </div>
+    </section>
+
+    <!-- Cards -->
+    <section class="section">
+      <div class="section__head">
+        <h2>MR Detailing Academy</h2>
+        <span class="muted">parallax</span>
+      </div>
+
+      <div class="cards">
+        <article class="p-card" data-parallax>
+          <div class="p-card__frame"></div>
+          <div class="p-card__bg p-card__bg--wash"></div>
+          <div class="p-card__shine"></div>
+          <div class="layer layer--glow"></div>
+          <div class="layer layer--object layer--wash"></div>
+          <div class="layer layer--particles"></div>
+
+          <div class="p-card__content">
+            <div class="tag tag--green">FREE</div>
+            <h3>Курс мойки</h3>
+            <p class="muted">Обязательная база. Откроет доступ к платным курсам.</p>
+            <div class="row">
+              <button class="btn" id="openWash">Открыть</button>
+              <button class="btn btn--ghost" id="previewWash">Превью</button>
             </div>
-            <div class="mini__title">База знаний</div>
-            <div class="mini__sub muted">таблицы / шпаргалки</div>
-          </button>
+          </div>
+        </article>
 
-          <button class="mini glow" type="button">
-            <div class="mini__top">
-              <span class="mini__pill">NEW</span>
+        <article class="p-card" data-parallax>
+          <div class="p-card__frame"></div>
+          <div class="p-card__bg p-card__bg--interior"></div>
+          <div class="p-card__shine"></div>
+          <div class="layer layer--glow"></div>
+          <div class="layer layer--object layer--interior"></div>
+          <div class="layer layer--particles"></div>
+
+          <div class="p-card__content">
+            <div class="tag tag--purple">LOCKED</div>
+            <h3>Химчистка салона</h3>
+            <p class="muted">Покупка/подписка. –50% за 3 друзей.</p>
+            <div class="row">
+              <button class="btn btn--primary" id="buyInterior">⭐ Купить</button>
+              <button class="btn btn--ghost" id="refInterior">🎁 Скидка</button>
             </div>
-            <div class="mini__title">Feedback</div>
-            <div class="mini__sub muted">пожелания / баги</div>
-          </button>
+          </div>
+        </article>
+      </div>
+    </section>
 
-          <button class="mini glow" type="button">
-            <div class="mini__top">
-              <span class="mini__pill">PRO</span>
-            </div>
-            <div class="mini__title">Сопровождение</div>
-            <div class="mini__sub muted">чаты / помощь</div>
-          </button>
+    <section class="hero" data-parallax>
+      <div class="hero__bg"></div>
+      <div class="hero__frame"></div>
+      <div class="layer layer--glow hero__glow"></div>
+      <div class="layer hero__hands"></div>
+      <div class="layer hero__ring"></div>
+      <div class="layer layer--particles hero__particles"></div>
 
-          <button class="mini glow" type="button">
-            <div class="mini__top">
-              <span class="mini__pill">HOT</span>
-            </div>
-            <div class="mini__title">Рефералы</div>
-            <div class="mini__sub muted">скидки за друзей</div>
-          </button>
-        </div>
-      </section>
+      <div class="hero__content">
+        <h1>База детейлера</h1>
+        <p class="muted">Химия, схемы, стандарты качества и частые ошибки.</p>
+        <button class="btn btn--primary" data-go="courses">Открыть курсы</button>
+      </div>
+    </section>
 
-      <!-- Cards grid -->
-      <section class="section">
-        <div class="section__head">
-          <h2>MR Detailing Academy</h2>
-          <span class="muted">parallax</span>
-        </div>
+    <div class="spacer"></div>
+  </section>
 
-        <div class="cards">
-          <!-- Wash (free) -->
-          <article class="p-card" data-parallax>
-            <div class="p-card__frame"></div>
-            <div class="p-card__bg p-card__bg--wash"></div>
-            <div class="p-card__shine"></div>
+  <!-- COURSES -->
+  <section class="screen" id="screen-courses">
+    <div class="section">
+      <div class="section__head">
+        <h2>Курсы</h2>
+        <span class="muted" id="coursesHint">выбери курс</span>
+      </div>
 
-            <div class="layer layer--glow"></div>
-            <div class="layer layer--object layer--wash"></div>
-            <div class="layer layer--particles"></div>
+      <div class="cards" id="coursesRoot"></div>
+    </div>
+  </section>
 
-            <div class="p-card__content">
-              <div class="tag tag--green">FREE</div>
-              <h3>Курс мойки</h3>
-              <p class="muted">Обязательная база. Откроет доступ к платным курсам.</p>
-              <div class="row">
-                <button class="btn" id="openWash">Открыть</button>
-                <button class="btn btn--ghost" id="previewWash">Превью</button>
-              </div>
-            </div>
-          </article>
+  <!-- PROGRESS -->
+  <section class="screen" id="screen-progress">
+    <div class="section">
+      <div class="section__head">
+        <h2>Прогресс</h2>
+        <span class="muted">по твоим курсам</span>
+      </div>
+
+      <div class="glass" id="progressRoot"></div>
+    </div>
+  </section>
+
+  <!-- BONUS -->
+  <section class="screen" id="screen-bonus">
+    <div class="section">
+      <div class="section__head">
+        <h2>Бонусы</h2>
+        <span class="muted">рефералы / база</span>
+      </div>
+
+      <div class="glass" id="bonusRoot"></div>
+    </div>
+  </section>
+
+  <!-- PROFILE -->
+  <section class="screen" id="screen-profile">
+    <div class="section">
+      <div class="section__head">
+        <h2>Профиль</h2>
+        <span class="muted">настройки</span>
+      </div>
+
+      <div class="glass" id="profileRoot"></div>
+    </div>
+  </section>
+</main>
+
 
           <!-- Interior (locked) -->
           <article class="p-card" data-parallax>
