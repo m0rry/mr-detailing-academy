@@ -453,3 +453,5 @@ p{margin:0 0 12px;line-height:1.35}
   background-image:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='260' viewBox='0 0 420 260'%3E%3Cpath d='M210 60c40 24 70 10 70 10v60c0 44-30 74-70 88-40-14-70-44-70-88V70s30 14 70-10z' fill='rgba(255,255,255,.09)' stroke='rgba(255,255,255,.25)' stroke-width='5'/%3E%3Cpath d='M210 92v104' stroke='rgba(143,107,255,.35)' stroke-width='6' stroke-linecap='round'/%3E%3Cpath d='M170 126h80' stroke='rgba(143,107,255,.35)' stroke-width='6' stroke-linecap='round'/%3E%3Ccircle cx='286' cy='88' r='20' fill='rgba(108,77,255,.18)'/%3E%3C/svg%3E");
 }
+.screen{display:none}
+.screen.is-active{display:block}
