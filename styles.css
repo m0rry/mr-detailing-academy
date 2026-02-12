@@ -596,4 +596,38 @@ p{margin:0 0 12px;line-height:1.35}
 @media (max-width: 360px){
   .courseCard__actions{ grid-template-columns: 1fr; }
 }
+/* ===== Premium course icon ===== */
+.courseIcon{
+  position:absolute;
+  right:22px;
+  top:50%;
+  transform:translateY(-50%);
+  width:56px;
+  height:56px;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:rgba(255,255,255,.65);
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.12);
+  backdrop-filter: blur(10px);
+}
+
+.courseIcon svg{
+  width:34px;
+  height:34px;
+}
+
+/* FREE подсветка */
+.courseCard.free .courseIcon{
+  color:#33d6a6;
+  box-shadow:0 0 0 1px rgba(51,214,166,.25) inset;
+}
+
+/* LOCKED подсветка */
+.courseCard.locked .courseIcon{
+  color:#9b7cff;
+  box-shadow:0 0 0 1px rgba(155,124,255,.3) inset;
+}
 
