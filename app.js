@@ -29,6 +29,14 @@ function setProgress(path, value) {
 
 // --- Data (MVP обучение) ---
 const academy = {
+  function iconFor(courseId){
+  const common = `style="width:34px;height:34px;filter:drop-shadow(0 12px 18px rgba(143,107,255,.22));"`;
+  if(courseId==="wash") return `<svg ${common} viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.92)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14l2-5h14l2 5"/><path d="M5 14v3a2 2 0 0 0 2 2h1"/><path d="M19 14v3a2 2 0 0 1-2 2h-1"/><path d="M7 9l1-3h8l1 3"/><path d="M12 3c0 4-3 5-3 8a3 3 0 0 0 6 0c0-3-3-4-3-8z" stroke="rgba(143,107,255,.8)"/></svg>`;
+  if(courseId==="interior") return `<svg ${common} viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.92)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10a4 4 0 0 1 4-4h2a4 4 0 0 1 4 4v9H7v-9z"/><path d="M7 14h10"/><path d="M6 19h12" stroke="rgba(143,107,255,.8)"/></svg>`;
+  if(courseId==="polish") return `<svg ${common} viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.92)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10h10a3 3 0 0 1 3 3v1H4v-1a3 3 0 0 1 3-3z"/><path d="M9 14a3 3 0 1 0 6 0"/><path d="M18 9l3-2" stroke="rgba(143,107,255,.8)"/></svg>`;
+  return `<svg ${common} viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.92)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c5 3 9 1 9 1v8c0 6-4 10-9 12C7 22 3 18 3 12V4s4 2 9-1z"/><path d="M12 7v12" stroke="rgba(143,107,255,.8)"/></svg>`;
+}
+
   courses: [
     {
       id: "wash",
