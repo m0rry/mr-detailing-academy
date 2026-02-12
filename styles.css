@@ -423,3 +423,11 @@ p{margin:0 0 12px;line-height:1.35}
 }
 .opt:active{transform:scale(.99)}
 .small{font-size:12px}
+.brand{display:flex; gap:12px; align-items:center}
+.brand__logo{
+  width:46px; height:46px;
+  border-radius:16px;
+  display:grid; place-items:center;
+}
+.logo{width:46px; height:46px}
+.brand__sub{margin-top:2px; opacity:.95}
