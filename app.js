@@ -255,8 +255,67 @@ function markLessonDone(courseId, lessonId) {
 }
 
 /* ---------- render: courses list ---------- */
+function courseArtSvg(kind) {
+  // Premium inline SVG (без файлов) — выглядит как “арт” внутри карточки
+  const common = `opacity=".95"`;
+  const svgWrap = (inner) =>
+    `data:image/svg+xml,${encodeURIComponent(
+      `<svg xmlns='http://www.w3.org/2000/svg' width='900' height='360' viewBox='0 0 900 360'>
+        <defs>
+          <linearGradient id='g1' x1='0' y1='0' x2='1' y2='1'>
+            <stop offset='0' stop-color='rgba(155,124,255,.65)'/>
+            <stop offset='1' stop-color='rgba(51,214,166,.35)'/>
+          </linearGradient>
+          <filter id='blur'><feGaussianBlur stdDeviation='8'/></filter>
+        </defs>
+        ${inner}
+      </svg>`
+    )}`;
+
+  if (kind === "wash") {
+    return svgWrap(`
+      <circle cx='720' cy='120' r='90' fill='url(#g1)' filter='url(#blur)' ${common}/>
+      <path d='M230 210c50-80 210-120 330-70 55 22 90 58 108 102 16 40-10 72-52 72H280c-42 0-70-36-50-104z'
+            fill='rgba(255,255,255,.10)' stroke='rgba(255,255,255,.18)' stroke-width='4'/>
+      <path d='M590 92c0 24-22 38-22 56a22 22 0 0 0 44 0c0-18-22-32-22-56z'
+            fill='rgba(155,124,255,.55)'/>
+      <circle cx='330' cy='282' r='22' fill='rgba(51,214,166,.22)'/>
+      <circle cx='640' cy='282' r='22' fill='rgba(155,124,255,.18)'/>
+    `);
+  }
+
+  if (kind === "interior") {
+    return svgWrap(`
+      <circle cx='760' cy='220' r='110' fill='url(#g1)' filter='url(#blur)' ${common}/>
+      <path d='M300 85c-44 0-80 36-80 80v64c0 38 30 70 68 70h44c44 0 80-36 80-80v-54c0-44-36-80-80-80h-32z'
+            fill='rgba(255,255,255,.10)' stroke='rgba(255,255,255,.18)' stroke-width='4'/>
+      <path d='M238 186h256' stroke='rgba(155,124,255,.28)' stroke-width='8' stroke-linecap='round'/>
+      <path d='M250 140h190' stroke='rgba(51,214,166,.20)' stroke-width='6' stroke-linecap='round'/>
+    `);
+  }
+
+  if (kind === "polish") {
+    return svgWrap(`
+      <circle cx='710' cy='160' r='120' fill='url(#g1)' filter='url(#blur)' ${common}/>
+      <rect x='250' y='110' width='360' height='78' rx='18'
+            fill='rgba(255,255,255,.10)' stroke='rgba(255,255,255,.18)' stroke-width='4'/>
+      <circle cx='360' cy='245' r='70' fill='rgba(155,124,255,.20)'/>
+      <path d='M520 120l120-52' stroke='rgba(255,255,255,.22)' stroke-width='10' stroke-linecap='round'/>
+      <path d='M310 245h100' stroke='rgba(51,214,166,.22)' stroke-width='10' stroke-linecap='round'/>
+    `);
+  }
+
+  // protect
+  return svgWrap(`
+    <circle cx='720' cy='150' r='120' fill='url(#g1)' filter='url(#blur)' ${common}/>
+    <path d='M450 70c70 40 120 18 120 18v96c0 70-52 118-120 142-68-24-120-72-120-142V88s50 22 120-18z'
+          fill='rgba(255,255,255,.09)' stroke='rgba(255,255,255,.18)' stroke-width='4'/>
+    <path d='M450 120v170' stroke='rgba(155,124,255,.26)' stroke-width='8' stroke-linecap='round'/>
+  `);
+}
+
 function renderCoursesList() {
-  const root = $("#coursesRoot");
+  const root = document.getElementById("coursesRoot");
   if (!root) return;
 
   root.innerHTML = "";
@@ -264,42 +323,79 @@ function renderCoursesList() {
   academy.courses.forEach((course) => {
     const locked = isCourseLocked(course);
     const pct = coursePercent(course.id);
+    const artKind =
+      course.id === "wash" ? "wash" :
+      course.id === "interior" ? "interior" :
+      course.id === "polish" ? "polish" :
+      "protect";
 
-    const wrap = document.createElement("div");
-    wrap.className = "glass";
+    const el = document.createElement("div");
+    el.className = "courseCard";
 
-    wrap.innerHTML = `
-      <div class="item">
+    el.innerHTML = `
+      <div class="courseCard__art" style="background-image:url('${courseArtSvg(artKind)}'); background-size:cover; background-position:center;"></div>
+      <div class="courseCard__fade"></div>
+
+      <div class="courseCard__top" style="position:relative; z-index:2;">
         <div>
-          <strong>${course.title}</strong>
-          <div class="muted small">${course.desc}</div>
+          <div class="badgePill ${course.free ? "badgePill--free" : "badgePill--locked"}">
+            ${course.free ? "FREE" : (locked ? "LOCKED" : "PRO")}
+            <span style="opacity:.75">•</span>
+            <span>${pct}%</span>
+          </div>
+
+          <div class="courseCard__title" style="margin-top:10px;">${course.title}</div>
+          <div class="courseCard__desc">${course.desc}</div>
+
+          <div class="progressLine"><i style="width:${pct}%;"></i></div>
+
+          <div class="courseCard__actions">
+            <button class="btn ${locked ? "btn--ghost" : "btn--primary"}" data-open-course="${course.id}">
+              ${locked ? "🔒 Недоступно" : "Открыть"}
+            </button>
+            <button class="btn btn--ghost" data-preview-course="${course.id}">
+              Описание
+            </button>
+          </div>
         </div>
-        <span class="badge ${pct === 100 ? "ok" : "lock"}">${pct}%</span>
       </div>
-      <div class="row" style="margin-top:10px">
-        <button class="btn ${locked ? "btn--ghost" : "btn--primary"}" data-open-course="${course.id}">
-          ${locked ? "🔒 Недоступно" : "Открыть"}
-        </button>
-      </div>
+
+      ${locked ? `
+        <div class="lockOverlay">
+          <div class="lockOverlay__text">
+            <span class="lockOverlay__dot"></span>
+            Сначала пройди “Курс мойки”, чтобы открыть доступ
+          </div>
+        </div>` : ""}
     `;
-    root.appendChild(wrap);
+
+    root.appendChild(el);
   });
 
-  $$("[data-open-course]").forEach((btn) => {
+  document.querySelectorAll("[data-open-course]").forEach((btn) => {
     btn.addEventListener("click", () => {
-      const courseId = btn.dataset.openCourse;
-      const course = academy.courses.find((c) => c.id === courseId);
+      const id = btn.dataset.openCourse;
+      const course = academy.courses.find((c) => c.id === id);
       if (!course) return;
 
       if (isCourseLocked(course)) {
         popup("Закрыто", "Сначала пройди бесплатный курс «Мойка» — он откроет доступ к платным курсам.");
         return;
       }
+      renderCourseDetail(id);
+    });
+  });
 
-      renderCourseDetail(courseId);
+  document.querySelectorAll("[data-preview-course]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const id = btn.dataset.previewCourse;
+      const course = academy.courses.find((c) => c.id === id);
+      if (!course) return;
+      popup(course.title, course.desc);
     });
   });
 }
+
 
 /* ---------- render: course detail ---------- */
 function renderCourseDetail(courseId) {
