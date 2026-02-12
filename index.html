@@ -27,6 +27,45 @@
       </div>
 
       <div class="topbar__right">
+        <div class="topbar__center">
+  <div class="brand">
+    <div class="brand__logo" aria-label="MR Detailing Academy logo">
+      <!-- SVG Logo: MR + Droplet -->
+      <svg viewBox="0 0 64 64" class="logo">
+        <defs>
+          <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#8f6bff"/>
+            <stop offset="1" stop-color="#6c4dff"/>
+          </linearGradient>
+          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="3.2" result="b"/>
+            <feMerge>
+              <feMergeNode in="b"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+
+        <!-- glass plate -->
+        <rect x="6" y="6" width="52" height="52" rx="18" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.14)"/>
+        <!-- droplet -->
+        <path filter="url(#glow)" d="M44 20c0 9-8 14-8 20a8 8 0 0 0 16 0c0-6-8-11-8-20z" fill="url(#g)" opacity=".95"/>
+        <!-- MR monogram -->
+        <path d="M14 41V25c0-2 1.2-3 3-3h1.5c1.2 0 2.2.5 2.8 1.5l3.2 5 3.2-5c.6-1 1.6-1.5 2.8-1.5H36c1.8 0 3 1 3 3v16"
+              fill="none" stroke="rgba(255,255,255,.92)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M39 33h5.5c2.6 0 4.5-1.7 4.5-4.2S47.1 24.6 44.5 24.6H39V41"
+              fill="none" stroke="rgba(255,255,255,.92)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+
+    <div class="brand__text">
+      <div class="muted" id="greeting">Доброе утро,</div>
+      <div class="title" id="username">MarkeyG</div>
+      <div class="brand__sub muted">MR Detailing Academy</div>
+    </div>
+  </div>
+</div>
+
         <div class="muted">Баланс</div>
         <div class="balance"><span id="stars">100</span> ⭐</div>
       </div>
