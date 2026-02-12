@@ -1235,5 +1235,46 @@
       bindNav();
       showTab("home");
     })();
+    <script>
+  function showTab(tab) {
+    // скрыть все
+    document.querySelectorAll(".screen").forEach(s => s.classList.remove("is-active"));
+
+    // показать нужный
+    const target = document.getElementById("screen-" + tab);
+    (target || document.getElementById("screen-home"))?.classList.add("is-active");
+
+    // подсветка нижнего меню
+    document.querySelectorAll(".nav__item").forEach(b => b.classList.remove("is-active"));
+    document.querySelector(`.nav__item[data-tab="${tab}"]`)?.classList.add("is-active");
+
+    // если у тебя есть функции рендера — вызываем, если нет — просто не падаем
+    if (tab === "courses" && typeof renderCoursesList === "function") renderCoursesList();
+    if (tab === "progress" && typeof renderProgress === "function") renderProgress();
+    if (tab === "bonus" && typeof renderBonus === "function") renderBonus();
+    if (tab === "support" && typeof renderSupport === "function") renderSupport();
+    if (tab === "profile" && typeof renderProfile === "function") renderProfile();
+  }
+
+  // Делегирование кликов — работает всегда
+  document.addEventListener("click", (e) => {
+    const go = e.target.closest("[data-go]");
+    if (go) {
+      e.preventDefault();
+      showTab(go.dataset.go);
+      return;
+    }
+
+    const tab = e.target.closest(".nav__item[data-tab]");
+    if (tab) {
+      e.preventDefault();
+      showTab(tab.dataset.tab);
+      return;
+    }
+  });
+
+  // по умолчанию показываем home
+  window.addEventListener("load", () => showTab("home"));
+</script>
 </body>
 </html>
