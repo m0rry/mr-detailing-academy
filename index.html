@@ -1235,20 +1235,22 @@
       bindNav();
       showTab("home");
     })();
-    <script>
+   <script>
+  // ===== HARD NAV FIX (works even after rerenders) =====
   function showTab(tab) {
-    // скрыть все
+    // 1) hide all
     document.querySelectorAll(".screen").forEach(s => s.classList.remove("is-active"));
 
-    // показать нужный
+    // 2) show target (fallback to home)
     const target = document.getElementById("screen-" + tab);
     (target || document.getElementById("screen-home"))?.classList.add("is-active");
 
-    // подсветка нижнего меню
+    // 3) bottom nav highlight
     document.querySelectorAll(".nav__item").forEach(b => b.classList.remove("is-active"));
-    document.querySelector(`.nav__item[data-tab="${tab}"]`)?.classList.add("is-active");
+    const navBtn = document.querySelector('.nav__item[data-tab="' + tab + '"]');
+    if (navBtn) navBtn.classList.add("is-active");
 
-    // если у тебя есть функции рендера — вызываем, если нет — просто не падаем
+    // 4) optional renders (don't crash if missing)
     if (tab === "courses" && typeof renderCoursesList === "function") renderCoursesList();
     if (tab === "progress" && typeof renderProgress === "function") renderProgress();
     if (tab === "bonus" && typeof renderBonus === "function") renderBonus();
@@ -1256,24 +1258,16 @@
     if (tab === "profile" && typeof renderProfile === "function") renderProfile();
   }
 
-  // Делегирование кликов — работает всегда
+  // One click handler for everything (delegation)
   document.addEventListener("click", (e) => {
     const go = e.target.closest("[data-go]");
-    if (go) {
-      e.preventDefault();
-      showTab(go.dataset.go);
-      return;
-    }
+    if (go) { e.preventDefault(); showTab(go.dataset.go); return; }
 
     const tab = e.target.closest(".nav__item[data-tab]");
-    if (tab) {
-      e.preventDefault();
-      showTab(tab.dataset.tab);
-      return;
-    }
+    if (tab) { e.preventDefault(); showTab(tab.dataset.tab); return; }
   });
 
-  // по умолчанию показываем home
+  // Ensure something is visible on load
   window.addEventListener("load", () => showTab("home"));
 </script>
 </body>
