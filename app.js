@@ -339,69 +339,110 @@ bindNavigation();
 
 /* ---------- render: courses list ---------- */
 function renderCoursesList() {
-  const root = $("#coursesRoot");
+  const root = document.getElementById("coursesRoot");
   if (!root) return;
 
   root.innerHTML = "";
 
-  academy.courses.forEach((course) => {
+  academy.courses.forEach(course => {
     const locked = isCourseLocked(course);
     const pct = coursePercent(course.id);
 
-    const wrap = document.createElement("div");
-    wrap.className = "glass";
-
-    const badgeText = locked ? "LOCKED" : (course.free ? "FREE" : "PRO");
-
-    wrap.innerHTML = `
-      <div class="item">
-        <div>
-          <strong>${course.title}</strong>
-          <div class="muted small">${course.desc}</div>
-          <div class="muted small" style="margin-top:6px">Прогресс: <strong>${fmtPct(pct)}</strong></div>
-        </div>
-        <span class="badge ${pct === 100 ? "ok" : (locked ? "lock" : "ok")}">${badgeText}</span>
-      </div>
-
-      <div class="row" style="margin-top:10px">
-        <button class="btn ${locked ? "btn--ghost" : "btn--primary"}" data-open-course="${course.id}">
-          ${locked ? "🔒 Недоступно" : "Открыть"}
-        </button>
-        <button class="btn btn--ghost" data-preview-course="${course.id}">Описание</button>
-      </div>
-
-      ${locked ? `
-        <div class="muted small" style="margin-top:10px; opacity:.75">
-          Доступ откроется после покупки (Stars) или подписки.
-        </div>` : ``}
+    const iconWash = `
+      <svg viewBox="0 0 64 64" fill="none">
+        <path d="M12 38h40l-4 10H16l-4-10z" stroke="currentColor" stroke-width="2"/>
+        <path d="M18 38l6-14h16l6 14" stroke="currentColor" stroke-width="2"/>
+        <path d="M24 18c0 4-4 6-4 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <path d="M40 18c0 4 4 6 4 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
     `;
-    root.appendChild(wrap);
+
+    const iconInterior = `
+      <svg viewBox="0 0 64 64" fill="none">
+        <rect x="18" y="14" width="28" height="30" rx="6" stroke="currentColor" stroke-width="2"/>
+        <path d="M18 28h28" stroke="currentColor" stroke-width="2"/>
+        <circle cx="46" cy="20" r="3" fill="currentColor"/>
+        <circle cx="50" cy="14" r="2" fill="currentColor"/>
+      </svg>
+    `;
+
+    const iconPolish = `
+      <svg viewBox="0 0 64 64" fill="none">
+        <rect x="10" y="26" width="36" height="12" rx="6" stroke="currentColor" stroke-width="2"/>
+        <circle cx="48" cy="32" r="6" stroke="currentColor" stroke-width="2"/>
+        <path d="M20 44h24" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    `;
+
+    const iconProtect = `
+      <svg viewBox="0 0 64 64" fill="none">
+        <path d="M32 10l18 6v14c0 12-8 18-18 24-10-6-18-12-18-24V16l18-6z"
+              stroke="currentColor" stroke-width="2"/>
+        <path d="M24 30l6 6 10-12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    `;
+
+    const icon =
+      course.id === "wash" ? iconWash :
+      course.id === "interior" ? iconInterior :
+      course.id === "polish" ? iconPolish :
+      iconProtect;
+
+    const card = document.createElement("div");
+    card.className = `courseCard ${locked ? "locked" : "free"}`;
+
+    card.innerHTML = `
+      <div class="courseIcon">
+        ${icon}
+      </div>
+
+      <div class="courseBody">
+        <div class="badge">${locked ? "LOCKED" : course.free ? "FREE" : "PRO"} • ${pct}%</div>
+
+        <h3 class="courseTitle">${course.title}</h3>
+        <p class="courseDesc">${course.desc}</p>
+
+        <div class="courseActions">
+          <button class="btn ${locked ? "btn--ghost" : "btn--primary"}"
+                  data-open-course="${course.id}">
+            ${locked ? "🔒 Недоступно" : "Открыть"}
+          </button>
+
+          <button class="btn btn--ghost"
+                  data-preview-course="${course.id}">
+            Описание
+          </button>
+        </div>
+      </div>
+    `;
+
+    root.appendChild(card);
   });
 
-  $$("[data-open-course]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const courseId = btn.dataset.openCourse;
-      const course = academy.courses.find((c) => c.id === courseId);
+  // handlers
+  document.querySelectorAll("[data-open-course]").forEach(btn => {
+    btn.onclick = () => {
+      const id = btn.dataset.openCourse;
+      const course = academy.courses.find(c => c.id === id);
       if (!course) return;
 
       if (isCourseLocked(course)) {
-        popup("Закрыто", "Этот курс платный. Доступ откроется после оплаты Stars/подписки (сделаем следующим шагом).");
+        popup("Закрыто", "Этот курс платный. Доступ откроется после оплаты или подписки.");
         return;
       }
-
-      renderCourseDetail(courseId);
-    });
+      renderCourseDetail(id);
+    };
   });
 
-  $$("[data-preview-course]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const courseId = btn.dataset.previewCourse;
-      const course = academy.courses.find((c) => c.id === courseId);
-      if (!course) return;
-      popup(course.title, course.desc);
-    });
+  document.querySelectorAll("[data-preview-course]").forEach(btn => {
+    btn.onclick = () => {
+      const id = btn.dataset.previewCourse;
+      const course = academy.courses.find(c => c.id === id);
+      if (course) popup(course.title, course.desc);
+    };
   });
 }
+
 
 /* ---------- render: course detail ---------- */
 function renderCourseDetail(courseId) {
