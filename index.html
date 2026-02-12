@@ -426,3 +426,34 @@
 </script>
 </body>
 </html>
+<script>
+  // Emergency nav: даже если app.js сломан, вкладки не будут пустыми
+  (function () {
+    const screens = () => Array.from(document.querySelectorAll(".screen"));
+    const navBtns = () => Array.from(document.querySelectorAll(".nav__item"));
+    const goBtns  = () => Array.from(document.querySelectorAll("[data-go]"));
+
+    function show(tab) {
+      const list = screens();
+      list.forEach(s => s.classList.remove("is-active"));
+      const target = document.getElementById("screen-" + tab);
+      if (target) target.classList.add("is-active");
+      else {
+        // если таба нет — не убиваем весь UI
+        const home = document.getElementById("screen-home");
+        if (home) home.classList.add("is-active");
+      }
+
+      navBtns().forEach(b => b.classList.remove("is-active"));
+      const active = document.querySelector('.nav__item[data-tab="' + tab + '"]');
+      if (active) active.classList.add("is-active");
+    }
+
+    // гарантируем, что хоть Home виден
+    setTimeout(() => show("home"), 0);
+
+    // перевешиваем клики
+    navBtns().forEach(btn => btn.onclick = () => show(btn.dataset.tab));
+    goBtns().forEach(btn  => btn.onclick  = () => show(btn.dataset.go));
+  })();
+</script>
