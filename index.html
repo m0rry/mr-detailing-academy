@@ -105,32 +105,98 @@
             <span class="muted">scroll →</span>
           </div>
 
-          <div class="hscroll">
-            <button class="mini glow" type="button" data-go="courses">
-              <div class="mini__top"><span class="mini__pill">START</span></div>
-              <div class="mini__title">Курсы</div>
-              <div class="mini__sub muted">модули / уроки</div>
-            </button>
+          <div class="hscroll sections">
 
-            <button class="mini glow" type="button" data-go="progress">
-              <div class="mini__top"><span class="mini__pill">LIVE</span></div>
-              <div class="mini__title">Прогресс</div>
-              <div class="mini__sub muted">проценты / статус</div>
-            </button>
+  <!-- Курсы -->
+  <button class="mini glow" data-go="courses">
+    <div class="mini__top"><span class="mini__pill">START</span></div>
 
-            <button class="mini glow" type="button" data-go="bonus">
-              <div class="mini__top"><span class="mini__pill">HOT</span></div>
-              <div class="mini__title">Бонусы</div>
-              <div class="mini__sub muted">рефералы / скидки</div>
-            </button>
+    <div class="mini__icon">
+      <svg viewBox="0 0 64 64" fill="none">
+        <rect x="10" y="14" width="44" height="36" rx="6"
+              stroke="currentColor" stroke-width="2"/>
+        <path d="M18 24h28M18 32h28M18 40h18"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </div>
 
-            <button class="mini glow" type="button" data-go="profile">
-              <div class="mini__top"><span class="mini__pill">ME</span></div>
-              <div class="mini__title">Профиль</div>
-              <div class="mini__sub muted">настройки</div>
-            </button>
-          </div>
-        </section>
+    <div class="mini__title">Курсы</div>
+    <div class="mini__sub muted">модули / уроки</div>
+  </button>
+
+  <!-- Прогресс -->
+  <button class="mini glow" data-go="progress">
+    <div class="mini__top"><span class="mini__pill">LIVE</span></div>
+
+    <div class="mini__icon">
+      <svg viewBox="0 0 64 64" fill="none">
+        <circle cx="32" cy="32" r="18"
+                stroke="currentColor" stroke-width="2"/>
+        <path d="M32 20v12l8 6"
+              stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+
+    <div class="mini__title">Прогресс</div>
+    <div class="mini__sub muted">проценты / статус</div>
+  </button>
+
+  <!-- Бонусы -->
+  <button class="mini glow" data-go="bonus">
+    <div class="mini__top"><span class="mini__pill">HOT</span></div>
+
+    <div class="mini__icon">
+      <svg viewBox="0 0 64 64" fill="none">
+        <path d="M32 10l6 12 14 2-10 10 2 14-12-6-12 6 2-14-10-10 14-2 6-12z"
+              stroke="currentColor" stroke-width="2"
+              stroke-linejoin="round"/>
+      </svg>
+    </div>
+
+    <div class="mini__title">Бонусы</div>
+    <div class="mini__sub muted">рефералы / скидки</div>
+  </button>
+
+  <!-- Сопровождение / Чаты -->
+  <button class="mini glow premium" data-go="support">
+    <div class="mini__top"><span class="mini__pill">PRO</span></div>
+
+    <div class="mini__icon">
+      <svg viewBox="0 0 64 64" fill="none">
+        <path d="M12 18h40v24H22l-10 8v-8H12V18z"
+              stroke="currentColor" stroke-width="2"
+              stroke-linejoin="round"/>
+        <circle cx="26" cy="30" r="2" fill="currentColor"/>
+        <circle cx="32" cy="30" r="2" fill="currentColor"/>
+        <circle cx="38" cy="30" r="2" fill="currentColor"/>
+      </svg>
+    </div>
+
+    <div class="mini__title">Сопровождение</div>
+    <div class="mini__sub muted">чаты / помощь</div>
+  </button>
+
+  <!-- Профиль -->
+  <button class="mini glow" data-go="profile">
+    <div class="mini__top"><span class="mini__pill">ME</span></div>
+
+    <div class="mini__icon">
+      <svg viewBox="0 0 64 64" fill="none">
+        <circle cx="32" cy="24" r="8"
+                stroke="currentColor" stroke-width="2"/>
+        <path d="M16 46c0-8 32-8 32 0"
+              stroke="currentColor" stroke-width="2"
+              stroke-linecap="round"/>
+      </svg>
+    </div>
+
+    <div class="mini__title">Профиль</div>
+    <div class="mini__sub muted">настройки</div>
+  </button>
+
+</div>
+
 
         <section class="section">
           <div class="section__head">
