@@ -455,3 +455,124 @@ p{margin:0 0 12px;line-height:1.35}
 }
 .screen{display:none}
 .screen.is-active{display:block}
+
+/* ===== Premium course cards ===== */
+.courseCard{
+  position:relative;
+  overflow:hidden;
+  border-radius:18px;
+  padding:16px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow: 0 18px 40px rgba(0,0,0,.35);
+}
+
+.courseCard__top{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.courseCard__title{
+  font-size:18px;
+  font-weight:800;
+  letter-spacing:.2px;
+}
+
+.courseCard__desc{
+  margin-top:6px;
+  opacity:.78;
+  font-size:13px;
+  line-height:1.35;
+}
+
+.courseCard__art{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  opacity:.95;
+}
+
+.courseCard__fade{
+  position:absolute;
+  inset:-40px -40px -40px -40px;
+  background: radial-gradient(800px 220px at 15% 30%, rgba(155,124,255,.30), transparent 60%),
+              radial-gradient(700px 240px at 85% 70%, rgba(51,214,166,.18), transparent 60%),
+              linear-gradient(180deg, rgba(0,0,0,.18), rgba(0,0,0,.55));
+  pointer-events:none;
+}
+
+.courseCard__actions{
+  margin-top:14px;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  position:relative;
+  z-index:2;
+}
+
+.badgePill{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:6px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:700;
+  border:1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.08);
+}
+
+.badgePill--free{ box-shadow: 0 0 0 1px rgba(51,214,166,.18) inset; }
+.badgePill--locked{ box-shadow: 0 0 0 1px rgba(155,124,255,.20) inset; }
+
+.progressLine{
+  margin-top:12px;
+  height:8px;
+  border-radius:999px;
+  background: rgba(255,255,255,.10);
+  overflow:hidden;
+  position:relative;
+  z-index:2;
+}
+.progressLine > i{
+  display:block;
+  height:100%;
+  width:0%;
+  border-radius:999px;
+  background: linear-gradient(90deg, rgba(155,124,255,.95), rgba(51,214,166,.75));
+  box-shadow: 0 10px 18px rgba(155,124,255,.20);
+}
+
+.lockOverlay{
+  position:absolute;
+  inset:0;
+  background: radial-gradient(700px 240px at 30% 10%, rgba(155,124,255,.18), transparent 60%),
+              rgba(0,0,0,.30);
+  display:flex;
+  align-items:flex-end;
+  justify-content:flex-start;
+  padding:14px;
+  pointer-events:none;
+}
+
+.lockOverlay__text{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  padding:10px 12px;
+  border-radius:14px;
+  background: rgba(0,0,0,.35);
+  border:1px solid rgba(255,255,255,.14);
+  backdrop-filter: blur(10px);
+  font-size:12px;
+  opacity:.95;
+}
+
+.lockOverlay__dot{
+  width:9px;height:9px;border-radius:50%;
+  background: rgba(155,124,255,.95);
+  box-shadow: 0 0 18px rgba(155,124,255,.55);
+}
+
