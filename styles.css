@@ -363,8 +363,9 @@ p{margin:0 0 12px;line-height:1.35}
   box-shadow: 0 0 0 1px rgba(255,255,255,.10) inset;
 }
 /* Screens (SPA navigation) */
-.screen{display:none; animation:fadeUp .18s ease}
-.screen.is-active{display:block}
+.screen { display: none; }
+.screen.is-active { display: block; }
+
 
 @keyframes fadeUp{
   from{opacity:0; transform:translateY(8px)}
