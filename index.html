@@ -1237,5 +1237,13 @@
     })();
 
   </script>
+  <script>
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('button, a, [data-go], [data-tab]');
+    if (t) {
+      alert('CLICK OK: ' + (t.dataset.go || t.dataset.tab || t.id || t.className));
+    }
+  }, true);
+</script>
 </body>
 </html>
