@@ -5,6 +5,17 @@
    - нижние кнопки: .nav__item[data-tab="..."]
    - контейнеры: #coursesRoot #progressRoot #bonusRoot #supportRoot #profileRoot
 */
+document.documentElement.insertAdjacentHTML(
+  "beforeend",
+  `<div style="
+    position:fixed;top:10px;right:10px;z-index:999999;
+    padding:8px 10px;border-radius:10px;
+    background:rgba(51,214,166,.18);
+    border:1px solid rgba(51,214,166,.55);
+    color:#fff;font:12px -apple-system,system-ui">
+    ✅ app.js LOADED
+  </div>`
+);
 
 (() => {
   const tg = window.Telegram?.WebApp;
