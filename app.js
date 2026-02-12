@@ -1,31 +1,9 @@
-// MR Detailing Academy — app.js (FULL, WORKING)
-// - Admin-only full access (by Telegram user id)
-// - Regular users: free course open, paid locked
-// - Courses -> Modules -> Lesson -> Test -> Pass/Fail + progress
-// - Stores progress in localStorage
+// MR Detailing Academy — app.js (WORKING)
+// Compatible with the index.html I sent (screen-* sections + bottom nav data-tab)
 
 const tg = window.Telegram?.WebApp;
 const $ = (q) => document.querySelector(q);
 const $$ = (q) => Array.from(document.querySelectorAll(q));
-
-/* =========================
-   ADMIN ACCESS (IMPORTANT)
-   =========================
-   1) Get your Telegram ID via @userinfobot
-   2) Replace YOUR_TELEGRAM_ID_HERE below with digits (example: 123456789)
-*/
-const ADMIN_TG_IDS = new Set([
-  YOUR_TELEGRAM_ID_HERE, // <-- CHANGE THIS
-]);
-
-function getTelegramUserId() {
-  const u = tg?.initDataUnsafe?.user;
-  return u?.id ? Number(u.id) : null;
-}
-function isAdmin() {
-  const id = getTelegramUserId();
-  return id != null && ADMIN_TG_IDS.has(id);
-}
 
 /* ---------- helpers ---------- */
 function safeSetText(id, value) {
@@ -45,12 +23,7 @@ function nowGreeting() {
   const h = new Date().getHours();
   if (h < 12) return "Доброе утро,";
   if (h < 18) return "Добрый день,";
-  return "Добрый вечер,";
-}
-
-function fmtPct(n) {
-  const v = Math.max(0, Math.min(100, Number(n) || 0));
-  return `${v}%`;
+  if (h < 20) return "Добрый вечер,";
 }
 
 /* ---------- state ---------- */
@@ -63,10 +36,12 @@ const state = {
 function saveProgress() {
   localStorage.setItem("mr_progress", JSON.stringify(state.progress));
 }
+
 function setProgress(key, value) {
   state.progress[key] = value;
   saveProgress();
 }
+
 function getProgress(key) {
   return !!state.progress[key];
 }
@@ -77,7 +52,7 @@ const academy = {
     {
       id: "wash",
       title: "Курс мойки",
-      desc: "Обязательная база. Откроет доступ к остальному обучению.",
+      desc: "Обязательная база. Откроет доступ к платным курсам.",
       free: true,
       modules: [
         {
@@ -90,7 +65,7 @@ const academy = {
               text:
 `Детейлинг — это системный уход за автомобилем: очистка + восстановление + защита.
 
-Цель: не “быстро помыть”, а делать стабильный результат и сохранять покрытие.`,
+Цель: не “быстро помыть”, а сделать стабильный результат и сохранить покрытие.`,
               test: {
                 q: "Детейлинг — это…",
                 options: [
@@ -98,7 +73,7 @@ const academy = {
                   "Системный уход: очистка + восстановление + защита",
                   "Только полировка кузова",
                 ],
-                correctIndex: 1,
+                correctIndex: 1, // 0-based
                 explain: "Детейлинг включает очистку, восстановление и защиту.",
               },
             },
@@ -182,68 +157,6 @@ const academy = {
         },
       ],
     },
-    {
-      id: "polish",
-      title: "Полировка",
-      desc: "Техника, круги, пасты, этапы. PRO-доступ.",
-      free: false,
-      modules: [
-        {
-          id: "pol_m1",
-          title: "Модуль 1 — Теория",
-          lessons: [
-            {
-              id: "pol_l1",
-              title: "Зачем полировка",
-              text:
-`Полировка — это контролируемое снятие/выравнивание микрослоя лака для устранения дефектов.
-Важно: всегда начинать с минимально агрессивной связки.`,
-              test: {
-                q: "С чего правильно начинать?",
-                options: [
-                  "С максимально жёсткой пасты",
-                  "С минимально агрессивной связки",
-                  "С наждачки в любом случае",
-                ],
-                correctIndex: 1,
-                explain: "Правильно — минимальная агрессия, затем при необходимости усиление.",
-              },
-            },
-          ],
-        },
-      ],
-    },
-    {
-      id: "protect",
-      title: "Защита",
-      desc: "Керамика/воск/силаенты, подготовка и нанесение.",
-      free: false,
-      modules: [
-        {
-          id: "pr_m1",
-          title: "Модуль 1 — Подготовка",
-          lessons: [
-            {
-              id: "pr_l1",
-              title: "Подготовка под защиту",
-              text:
-`Любая защита держится на подготовке:
-мойка → деконтаминация → обезжиривание → нанесение → выдержка.`,
-              test: {
-                q: "Что является ключевым для стойкости защиты?",
-                options: [
-                  "Только бренд состава",
-                  "Подготовка поверхности",
-                  "Солнечная погода",
-                ],
-                correctIndex: 1,
-                explain: "Стойкость = подготовка поверхности и правильная технология нанесения.",
-              },
-            },
-          ],
-        },
-      ],
-    },
   ],
 };
 
@@ -268,19 +181,55 @@ const academy = {
   $("#closeBtn")?.addEventListener("click", () => tg.close());
 })();
 
+/* ---------- SPA navigation (screens) ---------- */
+function showTab(tab) {
+  state.tab = tab;
+
+  // screens
+  $$(".screen").forEach((s) => s.classList.remove("is-active"));
+  $(`#screen-${tab}`)?.classList.add("is-active");
+
+  // bottom nav active
+  $$(".nav__item").forEach((b) => b.classList.remove("is-active"));
+  $(`.nav__item[data-tab="${tab}"]`)?.classList.add("is-active");
+
+  // tab renders
+  if (tab === "courses") renderCoursesList();
+  if (tab === "progress") renderProgress();
+  if (tab === "bonus") renderBonus();
+  if (tab === "profile") renderProfile();
+}
+
+/* bind nav buttons */
+function bindNavigation() {
+  // bottom nav
+  $$(".nav__item").forEach((btn) => {
+    btn.addEventListener("click", () => showTab(btn.dataset.tab));
+  });
+
+  // any data-go buttons
+  $$("[data-go]").forEach((btn) => {
+    btn.addEventListener("click", () => showTab(btn.dataset.go));
+  });
+
+  // home main CTA
+  $("#openWash")?.addEventListener("click", () => {
+    showTab("courses");
+    renderCourseDetail("wash");
+  });
+}
+bindNavigation();
+
 /* ---------- access logic ---------- */
 function washDone() {
   return getProgress("course_wash_done");
 }
 
-// IMPORTANT: Admin sees everything open. Everyone else: free open, paid locked.
 function isCourseLocked(course) {
-  if (isAdmin()) return false;
   if (course.free) return false;
-  return true; // paid locked for non-admin until we connect payments
+  return !washDone(); // lock all paid until wash completed (MVP rule)
 }
 
-/* ---------- progress helpers ---------- */
 function allLessons(course) {
   return course.modules.flatMap((m) => m.lessons.map((l) => ({ ...l, moduleId: m.id })));
 }
@@ -297,6 +246,7 @@ function coursePercent(courseId) {
 function markLessonDone(courseId, lessonId) {
   setProgress(`lesson_${courseId}_${lessonId}_done`, true);
 
+  // if course completed
   const pct = coursePercent(courseId);
   if (pct === 100) {
     setProgress(`course_${courseId}_done`, true);
@@ -304,42 +254,68 @@ function markLessonDone(courseId, lessonId) {
   }
 }
 
-/* ---------- SPA navigation (screens) ---------- */
-function showTab(tab) {
-  state.tab = tab;
-
-  $$(".screen").forEach((s) => s.classList.remove("is-active"));
-  $(`#screen-${tab}`)?.classList.add("is-active");
-
-  $$(".nav__item").forEach((b) => b.classList.remove("is-active"));
-  $(`.nav__item[data-tab="${tab}"]`)?.classList.add("is-active");
-
-  if (tab === "courses") renderCoursesList();
-  if (tab === "progress") renderProgress();
-  if (tab === "bonus") renderBonus();
-  if (tab === "profile") renderProfile();
-}
-
-/* bind nav buttons */
-function bindNavigation() {
-  $$(".nav__item").forEach((btn) => {
-    btn.addEventListener("click", () => showTab(btn.dataset.tab));
-  });
-
-  $$("[data-go]").forEach((btn) => {
-    btn.addEventListener("click", () => showTab(btn.dataset.go));
-  });
-
-  $("#openWash")?.addEventListener("click", () => {
-    showTab("courses");
-    renderCourseDetail("wash");
-  });
-}
-bindNavigation();
-
 /* ---------- render: courses list ---------- */
+function courseArtSvg(kind) {
+  // Premium inline SVG (без файлов) — выглядит как “арт” внутри карточки
+  const common = `opacity=".95"`;
+  const svgWrap = (inner) =>
+    `data:image/svg+xml,${encodeURIComponent(
+      `<svg xmlns='http://www.w3.org/2000/svg' width='900' height='360' viewBox='0 0 900 360'>
+        <defs>
+          <linearGradient id='g1' x1='0' y1='0' x2='1' y2='1'>
+            <stop offset='0' stop-color='rgba(155,124,255,.65)'/>
+            <stop offset='1' stop-color='rgba(51,214,166,.35)'/>
+          </linearGradient>
+          <filter id='blur'><feGaussianBlur stdDeviation='8'/></filter>
+        </defs>
+        ${inner}
+      </svg>`
+    )}`;
+
+  if (kind === "wash") {
+    return svgWrap(`
+      <circle cx='720' cy='120' r='90' fill='url(#g1)' filter='url(#blur)' ${common}/>
+      <path d='M230 210c50-80 210-120 330-70 55 22 90 58 108 102 16 40-10 72-52 72H280c-42 0-70-36-50-104z'
+            fill='rgba(255,255,255,.10)' stroke='rgba(255,255,255,.18)' stroke-width='4'/>
+      <path d='M590 92c0 24-22 38-22 56a22 22 0 0 0 44 0c0-18-22-32-22-56z'
+            fill='rgba(155,124,255,.55)'/>
+      <circle cx='330' cy='282' r='22' fill='rgba(51,214,166,.22)'/>
+      <circle cx='640' cy='282' r='22' fill='rgba(155,124,255,.18)'/>
+    `);
+  }
+
+  if (kind === "interior") {
+    return svgWrap(`
+      <circle cx='760' cy='220' r='110' fill='url(#g1)' filter='url(#blur)' ${common}/>
+      <path d='M300 85c-44 0-80 36-80 80v64c0 38 30 70 68 70h44c44 0 80-36 80-80v-54c0-44-36-80-80-80h-32z'
+            fill='rgba(255,255,255,.10)' stroke='rgba(255,255,255,.18)' stroke-width='4'/>
+      <path d='M238 186h256' stroke='rgba(155,124,255,.28)' stroke-width='8' stroke-linecap='round'/>
+      <path d='M250 140h190' stroke='rgba(51,214,166,.20)' stroke-width='6' stroke-linecap='round'/>
+    `);
+  }
+
+  if (kind === "polish") {
+    return svgWrap(`
+      <circle cx='710' cy='160' r='120' fill='url(#g1)' filter='url(#blur)' ${common}/>
+      <rect x='250' y='110' width='360' height='78' rx='18'
+            fill='rgba(255,255,255,.10)' stroke='rgba(255,255,255,.18)' stroke-width='4'/>
+      <circle cx='360' cy='245' r='70' fill='rgba(155,124,255,.20)'/>
+      <path d='M520 120l120-52' stroke='rgba(255,255,255,.22)' stroke-width='10' stroke-linecap='round'/>
+      <path d='M310 245h100' stroke='rgba(51,214,166,.22)' stroke-width='10' stroke-linecap='round'/>
+    `);
+  }
+
+  // protect
+  return svgWrap(`
+    <circle cx='720' cy='150' r='120' fill='url(#g1)' filter='url(#blur)' ${common}/>
+    <path d='M450 70c70 40 120 18 120 18v96c0 70-52 118-120 142-68-24-120-72-120-142V88s50 22 120-18z'
+          fill='rgba(255,255,255,.09)' stroke='rgba(255,255,255,.18)' stroke-width='4'/>
+    <path d='M450 120v170' stroke='rgba(155,124,255,.26)' stroke-width='8' stroke-linecap='round'/>
+  `);
+}
+
 function renderCoursesList() {
-  const root = $("#coursesRoot");
+  const root = document.getElementById("coursesRoot");
   if (!root) return;
 
   root.innerHTML = "";
@@ -347,61 +323,79 @@ function renderCoursesList() {
   academy.courses.forEach((course) => {
     const locked = isCourseLocked(course);
     const pct = coursePercent(course.id);
+    const artKind =
+      course.id === "wash" ? "wash" :
+      course.id === "interior" ? "interior" :
+      course.id === "polish" ? "polish" :
+      "protect";
 
-    const wrap = document.createElement("div");
-    wrap.className = "glass";
+    const el = document.createElement("div");
+    el.className = "courseCard";
 
-    const badgeText = locked ? "LOCKED" : (course.free ? "FREE" : "PRO");
+    el.innerHTML = `
+      <div class="courseCard__art" style="background-image:url('${courseArtSvg(artKind)}'); background-size:cover; background-position:center;"></div>
+      <div class="courseCard__fade"></div>
 
-    wrap.innerHTML = `
-      <div class="item">
+      <div class="courseCard__top" style="position:relative; z-index:2;">
         <div>
-          <strong>${course.title}</strong>
-          <div class="muted small">${course.desc}</div>
-          <div class="muted small" style="margin-top:6px">Прогресс: <strong>${fmtPct(pct)}</strong></div>
-        </div>
-        <span class="badge ${pct === 100 ? "ok" : (locked ? "lock" : "ok")}">${badgeText}</span>
-      </div>
+          <div class="badgePill ${course.free ? "badgePill--free" : "badgePill--locked"}">
+            ${course.free ? "FREE" : (locked ? "LOCKED" : "PRO")}
+            <span style="opacity:.75">•</span>
+            <span>${pct}%</span>
+          </div>
 
-      <div class="row" style="margin-top:10px">
-        <button class="btn ${locked ? "btn--ghost" : "btn--primary"}" data-open-course="${course.id}">
-          ${locked ? "🔒 Недоступно" : "Открыть"}
-        </button>
-        <button class="btn btn--ghost" data-preview-course="${course.id}">Описание</button>
+          <div class="courseCard__title" style="margin-top:10px;">${course.title}</div>
+          <div class="courseCard__desc">${course.desc}</div>
+
+          <div class="progressLine"><i style="width:${pct}%;"></i></div>
+
+          <div class="courseCard__actions">
+            <button class="btn ${locked ? "btn--ghost" : "btn--primary"}" data-open-course="${course.id}">
+              ${locked ? "🔒 Недоступно" : "Открыть"}
+            </button>
+            <button class="btn btn--ghost" data-preview-course="${course.id}">
+              Описание
+            </button>
+          </div>
+        </div>
       </div>
 
       ${locked ? `
-        <div class="muted small" style="margin-top:10px; opacity:.75">
-          Доступ откроется после покупки (Stars) или подписки.
-        </div>` : ``}
+        <div class="lockOverlay">
+          <div class="lockOverlay__text">
+            <span class="lockOverlay__dot"></span>
+            Сначала пройди “Курс мойки”, чтобы открыть доступ
+          </div>
+        </div>` : ""}
     `;
-    root.appendChild(wrap);
+
+    root.appendChild(el);
   });
 
-  $$("[data-open-course]").forEach((btn) => {
+  document.querySelectorAll("[data-open-course]").forEach((btn) => {
     btn.addEventListener("click", () => {
-      const courseId = btn.dataset.openCourse;
-      const course = academy.courses.find((c) => c.id === courseId);
+      const id = btn.dataset.openCourse;
+      const course = academy.courses.find((c) => c.id === id);
       if (!course) return;
 
       if (isCourseLocked(course)) {
-        popup("Закрыто", "Этот курс платный. Доступ откроется после оплаты Stars/подписки (сделаем следующим шагом).");
+        popup("Закрыто", "Сначала пройди бесплатный курс «Мойка» — он откроет доступ к платным курсам.");
         return;
       }
-
-      renderCourseDetail(courseId);
+      renderCourseDetail(id);
     });
   });
 
-  $$("[data-preview-course]").forEach((btn) => {
+  document.querySelectorAll("[data-preview-course]").forEach((btn) => {
     btn.addEventListener("click", () => {
-      const courseId = btn.dataset.previewCourse;
-      const course = academy.courses.find((c) => c.id === courseId);
+      const id = btn.dataset.previewCourse;
+      const course = academy.courses.find((c) => c.id === id);
       if (!course) return;
       popup(course.title, course.desc);
     });
   });
 }
+
 
 /* ---------- render: course detail ---------- */
 function renderCourseDetail(courseId) {
@@ -417,7 +411,6 @@ function renderCourseDetail(courseId) {
       </div>
       <div class="hr"></div>
       <div class="muted">${course.desc}</div>
-      <div class="muted small" style="margin-top:6px">Прогресс: <strong>${fmtPct(coursePercent(courseId))}</strong></div>
     </div>
   `;
 
@@ -544,19 +537,18 @@ function renderProgress() {
   if (!root) return;
 
   root.innerHTML = `
-    <div class="muted small">Прогресс хранится локально на устройстве (позже подключим сервер и привязку к Telegram ID).</div>
+    <div class="muted small">Пока прогресс хранится локально (позже подключим сервер).</div>
     <div class="hr"></div>
     ${academy.courses.map((c) => {
       const pct = coursePercent(c.id);
       const done = pct === 100;
-      const locked = isCourseLocked(c);
       return `
         <div class="item">
           <div>
             <strong>${c.title}</strong>
-            <div class="muted small">${locked ? "🔒 закрыт" : (done ? "✅ пройден" : "🟡 в процессе")}</div>
+            <div class="muted small">${done ? "✅ пройден" : "🟡 в процессе"}</div>
           </div>
-          <span class="badge ${done ? "ok" : (locked ? "lock" : "ok")}">${fmtPct(pct)}</span>
+          <span class="badge ${done ? "ok" : "lock"}">${pct}%</span>
         </div>
       `;
     }).join("")}
@@ -580,14 +572,14 @@ function renderBonus() {
     <div class="item">
       <div>
         <strong>Рефералы</strong>
-        <div class="muted small">3 друга = –50% на Химчистку (сделаем после Stars)</div>
+        <div class="muted small">3 друга = –50% на Химчистку</div>
       </div>
       <span class="badge lock">скоро</span>
     </div>
     <div class="item">
       <div>
-        <strong>Подписки</strong>
-        <div class="muted small">Курсы / Сопровождение / Комплекс</div>
+        <strong>База знаний</strong>
+        <div class="muted small">таблицы pH / круги / пасты</div>
       </div>
       <span class="badge lock">скоро</span>
     </div>
@@ -599,15 +591,11 @@ function renderProfile() {
   const root = $("#profileRoot");
   if (!root) return;
 
-  const id = getTelegramUserId();
-
   root.innerHTML = `
     <div class="item">
       <div>
         <strong>Пользователь</strong>
         <div class="muted small">${state.user.name}</div>
-        <div class="muted small" style="margin-top:4px">TG ID: ${id ?? "нет (браузер)"}</div>
-        ${isAdmin() ? `<div class="badge ok" style="margin-top:10px; display:inline-block">ADMIN MODE</div>` : ``}
       </div>
       <span class="badge ok">OK</span>
     </div>
