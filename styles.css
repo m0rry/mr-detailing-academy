@@ -575,4 +575,25 @@ p{margin:0 0 12px;line-height:1.35}
   background: rgba(155,124,255,.95);
   box-shadow: 0 0 18px rgba(155,124,255,.55);
 }
+/* FIX: actions/buttons alignment inside course cards */
+.courseCard__actions{
+  display:grid !important;
+  grid-template-columns: 1fr 1fr;
+  gap:10px;
+}
+
+.courseCard__actions .btn{
+  width:100%;
+  justify-content:center;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  min-height:44px;
+  padding:12px 14px;
+}
+
+/* на очень узких экранах — в одну колонку */
+@media (max-width: 360px){
+  .courseCard__actions{ grid-template-columns: 1fr; }
+}
 
