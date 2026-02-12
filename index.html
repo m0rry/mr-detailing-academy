@@ -1,459 +1,1241 @@
 <!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="theme-color" content="#0B0D12" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>MR Detailing Academy</title>
-  <link rel="stylesheet" href="./styles.css" />
 
-  <!-- Мини-фиксы, чтобы ничего не перекрывало клики + премиум вид иконок -->
   <style>
-    .bg, .bg * { pointer-events:none; }
-
-    .nav { z-index: 9999; }
-    .nav__item{ cursor:pointer; -webkit-tap-highlight-color:transparent; }
-    .nav__svg{
-      width:22px;height:22px;display:block;
-      color:rgba(255,255,255,.72);
-      transition: color .2s ease, transform .15s ease;
+    :root{
+      --bg:#0b0d12;
+      --card:rgba(255,255,255,.06);
+      --stroke:rgba(255,255,255,.12);
+      --text:rgba(255,255,255,.92);
+      --muted:rgba(255,255,255,.68);
+      --muted2:rgba(255,255,255,.52);
+      --p1:rgba(155,124,255,.90);
+      --p2:rgba(51,214,166,.75);
+      --shadow: 0 18px 40px rgba(0,0,0,.38);
+      --r16:16px;
+      --r18:18px;
+      --r22:22px;
+      --pad:16px;
     }
-    .nav__label{font-size:11px;margin-top:4px;opacity:.65}
-    .nav__item.is-active .nav__svg{color:#fff; transform: translateY(-1px);}
-    .nav__item.is-active .nav__label{opacity:1;}
 
-    /* Brand */
-    .brand{display:flex;align-items:center;gap:12px;}
-    .brand__logo{width:44px;height:44px;display:grid;place-items:center;}
-    .brand__text .title{line-height:1.05}
-    .brand__sub{margin-top:2px;font-size:11px;opacity:.7}
-    .logo{width:44px;height:44px;filter:drop-shadow(0 12px 18px rgba(143,107,255,.20));}
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif;
+      background: radial-gradient(1200px 700px at 10% 10%, rgba(155,124,255,.22), transparent 55%),
+                  radial-gradient(1000px 650px at 90% 70%, rgba(51,214,166,.14), transparent 60%),
+                  var(--bg);
+      color:var(--text);
+      overflow-x:hidden;
+    }
+
+    /* ====== layout ====== */
+    .app{
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 16px 16px 92px;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      padding-top:4px;
+    }
+
+    .topbar__left{
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+    }
+
+    .xbtn{
+      width:34px;height:34px;border-radius:12px;
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.06);
+      color:var(--text);
+      display:grid; place-items:center;
+      cursor:pointer;
+      box-shadow: 0 10px 22px rgba(0,0,0,.22);
+    }
+
+    .hello{
+      line-height:1.1;
+    }
+    .hello .muted{ color:var(--muted); font-size:13px; }
+    .hello .name{ font-size:28px; font-weight:900; letter-spacing:.2px; }
+
+    .topbar__right{
+      text-align:right;
+      line-height:1.1;
+    }
+    .topbar__right .muted{ color:var(--muted); font-size:12px; }
+    .topbar__right .bal{ font-size:18px; font-weight:800; }
+
+    .sectionTitle{
+      margin:18px 0 10px;
+      font-size:18px;
+      font-weight:900;
+      letter-spacing:.2px;
+    }
+
+    /* ====== glass cards ====== */
+    .glass{
+      background: var(--card);
+      border: 1px solid var(--stroke);
+      border-radius: var(--r18);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+    .hr{
+      height:1px;
+      background: rgba(255,255,255,.10);
+      margin: 12px 0;
+    }
+    .muted{ color:var(--muted); }
+    .muted2{ color:var(--muted2); }
+    .small{ font-size:12px; }
+
+    /* ====== horizontal sections cards ====== */
+    .hscroll{
+      display:flex;
+      gap:12px;
+      overflow:auto;
+      padding-bottom:6px;
+      -webkit-overflow-scrolling:touch;
+    }
+    .hscroll::-webkit-scrollbar{ height:0; }
+
+    .mini{
+      min-width: 188px;
+      padding: 14px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      box-shadow: 0 16px 36px rgba(0,0,0,.35);
+      backdrop-filter: blur(12px);
+      color:var(--text);
+      cursor:pointer;
+      text-align:left;
+      position:relative;
+      overflow:hidden;
+    }
+    .mini:active{ transform: translateY(1px); }
+
+    .mini::before{
+      content:"";
+      position:absolute; inset:-40px;
+      background:
+        radial-gradient(500px 160px at 18% 28%, rgba(155,124,255,.26), transparent 60%),
+        radial-gradient(500px 160px at 86% 70%, rgba(51,214,166,.14), transparent 60%),
+        linear-gradient(180deg, rgba(0,0,0,.10), rgba(0,0,0,.40));
+      pointer-events:none;
+    }
+
+    .mini__top{
+      display:flex;
+      justify-content:flex-end;
+      position:relative;
+      z-index:1;
+    }
+    .mini__pill{
+      font-size:11px;
+      font-weight:800;
+      letter-spacing:.6px;
+      padding:4px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(0,0,0,.22);
+    }
+    .mini__iconWrap{
+      position:relative; z-index:1;
+      margin-top:10px;
+      width:54px;height:54px;
+      border-radius:16px;
+      display:grid;place-items:center;
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow:
+        0 18px 40px rgba(0,0,0,.35),
+        0 0 0 1px rgba(155,124,255,.16) inset;
+      backdrop-filter: blur(10px);
+    }
+    .mini__icon{
+      width:28px;height:28px;
+      color: rgba(255,255,255,.90);
+      filter: drop-shadow(0 10px 20px rgba(155,124,255,.18));
+    }
+    .mini__icon svg{ width:100%; height:100%; display:block; }
+    .mini__icon svg *{ stroke-width: 1.6 !important; }
+
+    .mini__title{
+      position:relative; z-index:1;
+      margin-top:10px;
+      font-weight:900;
+      font-size:16px;
+    }
+    .mini__sub{
+      position:relative; z-index:1;
+      margin-top:2px;
+      font-size:12px;
+      color:var(--muted);
+    }
+    .mini.premium .mini__iconWrap{
+      box-shadow:
+        0 18px 40px rgba(0,0,0,.35),
+        0 0 0 1px rgba(155,124,255,.28) inset,
+        0 0 28px rgba(155,124,255,.16);
+    }
+
+    /* ====== hero course cards (Home) ====== */
+    .heroCard{
+      position:relative;
+      overflow:hidden;
+      border-radius: 20px;
+      padding: 16px;
+      margin-top:12px;
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+    .heroCard::before{
+      content:"";
+      position:absolute; inset:-50px;
+      background:
+        radial-gradient(800px 220px at 14% 28%, rgba(155,124,255,.28), transparent 60%),
+        radial-gradient(760px 220px at 90% 70%, rgba(51,214,166,.14), transparent 60%),
+        linear-gradient(180deg, rgba(0,0,0,.10), rgba(0,0,0,.55));
+      pointer-events:none;
+    }
+    .heroRow{
+      position:relative;
+      z-index:1;
+      display:flex;
+      gap:14px;
+      align-items:flex-start;
+      justify-content:space-between;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      font-size:12px;
+      font-weight:900;
+      letter-spacing:.4px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.22);
+    }
+    .heroTitle{
+      margin-top:10px;
+      font-size:22px;
+      font-weight:950;
+      letter-spacing:.2px;
+    }
+    .heroDesc{
+      margin-top:6px;
+      font-size:13px;
+      color:var(--muted);
+      line-height:1.35;
+      max-width: 520px;
+    }
+    .heroActions{
+      margin-top:14px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    /* ====== buttons ====== */
+    .btn{
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color:var(--text);
+      padding: 11px 14px;
+      border-radius: 14px;
+      cursor:pointer;
+      font-weight:900;
+      line-height:1;
+      min-height:42px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+    }
+    .btn--primary{
+      background: linear-gradient(90deg, rgba(155,124,255,.95), rgba(51,214,166,.70));
+      border-color: rgba(255,255,255,.18);
+      box-shadow: 0 18px 40px rgba(155,124,255,.16);
+    }
+    .btn--ghost{
+      background: rgba(255,255,255,.04);
+    }
+
+    /* ====== course list cards ====== */
+    .courseCard{
+      position:relative;
+      overflow:hidden;
+      padding:16px;
+      border-radius:20px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+      margin-top:12px;
+    }
+    .courseCard::before{
+      content:"";
+      position:absolute; inset:-50px;
+      background:
+        radial-gradient(760px 220px at 15% 30%, rgba(155,124,255,.26), transparent 60%),
+        radial-gradient(760px 220px at 90% 70%, rgba(51,214,166,.14), transparent 60%),
+        linear-gradient(180deg, rgba(0,0,0,.10), rgba(0,0,0,.60));
+      pointer-events:none;
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      font-size:12px;
+      font-weight:900;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.20);
+      position:relative;
+      z-index:1;
+    }
+    .badge.ok{ box-shadow: 0 0 0 1px rgba(51,214,166,.18) inset; }
+    .badge.lock{ box-shadow: 0 0 0 1px rgba(155,124,255,.20) inset; }
+
+    .courseTitle{ position:relative; z-index:1; margin:10px 0 0; font-weight:950; font-size:20px; }
+    .courseDesc{ position:relative; z-index:1; margin:6px 0 0; color:var(--muted); font-size:13px; line-height:1.35; max-width: 560px; }
+
+    .progressLine{
+      position:relative; z-index:1;
+      margin-top:12px;
+      height:8px;
+      border-radius:999px;
+      background: rgba(255,255,255,.10);
+      overflow:hidden;
+      max-width: 520px;
+    }
+    .progressLine > i{
+      display:block;
+      height:100%;
+      width:0%;
+      border-radius:999px;
+      background: linear-gradient(90deg, rgba(155,124,255,.95), rgba(51,214,166,.75));
+      box-shadow: 0 10px 18px rgba(155,124,255,.20);
+    }
+
+    .courseActions{
+      position:relative; z-index:1;
+      margin-top:14px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+      max-width: 520px;
+    }
+    .courseActions .btn{
+      width:100%;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    @media (max-width: 360px){
+      .courseActions{ grid-template-columns: 1fr; }
+    }
+
+    .rightIcon{
+      position:absolute;
+      right:18px;
+      top:50%;
+      transform: translateY(-50%);
+      width:66px;height:66px;
+      border-radius:18px;
+      display:grid; place-items:center;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.12);
+      backdrop-filter: blur(10px);
+      box-shadow:
+        0 18px 40px rgba(0,0,0,.28),
+        0 0 0 1px rgba(155,124,255,.16) inset;
+      color: rgba(255,255,255,.86);
+      pointer-events:none;
+      z-index:1;
+    }
+    .rightIcon svg{ width:34px;height:34px; }
+    .courseCard.free .rightIcon{ box-shadow: 0 0 0 1px rgba(51,214,166,.18) inset, 0 18px 40px rgba(0,0,0,.28); }
+    .courseCard.locked .rightIcon{ box-shadow: 0 0 0 1px rgba(155,124,255,.22) inset, 0 18px 40px rgba(0,0,0,.28); }
+
+    /* ====== screens ====== */
+    .screen{ display:none; }
+    .screen.is-active{ display:block; }
+
+    /* ====== bottom nav ====== */
+    .nav{
+      position: fixed;
+      left:0; right:0; bottom:0;
+      padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+      background: rgba(10,12,16,.78);
+      backdrop-filter: blur(14px);
+      border-top: 1px solid rgba(255,255,255,.10);
+      display:flex;
+      justify-content:center;
+      z-index:999;
+    }
+    .navInner{
+      width:min(980px, 100%);
+      display:flex;
+      gap:10px;
+      justify-content:space-between;
+    }
+    .nav__item{
+      flex:1;
+      border-radius: 16px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.05);
+      color: rgba(255,255,255,.78);
+      padding: 10px 10px;
+      cursor:pointer;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:6px;
+      font-weight:900;
+      font-size:11px;
+    }
+    .nav__item svg{ width:20px;height:20px; }
+    .nav__item.is-active{
+      background: rgba(255,255,255,.08);
+      color: rgba(255,255,255,.94);
+      box-shadow: 0 0 0 1px rgba(155,124,255,.18) inset;
+    }
+
+    /* simple list items */
+    .item{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      padding: 12px;
+      border-radius: 16px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.05);
+    }
   </style>
 </head>
 
 <body>
-  <!-- Background -->
-  <div class="bg">
-    <div class="bg__blob bg__blob--1"></div>
-    <div class="bg__blob bg__blob--2"></div>
-    <div class="bg__blob bg__blob--3"></div>
-    <div class="bg__grain"></div>
-  </div>
-
-  <div class="app" id="app">
-    <!-- Top Bar -->
-    <header class="topbar">
-      <button class="icon-btn" id="closeBtn" aria-label="Close">×</button>
-
-      <!-- BRAND + NAME -->
-      <div class="topbar__center">
-        <div class="brand">
-          <div class="brand__logo" aria-label="MR Detailing Academy">
-            <!-- Premium Logo: MR monogram + droplet (SVG, no assets needed) -->
-            <svg class="logo" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" role="img">
-              <defs>
-                <linearGradient id="mr_g" x1="14" y1="10" x2="54" y2="56" gradientUnits="userSpaceOnUse">
-                  <stop stop-color="#9B7CFF"/>
-                  <stop offset="1" stop-color="#6C4DFF"/>
-                </linearGradient>
-                <filter id="mr_glow" x="-50%" y="-50%" width="200%" height="200%">
-                  <feGaussianBlur stdDeviation="3.2" result="b"/>
-                  <feMerge>
-                    <feMergeNode in="b"/>
-                    <feMergeNode in="SourceGraphic"/>
-                  </feMerge>
-                </filter>
-              </defs>
-
-              <!-- Glass tile -->
-              <rect x="6" y="6" width="52" height="52" rx="18" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.14)"/>
-
-              <!-- Droplet -->
-              <path filter="url(#mr_glow)"
-                    d="M44 19c0 9-8 14-8 20a8 8 0 0 0 16 0c0-6-8-11-8-20z"
-                    fill="url(#mr_g)" opacity=".95"/>
-
-              <!-- MR monogram (clean + premium) -->
-              <path d="M14.5 42V25.5c0-2 1.2-3 3-3h1.7c1.1 0 2.1.5 2.7 1.5l3.1 5 3.1-5c.6-1 1.6-1.5 2.7-1.5H36c1.8 0 3 1 3 3V42"
-                    stroke="rgba(255,255,255,.92)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M39 32.8h5.7c2.6 0 4.6-1.7 4.6-4.2S47.3 24.4 44.7 24.4H39V42"
-                    stroke="rgba(255,255,255,.92)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-
-          <div class="brand__text">
-            <div class="muted" id="greeting">Доброе утро,</div>
-            <div class="title" id="username">MarkeyG</div>
-            <div class="brand__sub">MR Detailing Academy</div>
-          </div>
+  <div class="app">
+    <div class="topbar">
+      <div class="topbar__left">
+        <button class="xbtn" id="closeBtn">✕</button>
+        <div class="hello">
+          <div class="muted" id="greeting">Доброе утро,</div>
+          <div class="name" id="username">MarkeyG</div>
         </div>
       </div>
 
       <div class="topbar__right">
         <div class="muted">Баланс</div>
-        <div class="balance"><span id="stars">100</span> ⭐</div>
+        <div class="bal"><span id="balanceVal">100</span> ⭐</div>
       </div>
-    </header>
-
-    <!-- SCREENS -->
-    <main class="content">
-      <!-- HOME -->
-      <section class="screen is-active" id="screen-home">
-        <section class="section">
-          <div class="section__head">
-            <h2>Разделы</h2>
-            <span class="muted">scroll →</span>
-          </div>
-
-          <div class="hscroll sections">
-
-  <!-- Курсы -->
-  <button class="mini glow" data-go="courses">
-    <div class="mini__top"><span class="mini__pill">START</span></div>
-
-    <div class="mini__icon">
-      <svg viewBox="0 0 64 64" fill="none">
-        <rect x="10" y="14" width="44" height="36" rx="6"
-              stroke="currentColor" stroke-width="2"/>
-        <path d="M18 24h28M18 32h28M18 40h18"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-      </svg>
     </div>
 
-    <div class="mini__title">Курсы</div>
-    <div class="mini__sub muted">модули / уроки</div>
-  </button>
+    <!-- HOME -->
+    <section class="screen is-active" id="screen-home">
+      <div class="sectionTitle">Разделы</div>
 
-  <!-- Прогресс -->
-  <button class="mini glow" data-go="progress">
-    <div class="mini__top"><span class="mini__pill">LIVE</span></div>
+      <div class="hscroll sections">
+        <button class="mini" data-go="courses">
+          <div class="mini__top"><span class="mini__pill">START</span></div>
+          <div class="mini__iconWrap"><div class="mini__icon">
+            <svg viewBox="0 0 64 64" fill="none">
+              <rect x="10" y="14" width="44" height="36" rx="6" stroke="currentColor"/>
+              <path d="M18 24h28M18 32h28M18 40h18" stroke="currentColor" stroke-linecap="round"/>
+            </svg>
+          </div></div>
+          <div class="mini__title">Курсы</div>
+          <div class="mini__sub">модули / уроки</div>
+        </button>
 
-    <div class="mini__icon">
-      <svg viewBox="0 0 64 64" fill="none">
-        <circle cx="32" cy="32" r="18"
-                stroke="currentColor" stroke-width="2"/>
-        <path d="M32 20v12l8 6"
-              stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </div>
+        <button class="mini" data-go="progress">
+          <div class="mini__top"><span class="mini__pill">LIVE</span></div>
+          <div class="mini__iconWrap"><div class="mini__icon">
+            <svg viewBox="0 0 64 64" fill="none">
+              <circle cx="32" cy="32" r="18" stroke="currentColor"/>
+              <path d="M32 20v12l8 6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div></div>
+          <div class="mini__title">Прогресс</div>
+          <div class="mini__sub">проценты / статус</div>
+        </button>
 
-    <div class="mini__title">Прогресс</div>
-    <div class="mini__sub muted">проценты / статус</div>
-  </button>
+        <button class="mini" data-go="bonus">
+          <div class="mini__top"><span class="mini__pill">HOT</span></div>
+          <div class="mini__iconWrap"><div class="mini__icon">
+            <svg viewBox="0 0 64 64" fill="none">
+              <path d="M32 10l6 12 14 2-10 10 2 14-12-6-12 6 2-14-10-10 14-2 6-12z"
+                    stroke="currentColor" stroke-linejoin="round"/>
+            </svg>
+          </div></div>
+          <div class="mini__title">Бонусы</div>
+          <div class="mini__sub">рефералы / скидки</div>
+        </button>
 
-  <!-- Бонусы -->
-  <button class="mini glow" data-go="bonus">
-    <div class="mini__top"><span class="mini__pill">HOT</span></div>
+        <button class="mini premium" data-go="support">
+          <div class="mini__top"><span class="mini__pill">PRO</span></div>
+          <div class="mini__iconWrap"><div class="mini__icon">
+            <svg viewBox="0 0 64 64" fill="none">
+              <path d="M12 18h40v24H22l-10 8v-8H12V18z" stroke="currentColor" stroke-linejoin="round"/>
+              <circle cx="26" cy="30" r="2" fill="currentColor"/>
+              <circle cx="32" cy="30" r="2" fill="currentColor"/>
+              <circle cx="38" cy="30" r="2" fill="currentColor"/>
+            </svg>
+          </div></div>
+          <div class="mini__title">Сопровождение</div>
+          <div class="mini__sub">чаты / помощь</div>
+        </button>
 
-    <div class="mini__icon">
-      <svg viewBox="0 0 64 64" fill="none">
-        <path d="M32 10l6 12 14 2-10 10 2 14-12-6-12 6 2-14-10-10 14-2 6-12z"
-              stroke="currentColor" stroke-width="2"
-              stroke-linejoin="round"/>
-      </svg>
-    </div>
+        <button class="mini" data-go="profile">
+          <div class="mini__top"><span class="mini__pill">ME</span></div>
+          <div class="mini__iconWrap"><div class="mini__icon">
+            <svg viewBox="0 0 64 64" fill="none">
+              <circle cx="32" cy="24" r="8" stroke="currentColor"/>
+              <path d="M16 46c0-8 32-8 32 0" stroke="currentColor" stroke-linecap="round"/>
+            </svg>
+          </div></div>
+          <div class="mini__title">Профиль</div>
+          <div class="mini__sub">настройки</div>
+        </button>
+      </div>
 
-    <div class="mini__title">Бонусы</div>
-    <div class="mini__sub muted">рефералы / скидки</div>
-  </button>
+      <div class="sectionTitle">MR Academy</div>
 
-  <!-- Сопровождение / Чаты -->
-  <button class="mini glow premium" data-go="support">
-    <div class="mini__top"><span class="mini__pill">PRO</span></div>
-<!-- SUPPORT / CHATS -->
-<section class="screen" id="screen-support">
-  <section class="section">
-    <div class="section__head">
-      <h2>Сопровождение</h2>
-      <span class="muted">чаты / помощь</span>
-    </div>
-
-    <div class="glass" id="supportRoot"></div>
-
-    <div class="spacer"></div>
-  </section>
-</section>
-
-    <div class="mini__icon">
-      <svg viewBox="0 0 64 64" fill="none">
-        <path d="M12 18h40v24H22l-10 8v-8H12V18z"
-              stroke="currentColor" stroke-width="2"
-              stroke-linejoin="round"/>
-        <circle cx="26" cy="30" r="2" fill="currentColor"/>
-        <circle cx="32" cy="30" r="2" fill="currentColor"/>
-        <circle cx="38" cy="30" r="2" fill="currentColor"/>
-      </svg>
-    </div>
-
-    <div class="mini__title">Сопровождение</div>
-    <div class="mini__sub muted">чаты / помощь</div>
-  </button>
-
-  <!-- Профиль -->
-  <button class="mini glow" data-go="profile">
-    <div class="mini__top"><span class="mini__pill">ME</span></div>
-
-    <div class="mini__icon">
-      <svg viewBox="0 0 64 64" fill="none">
-        <circle cx="32" cy="24" r="8"
-                stroke="currentColor" stroke-width="2"/>
-        <path d="M16 46c0-8 32-8 32 0"
-              stroke="currentColor" stroke-width="2"
-              stroke-linecap="round"/>
-      </svg>
-    </div>
-
-    <div class="mini__title">Профиль</div>
-    <div class="mini__sub muted">настройки</div>
-  </button>
-
-</div>
-
-
-        <section class="section">
-          <div class="section__head">
-            <h2>MR Academy</h2>
-            <span class="muted">parallax</span>
+      <!-- FREE hero -->
+      <div class="heroCard">
+        <div class="heroRow">
+          <div>
+            <span class="pill">FREE • база</span>
+            <div class="heroTitle">Курс мойки</div>
+            <div class="heroDesc">База, которая открывает доступ к платным курсам. Пройди модули и сдай короткие тесты.</div>
+            <div class="heroActions">
+              <button class="btn btn--primary" id="homeStartWash">Начать</button>
+              <button class="btn btn--ghost" id="homeAllCourses">Все курсы</button>
+            </div>
           </div>
-
-          <div class="cards">
-            <article class="p-card" data-parallax>
-              <div class="p-card__frame"></div>
-              <div class="p-card__bg p-card__bg--wash"></div>
-              <div class="p-card__shine"></div>
-
-              <div class="layer layer--glow"></div>
-              <div class="layer layer--object layer--wash"></div>
-              <div class="layer layer--particles"></div>
-
-              <div class="p-card__content">
-                <div class="tag tag--green">FREE</div>
-                <h3>Курс мойки</h3>
-                <p class="muted">База, которая открывает доступ к платным курсам.</p>
-                <div class="row">
-                  <button class="btn btn--primary" id="openWash">Начать</button>
-                  <button class="btn btn--ghost" data-go="courses">Все курсы</button>
-                </div>
-              </div>
-            </article>
-
-            <article class="p-card" data-parallax>
-              <div class="p-card__frame"></div>
-              <div class="p-card__bg p-card__bg--interior"></div>
-              <div class="p-card__shine"></div>
-
-              <div class="layer layer--glow"></div>
-              <div class="layer layer--object layer--interior"></div>
-              <div class="layer layer--particles"></div>
-
-              <div class="p-card__content">
-                <div class="tag tag--purple">LOCKED</div>
-                <h3>Химчистка салона</h3>
-                <p class="muted">Доступ после “Мойки”. Оплата Stars — дальше.</p>
-                <div class="row">
-                  <button class="btn btn--ghost" data-go="courses">Список</button>
-                  <button class="btn btn--ghost" data-go="bonus">Скидка</button>
-                </div>
-              </div>
-            </article>
+          <div class="rightIcon" aria-hidden="true">
+            <svg viewBox="0 0 64 64" fill="none">
+              <path d="M12 38h40l-4 10H16l-4-10z" stroke="currentColor"/>
+              <path d="M18 38l6-14h16l6 14" stroke="currentColor"/>
+              <path d="M24 18c0 4-4 6-4 10" stroke="currentColor" stroke-linecap="round"/>
+              <path d="M40 18c0 4 4 6 4 10" stroke="currentColor" stroke-linecap="round"/>
+            </svg>
           </div>
-        </section>
+        </div>
+      </div>
 
-        <section class="hero" data-parallax>
-          <div class="hero__bg"></div>
-          <div class="hero__frame"></div>
-
-          <div class="layer layer--glow hero__glow"></div>
-          <div class="layer hero__hands"></div>
-          <div class="layer hero__ring"></div>
-          <div class="layer layer--particles hero__particles"></div>
-
-          <div class="hero__content">
-            <h1>MR Detailing Academy</h1>
-            <p class="muted">Урок → тест → результат → прогресс. Всё в одном приложении.</p>
-            <button class="btn btn--primary" data-go="courses">Открыть обучение</button>
+      <!-- LOCKED hero -->
+      <div class="heroCard">
+        <div class="heroRow">
+          <div>
+            <span class="pill">LOCKED • PRO</span>
+            <div class="heroTitle">Химчистка салона</div>
+            <div class="heroDesc">Покупка/подписка. –50% за 3 друзей. Доступ откроем через Stars (сделаем следующим шагом).</div>
+            <div class="heroActions">
+              <button class="btn btn--ghost" id="homeGoCourses">Список</button>
+              <button class="btn btn--ghost" id="homeGoBonus">Скидка</button>
+            </div>
           </div>
-        </section>
-
-        <div class="spacer"></div>
-      </section>
-
-      <!-- COURSES -->
-      <section class="screen" id="screen-courses">
-        <section class="section">
-          <div class="section__head">
-            <h2>Курсы</h2>
-            <span class="muted">выбери курс</span>
+          <div class="rightIcon" aria-hidden="true">
+            <svg viewBox="0 0 64 64" fill="none">
+              <rect x="18" y="14" width="28" height="30" rx="6" stroke="currentColor"/>
+              <path d="M18 28h28" stroke="currentColor"/>
+              <circle cx="46" cy="20" r="3" fill="currentColor"/>
+              <circle cx="50" cy="14" r="2" fill="currentColor"/>
+            </svg>
           </div>
-          <div class="cards" id="coursesRoot"></div>
-          <div class="spacer"></div>
-        </section>
-      </section>
+        </div>
+      </div>
+    </section>
 
-      <!-- PROGRESS -->
-      <section class="screen" id="screen-progress">
-        <section class="section">
-          <div class="section__head">
-            <h2>Прогресс</h2>
-            <span class="muted">по курсам</span>
-          </div>
-          <div class="glass" id="progressRoot"></div>
-          <div class="spacer"></div>
-        </section>
-      </section>
+    <!-- COURSES -->
+    <section class="screen" id="screen-courses">
+      <div class="sectionTitle">Курсы</div>
+      <div id="coursesRoot"></div>
+    </section>
 
-      <!-- BONUS -->
-      <section class="screen" id="screen-bonus">
-        <section class="section">
-          <div class="section__head">
-            <h2>Бонусы</h2>
-            <span class="muted">рефералы</span>
-          </div>
-          <div class="glass" id="bonusRoot"></div>
-          <div class="spacer"></div>
-        </section>
-      </section>
+    <!-- PROGRESS -->
+    <section class="screen" id="screen-progress">
+      <div class="sectionTitle">Прогресс</div>
+      <div class="glass" style="padding:14px">
+        <div class="muted small">Сейчас прогресс хранится на устройстве. Потом привяжем к Telegram ID и серверу.</div>
+      </div>
+      <div style="height:10px"></div>
+      <div id="progressRoot"></div>
+    </section>
 
-      <!-- PROFILE -->
-      <section class="screen" id="screen-profile">
-        <section class="section">
-          <div class="section__head">
-            <h2>Профиль</h2>
-            <span class="muted">настройки</span>
-          </div>
-          <div class="glass" id="profileRoot"></div>
-          <div class="spacer"></div>
-        </section>
-      </section>
-    </main>
+    <!-- BONUS -->
+    <section class="screen" id="screen-bonus">
+      <div class="sectionTitle">Бонусы</div>
+      <div id="bonusRoot"></div>
+    </section>
 
-    <!-- Bottom Nav (premium icons) -->
-    <nav class="nav" role="navigation" aria-label="Bottom Navigation">
-      <!-- HOME -->
-      <button class="nav__item is-active" data-tab="home" type="button" aria-label="Home">
-        <svg class="nav__svg" viewBox="0 0 24 24" fill="none">
-          <path d="M3 11.5L12 4l9 7.5"
-                stroke="currentColor" stroke-width="1.6"
-                stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M6.5 10.5V20h11V10.5"
-                stroke="currentColor" stroke-width="1.6"
-                stroke-linecap="round"/>
-        </svg>
-        <span class="nav__label">Главная</span>
-      </button>
+    <!-- SUPPORT -->
+    <section class="screen" id="screen-support">
+      <div class="sectionTitle">Сопровождение</div>
+      <div id="supportRoot"></div>
+    </section>
 
-      <!-- COURSES -->
-      <button class="nav__item" data-tab="courses" type="button" aria-label="Courses">
-        <svg class="nav__svg" viewBox="0 0 24 24" fill="none">
-          <rect x="4" y="4" width="16" height="16" rx="3"
-                stroke="currentColor" stroke-width="1.6"/>
-          <path d="M8 9h8M8 13h8M8 17h5"
-                stroke="currentColor" stroke-width="1.6"
-                stroke-linecap="round"/>
-        </svg>
-        <span class="nav__label">Курсы</span>
-      </button>
-
-      <!-- PROGRESS -->
-      <button class="nav__item" data-tab="progress" type="button" aria-label="Progress">
-        <svg class="nav__svg" viewBox="0 0 24 24" fill="none">
-          <circle cx="12" cy="12" r="8"
-                  stroke="currentColor" stroke-width="1.6"/>
-          <path d="M12 7v5l3 2"
-                stroke="currentColor" stroke-width="1.6"
-                stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <span class="nav__label">Прогресс</span>
-      </button>
-
-      <!-- BONUS -->
-      <button class="nav__item" data-tab="bonus" type="button" aria-label="Bonuses">
-        <svg class="nav__svg" viewBox="0 0 24 24" fill="none">
-          <path d="M12 4l2.4 4.8 5.3.4-4 3.6 1.2 5.2L12 15.6 7.1 18l1.2-5.2-4-3.6 5.3-.4L12 4z"
-                stroke="currentColor" stroke-width="1.5"
-                stroke-linejoin="round"/>
-        </svg>
-        <span class="nav__label">Бонусы</span>
-      </button>
-
-      <!-- PROFILE -->
-      <button class="nav__item" data-tab="profile" type="button" aria-label="Profile">
-        <svg class="nav__svg" viewBox="0 0 24 24" fill="none">
-          <circle cx="12" cy="8" r="3.5"
-                  stroke="currentColor" stroke-width="1.6"/>
-          <path d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6"
-                stroke="currentColor" stroke-width="1.6"
-                stroke-linecap="round"/>
-        </svg>
-        <span class="nav__label">Профиль</span>
-      </button>
-    </nav>
+    <!-- PROFILE -->
+    <section class="screen" id="screen-profile">
+      <div class="sectionTitle">Профиль</div>
+      <div id="profileRoot"></div>
+    </section>
   </div>
 
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script src="./app.js"></script>
+  <!-- bottom nav -->
+  <div class="nav">
+    <div class="navInner">
+      <button class="nav__item is-active" data-tab="home" title="Главная">
+        <svg viewBox="0 0 64 64" fill="none">
+          <path d="M12 30l20-16 20 16v22H12V30z" stroke="currentColor" stroke-linejoin="round"/>
+        </svg>
+        Главная
+      </button>
+      <button class="nav__item" data-tab="courses" title="Курсы">
+        <svg viewBox="0 0 64 64" fill="none">
+          <rect x="14" y="16" width="36" height="32" rx="6" stroke="currentColor"/>
+          <path d="M22 26h20M22 34h20" stroke="currentColor" stroke-linecap="round"/>
+        </svg>
+        Курсы
+      </button>
+      <button class="nav__item" data-tab="progress" title="Прогресс">
+        <svg viewBox="0 0 64 64" fill="none">
+          <circle cx="32" cy="32" r="18" stroke="currentColor"/>
+          <path d="M32 20v12l8 6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Прогресс
+      </button>
+      <button class="nav__item" data-tab="bonus" title="Бонусы">
+        <svg viewBox="0 0 64 64" fill="none">
+          <path d="M32 10l6 12 14 2-10 10 2 14-12-6-12 6 2-14-10-10 14-2 6-12z"
+                stroke="currentColor" stroke-linejoin="round"/>
+        </svg>
+        Бонусы
+      </button>
+      <button class="nav__item" data-tab="profile" title="Профиль">
+        <svg viewBox="0 0 64 64" fill="none">
+          <circle cx="32" cy="24" r="8" stroke="currentColor"/>
+          <path d="M16 46c0-8 32-8 32 0" stroke="currentColor" stroke-linecap="round"/>
+        </svg>
+        Профиль
+      </button>
+    </div>
+  </div>
 
-  <!-- Fallback nav (чтобы кнопки работали даже если app.js упал) -->
   <script>
-    (function () {
-      const screens = Array.from(document.querySelectorAll(".screen"));
-      const navBtns = Array.from(document.querySelectorAll(".nav__item"));
-      const goBtns = Array.from(document.querySelectorAll("[data-go]"));
+    /***********************
+     * MR Detailing Academy
+     * Single-file stable build
+     ***********************/
+    const tg = window.Telegram?.WebApp;
 
-      function show(tab) {
-        screens.forEach(s => s.classList.remove("is-active"));
-        const target = document.getElementById("screen-" + tab);
-        if (target) target.classList.add("is-active");
+    // === SET YOUR ADMIN TG ID HERE ===
+    // get it via @userinfobot
+    const ADMIN_TG_IDS = new Set([
+      340616352 // <-- CHANGE THIS
+    ]);
 
-        navBtns.forEach(b => b.classList.remove("is-active"));
-        const active = document.querySelector('.nav__item[data-tab="' + tab + '"]');
-        if (active) active.classList.add("is-active");
-      }
+    const $ = (q) => document.querySelector(q);
+    const $$ = (q) => Array.from(document.querySelectorAll(q));
 
-      navBtns.forEach(btn => btn.addEventListener("click", () => show(btn.dataset.tab)));
-      goBtns.forEach(btn => btn.addEventListener("click", () => show(btn.dataset.go)));
-    })();
-  </script>
-  <script>
-  // SHOW JS ERRORS прямо в UI (чтобы понять, что ломается)
-  window.addEventListener("error", (e) => {
-    alert("JS error: " + (e?.message || "unknown"));
-  });
-  window.addEventListener("unhandledrejection", (e) => {
-    alert("Promise error: " + (e?.reason?.message || e?.reason || "unknown"));
-  });
-</script>
-</body>
-</html>
-<script>
-  // Emergency nav: даже если app.js сломан, вкладки не будут пустыми
-  (function () {
-    const screens = () => Array.from(document.querySelectorAll(".screen"));
-    const navBtns = () => Array.from(document.querySelectorAll(".nav__item"));
-    const goBtns  = () => Array.from(document.querySelectorAll("[data-go]"));
-
-    function show(tab) {
-      const list = screens();
-      list.forEach(s => s.classList.remove("is-active"));
-      const target = document.getElementById("screen-" + tab);
-      if (target) target.classList.add("is-active");
-      else {
-        // если таба нет — не убиваем весь UI
-        const home = document.getElementById("screen-home");
-        if (home) home.classList.add("is-active");
-      }
-
-      navBtns().forEach(b => b.classList.remove("is-active"));
-      const active = document.querySelector('.nav__item[data-tab="' + tab + '"]');
-      if (active) active.classList.add("is-active");
+    function popup(title, message){
+      if (tg?.showPopup) tg.showPopup({ title, message, buttons:[{type:"ok"}] });
+      else alert(title + "\n\n" + message);
     }
 
-    // гарантируем, что хоть Home виден
-    setTimeout(() => show("home"), 0);
+    function nowGreeting(){
+      const h = new Date().getHours();
+      if (h < 12) return "Доброе утро,";
+      if (h < 18) return "Добрый день,";
+      return "Добрый вечер,";
+    }
 
-    // перевешиваем клики
-    navBtns().forEach(btn => btn.onclick = () => show(btn.dataset.tab));
-    goBtns().forEach(btn  => btn.onclick  = () => show(btn.dataset.go));
-  })();
-</script>
+    function getTelegramUserId(){
+      const u = tg?.initDataUnsafe?.user;
+      return u?.id ? Number(u.id) : null;
+    }
+    function isAdmin(){
+      const id = getTelegramUserId();
+      return id != null && ADMIN_TG_IDS.has(id);
+    }
+
+    // ===== data =====
+    const academy = {
+      courses: [
+        {
+          id:"wash", free:true,
+          title:"Курс мойки",
+          desc:"Обязательная база. Откроет доступ к платным курсам.",
+          icon:"wash",
+          modules:[
+            { id:"wash_m1", title:"Модуль 1 — Основы", lessons:[
+              { id:"wash_l1", title:"Что такое детейлинг", text:
+`Детейлинг — это системный уход за авто: очистка + восстановление + защита.
+Цель: стабильный результат и сохранение покрытия.`,
+                test:{ q:"Детейлинг — это…", options:[
+                  "Просто мойка с пеной",
+                  "Системный уход: очистка + восстановление + защита",
+                  "Только полировка"
+                ], correct:1, explain:"Детейлинг включает очистку, восстановление и защиту." }
+              },
+              { id:"wash_l2", title:"Ошибки новичков", text:
+`Ошибки:
+1) Одна губка на всё → микроцарапины
+2) Мойка по сухой пыли
+3) Сильная химия без контроля
+4) Плохая сушка → разводы`,
+                test:{ q:"Что чаще всего вызывает микроцарапины?", options:[
+                  "Одна губка/тряпка на всё",
+                  "Раздельные ведра и микрофибры",
+                  "Сушка воздухом"
+                ], correct:0, explain:"Одна губка собирает абразив и царапает ЛКП." }
+              }
+            ]},
+            { id:"wash_m2", title:"Модуль 2 — Процесс", lessons:[
+              { id:"wash_l3", title:"Двухфазная мойка", text:
+`Фаза 1: бесконтакт — снимает основную грязь.
+Фаза 2: контакт — безопасно домывает.
+Правило: контакт только после бесконтакта.`,
+                test:{ q:"Зачем нужна первая фаза?", options:[
+                  "Чтобы снять грязь и снизить риск царапин",
+                  "Чтобы высушить кузов",
+                  "Чтобы быстрее перейти к контакту"
+                ], correct:0, explain:"Фаза 1 снимает грязь — меньше абразива при контакте." }
+              }
+            ]}
+          ]
+        },
+
+        { id:"interior", free:false, title:"Химчистка салона",
+          desc:"Покупка/подписка. –50% за 3 друзей.",
+          icon:"interior",
+          modules:[
+            { id:"int_m1", title:"Модуль 1 — Материалы", lessons:[
+              { id:"int_l1", title:"Ткань vs кожа", text:
+`Ткань: впитывает → важна экстракция.
+Кожа: нельзя заливать/пересушивать → мягкие средства + защита.`,
+                test:{ q:"Что опаснее всего для кожи?", options:[
+                  "Мягкое средство и защита",
+                  "Сильная щёлочь и залив водой",
+                  "Лёгкая влажная протирка"
+                ], correct:1, explain:"Сильная химия и вода могут повредить кожу и швы." }
+              }
+            ]}
+          ]
+        },
+
+        { id:"polish", free:false, title:"Полировка",
+          desc:"Техника, круги, пасты, этапы. PRO-доступ.",
+          icon:"polish",
+          modules:[
+            { id:"pol_m1", title:"Модуль 1 — Теория", lessons:[
+              { id:"pol_l1", title:"Зачем полировка", text:
+`Полировка — контролируемое выравнивание микрослоя лака для устранения дефектов.
+Начинай с минимально агрессивной связки.`,
+                test:{ q:"С чего правильно начинать?", options:[
+                  "С максимально жёсткой пасты",
+                  "С минимально агрессивной связки",
+                  "С наждачки в любом случае"
+                ], correct:1, explain:"Правильно — минимальная агрессия, затем усиление при необходимости." }
+              }
+            ]}
+          ]
+        },
+
+        { id:"protect", free:false, title:"Защита",
+          desc:"Керамика/воск/силаенты: подготовка и нанесение.",
+          icon:"protect",
+          modules:[
+            { id:"pr_m1", title:"Модуль 1 — Подготовка", lessons:[
+              { id:"pr_l1", title:"Подготовка под защиту", text:
+`Любая защита держится на подготовке:
+мойка → деконтаминация → обезжиривание → нанесение → выдержка.`,
+                test:{ q:"Ключ к стойкости защиты?", options:[
+                  "Только бренд состава",
+                  "Подготовка поверхности",
+                  "Солнечная погода"
+                ], correct:1, explain:"Стойкость = подготовка + правильная технология." }
+              }
+            ]}
+          ]
+        }
+      ]
+    };
+
+    // ===== storage =====
+    const state = {
+      tab:"home",
+      progress: JSON.parse(localStorage.getItem("mr_progress") || "{}")
+    };
+    function save(){ localStorage.setItem("mr_progress", JSON.stringify(state.progress)); }
+    function setP(k,v){ state.progress[k]=v; save(); }
+    function getP(k){ return !!state.progress[k]; }
+
+    function courseLessons(course){
+      return course.modules.flatMap(m => m.lessons.map(l => ({...l, moduleId:m.id, moduleTitle:m.title})));
+    }
+    function coursePercent(courseId){
+      const c = academy.courses.find(x=>x.id===courseId);
+      if(!c) return 0;
+      const lessons = courseLessons(c);
+      const done = lessons.filter(l => getP(`lesson_${courseId}_${l.id}_done`)).length;
+      return Math.round((done/lessons.length)*100);
+    }
+    function markLessonDone(courseId, lessonId){
+      setP(`lesson_${courseId}_${lessonId}_done`, true);
+      if (coursePercent(courseId) === 100) setP(`course_${courseId}_done`, true);
+      if (courseId === "wash" && coursePercent(courseId) === 100) setP("course_wash_done", true);
+    }
+
+    // ===== access rules =====
+    function isCourseLocked(course){
+      if (isAdmin()) return false;      // only you have full access
+      if (course.free) return false;    // free open
+      return true;                      // paid locked (we'll connect Stars later)
+    }
+
+    // ===== icon svgs =====
+    function svgRight(kind){
+      if (kind==="wash") return `
+        <svg viewBox="0 0 64 64" fill="none">
+          <path d="M12 38h40l-4 10H16l-4-10z" stroke="currentColor"/>
+          <path d="M18 38l6-14h16l6 14" stroke="currentColor"/>
+          <path d="M24 18c0 4-4 6-4 10" stroke="currentColor" stroke-linecap="round"/>
+          <path d="M40 18c0 4 4 6 4 10" stroke="currentColor" stroke-linecap="round"/>
+        </svg>`;
+      if (kind==="interior") return `
+        <svg viewBox="0 0 64 64" fill="none">
+          <rect x="18" y="14" width="28" height="30" rx="6" stroke="currentColor"/>
+          <path d="M18 28h28" stroke="currentColor"/>
+          <circle cx="46" cy="20" r="3" fill="currentColor"/>
+          <circle cx="50" cy="14" r="2" fill="currentColor"/>
+        </svg>`;
+      if (kind==="polish") return `
+        <svg viewBox="0 0 64 64" fill="none">
+          <rect x="10" y="26" width="36" height="12" rx="6" stroke="currentColor"/>
+          <circle cx="48" cy="32" r="6" stroke="currentColor"/>
+          <path d="M20 44h24" stroke="currentColor" stroke-linecap="round"/>
+        </svg>`;
+      return `
+        <svg viewBox="0 0 64 64" fill="none">
+          <path d="M32 10l18 6v14c0 12-8 18-18 24-10-6-18-12-18-24V16l18-6z" stroke="currentColor"/>
+          <path d="M24 30l6 6 10-12" stroke="currentColor" stroke-linecap="round"/>
+        </svg>`;
+    }
+
+    // ===== navigation =====
+    function showTab(tab){
+      state.tab = tab;
+
+      $$(".screen").forEach(s => s.classList.remove("is-active"));
+      const target = $("#screen-" + tab);
+      (target || $("#screen-home"))?.classList.add("is-active");
+
+      $$(".nav__item").forEach(b => b.classList.remove("is-active"));
+      $(`.nav__item[data-tab="${tab}"]`)?.classList.add("is-active");
+
+      if (tab==="courses") renderCoursesList();
+      if (tab==="progress") renderProgress();
+      if (tab==="bonus") renderBonus();
+      if (tab==="support") renderSupport();
+      if (tab==="profile") renderProfile();
+    }
+
+    function bindNav(){
+      $$(".nav__item").forEach(btn => btn.addEventListener("click", ()=>showTab(btn.dataset.tab)));
+      $$("[data-go]").forEach(btn => btn.addEventListener("click", ()=>showTab(btn.dataset.go)));
+
+      $("#homeStartWash")?.addEventListener("click", ()=>{
+        showTab("courses");
+        renderCourseDetail("wash");
+      });
+      $("#homeAllCourses")?.addEventListener("click", ()=>showTab("courses"));
+      $("#homeGoCourses")?.addEventListener("click", ()=>showTab("courses"));
+      $("#homeGoBonus")?.addEventListener("click", ()=>showTab("bonus"));
+    }
+
+    // ===== render: courses =====
+    function renderCoursesList(){
+      const root = $("#coursesRoot");
+      if (!root) return;
+      root.innerHTML = "";
+
+      academy.courses.forEach(course=>{
+        const locked = isCourseLocked(course);
+        const pct = coursePercent(course.id);
+
+        const el = document.createElement("div");
+        el.className = `courseCard ${locked ? "locked" : "free"}`;
+        el.innerHTML = `
+          <div class="rightIcon">${svgRight(course.icon)}</div>
+
+          <div class="badge ${locked ? "lock" : "ok"}">${locked ? "LOCKED" : (course.free ? "FREE" : "PRO")} • ${pct}%</div>
+          <div class="courseTitle">${course.title}</div>
+          <div class="courseDesc">${course.desc}</div>
+
+          <div class="progressLine"><i style="width:${pct}%"></i></div>
+
+          <div class="courseActions">
+            <button class="btn ${locked ? "btn--ghost" : "btn--primary"}" data-open-course="${course.id}">
+              ${locked ? "🔒 Недоступно" : "Открыть"}
+            </button>
+            <button class="btn btn--ghost" data-preview-course="${course.id}">Описание</button>
+          </div>
+        `;
+        root.appendChild(el);
+      });
+
+      $$("[data-open-course]").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+          const id = btn.dataset.openCourse;
+          const course = academy.courses.find(c=>c.id===id);
+          if (!course) return;
+          if (isCourseLocked(course)) return popup("Закрыто", "Платный курс. Доступ откроем через Telegram Stars/подписку (следующий шаг).");
+          renderCourseDetail(id);
+        });
+      });
+
+      $$("[data-preview-course]").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+          const id = btn.dataset.previewCourse;
+          const course = academy.courses.find(c=>c.id===id);
+          if (course) popup(course.title, course.desc);
+        });
+      });
+    }
+
+    function renderCourseDetail(courseId){
+      const root = $("#coursesRoot");
+      const course = academy.courses.find(c=>c.id===courseId);
+      if (!root || !course) return;
+
+      root.innerHTML = `
+        <div class="glass" style="padding:14px">
+          <div style="display:flex; justify-content:space-between; gap:12px; align-items:center">
+            <div>
+              <div style="font-weight:950; font-size:18px">${course.title}</div>
+              <div class="muted small" style="margin-top:4px">${course.desc}</div>
+              <div class="muted small" style="margin-top:6px">Прогресс: <b>${coursePercent(courseId)}%</b></div>
+            </div>
+            <button class="btn btn--ghost" id="backCourses">← Назад</button>
+          </div>
+        </div>
+        <div style="height:10px"></div>
+      `;
+
+      course.modules.forEach(m=>{
+        const block = document.createElement("div");
+        block.className = "glass";
+        block.style.padding = "14px";
+        block.style.marginTop = "12px";
+        block.innerHTML = `
+          <div style="display:flex;justify-content:space-between;gap:12px;align-items:center">
+            <div style="font-weight:950">${m.title}</div>
+            <span class="badge lock">${m.lessons.length} урок(а)</span>
+          </div>
+          <div class="hr"></div>
+          ${m.lessons.map(l=>{
+            const done = getP(\`lesson_${courseId}_${l.id}_done\`);
+            return `
+              <div class="item" style="margin-top:10px">
+                <div>
+                  <div style="font-weight:900">${l.title}</div>
+                  <div class="muted small">${done ? "✅ пройдено" : "🟡 не пройдено"}</div>
+                </div>
+                <button class="btn btn--primary" data-open-lesson="${courseId}|${m.id}|${l.id}">Открыть</button>
+              </div>`;
+          }).join("")}
+        `;
+        root.appendChild(block);
+      });
+
+      $("#backCourses")?.addEventListener("click", renderCoursesList);
+      $$("[data-open-lesson]").forEach(b=>{
+        b.addEventListener("click", ()=>{
+          const [cId,mId,lId] = b.dataset.openLesson.split("|");
+          renderLesson(cId,mId,lId);
+        });
+      });
+    }
+
+    function renderLesson(courseId, moduleId, lessonId){
+      const root = $("#coursesRoot");
+      const course = academy.courses.find(c=>c.id===courseId);
+      const mod = course?.modules.find(m=>m.id===moduleId);
+      const lesson = mod?.lessons.find(l=>l.id===lessonId);
+      if(!root || !lesson) return;
+
+      root.innerHTML = `
+        <div class="glass" style="padding:14px">
+          <div style="display:flex;justify-content:space-between;gap:12px;align-items:center">
+            <div>
+              <div style="font-weight:950">${course.title}</div>
+              <div class="muted small" style="margin-top:4px">${mod.title}</div>
+            </div>
+            <button class="btn btn--ghost" id="backToModules">← К модулям</button>
+          </div>
+          <div class="hr"></div>
+          <div style="font-weight:950; font-size:18px">${lesson.title}</div>
+          <div class="muted" style="white-space:pre-line; margin-top:8px; line-height:1.45">${lesson.text}</div>
+          <div class="hr"></div>
+          <button class="btn btn--primary" id="startTest">Пройти тест</button>
+        </div>
+      `;
+
+      $("#backToModules")?.addEventListener("click", ()=>renderCourseDetail(courseId));
+      $("#startTest")?.addEventListener("click", ()=>renderTest(courseId,moduleId,lessonId));
+    }
+
+    function renderTest(courseId, moduleId, lessonId){
+      const root = $("#coursesRoot");
+      const course = academy.courses.find(c=>c.id===courseId);
+      const mod = course?.modules.find(m=>m.id===moduleId);
+      const lesson = mod?.lessons.find(l=>l.id===lessonId);
+      const test = lesson?.test;
+      if(!root || !test) return;
+
+      root.innerHTML = `
+        <div class="glass" style="padding:14px">
+          <div style="display:flex;justify-content:space-between;gap:12px;align-items:center">
+            <div style="font-weight:950">Тест</div>
+            <button class="btn btn--ghost" id="backLesson">← К уроку</button>
+          </div>
+          <div class="hr"></div>
+          <div style="font-weight:950; font-size:18px">${test.q}</div>
+          <div id="opts" style="margin-top:12px; display:grid; gap:10px"></div>
+          <div class="hr"></div>
+          <div class="muted small">Выбери один вариант</div>
+        </div>
+      `;
+
+      $("#backLesson")?.addEventListener("click", ()=>renderLesson(courseId,moduleId,lessonId));
+
+      const opts = $("#opts");
+      test.options.forEach((t,idx)=>{
+        const b = document.createElement("button");
+        b.className = "btn btn--ghost";
+        b.style.justifyContent = "flex-start";
+        b.textContent = t;
+        b.addEventListener("click", ()=>{
+          if (idx === test.correct){
+            markLessonDone(courseId, lessonId);
+            popup("✅ Сдано", test.explain);
+            renderCourseDetail(courseId);
+          } else {
+            popup("❌ Не сдано", "Неправильно. Повтори урок и попробуй снова.\n\n" + test.explain);
+            renderLesson(courseId,moduleId,lessonId);
+          }
+        });
+        opts.appendChild(b);
+      });
+    }
+
+    // ===== render: progress =====
+    function renderProgress(){
+      const root = $("#progressRoot");
+      if(!root) return;
+      root.innerHTML = "";
+
+      academy.courses.forEach(c=>{
+        const pct = coursePercent(c.id);
+        const locked = isCourseLocked(c);
+        const el = document.createElement("div");
+        el.className = "item";
+        el.style.marginTop = "10px";
+        el.innerHTML = `
+          <div>
+            <div style="font-weight:950">${c.title}</div>
+            <div class="muted small">${locked ? "🔒 закрыт" : (pct===100 ? "✅ пройден" : "🟡 в процессе")}</div>
+          </div>
+          <span class="badge ${locked ? "lock" : "ok"}">${pct}%</span>
+        `;
+        root.appendChild(el);
+      });
+
+      const reset = document.createElement("button");
+      reset.className = "btn btn--ghost";
+      reset.style.marginTop = "12px";
+      reset.textContent = "Сбросить прогресс";
+      reset.addEventListener("click", ()=>{
+        state.progress = {};
+        save();
+        popup("Готово", "Прогресс сброшен.");
+        renderProgress();
+      });
+      root.appendChild(reset);
+    }
+
+    // ===== render: bonus =====
+    function renderBonus(){
+      const root = $("#bonusRoot");
+      if(!root) return;
+      root.innerHTML = `
+        <div class="glass" style="padding:14px">
+          <div class="item">
+            <div>
+              <div style="font-weight:950">Рефералы</div>
+              <div class="muted small">Приведи 3 друзей — получи –50% на Химчистку (подключим после Stars)</div>
+            </div>
+            <span class="badge lock">скоро</span>
+          </div>
+          <div style="height:10px"></div>
+          <div class="item">
+            <div>
+              <div style="font-weight:950">Пакеты</div>
+              <div class="muted small">Курсы / Сопровождение / Комплекс со скидкой</div>
+            </div>
+            <span class="badge lock">скоро</span>
+          </div>
+        </div>
+      `;
+    }
+
+    // ===== support logic =====
+    function boughtCoursesCount(){
+      // Пока MVP: считаем купленными те, где поставлен флаг course_{id}_purchased
+      // (когда подключим Stars — будем ставить эти флаги автоматически после оплаты)
+      return academy.courses.filter(c => getP(`course_${c.id}_purchased`)).length;
+    }
+    function hasSupportAccess(){
+      if (isAdmin()) return true;
+      const forever = boughtCoursesCount() >= 3;
+      const sub = getP("support_sub_active"); // позже привяжем к Stars subscription
+      return forever || sub;
+    }
+
+    function renderSupport(){
+      const root = $("#supportRoot");
+      if(!root) return;
+
+      const access = hasSupportAccess();
+      root.innerHTML = `
+        <div class="glass" style="padding:14px">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+            <div>
+              <div style="font-weight:950; font-size:18px">Чаты и помощь</div>
+              <div class="muted small" style="margin-top:6px">
+                Доступ: подписка на месяц (Stars) <b>или</b> навсегда, если куплено <b>3+ курса</b>.
+              </div>
+              ${access ? `<div style="margin-top:10px"><span class="badge ok">ДОСТУП ЕСТЬ</span></div>` :
+                         `<div style="margin-top:10px"><span class="badge lock">НУЖЕН ДОСТУП</span></div>`}
+            </div>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="item">
+            <div>
+              <div style="font-weight:950">Закрытый чат учеников</div>
+              <div class="muted small">Разборы, кейсы, советы, поддержка</div>
+            </div>
+            <span class="badge ${access ? "ok" : "lock"}">${access ? "OPEN" : "PRO"}</span>
+          </div>
+
+          <div style="height:10px"></div>
+
+          <div class="item">
+            <div>
+              <div style="font-weight:950">Чат с наставником</div>
+              <div class="muted small">Вопросы по работам, подбор химии, разбор ошибок</div>
+            </div>
+            <span class="badge ${access ? "ok" : "lock"}">${access ? "OPEN" : "PRO"}</span>
+          </div>
+
+          <div class="hr"></div>
+
+          <div style="display:grid; gap:10px">
+            <button class="btn btn--primary" id="supportBuy">${access ? "Открыть чат" : "Оформить подписку (скоро Stars)"}</button>
+            <button class="btn btn--ghost" id="supportForever">Как получить навсегда?</button>
+          </div>
+        </div>
+      `;
+
+      $("#supportBuy")?.addEventListener("click", ()=>{
+        if (access){
+          popup("Чаты", "Comming Soon");
+        } else {
+          popup("Скоро", "Подключим Telegram Stars и сделаем подписку/Comming Soon");
+        }
+      });
+
+      $("#supportForever")?.addEventListener("click", ()=>{
+        popup("Навсегда", "Навсегда выдаётся автоматически, если куплено 3+ курса. После Stars это будет считаться автоматически.");
+      });
+    }
+
+    // ===== profile =====
+    function renderProfile(){
+      const root = $("#profileRoot");
+      if(!root) return;
+
+      const uid = getTelegramUserId();
+      root.innerHTML = `
+        <div class="glass" style="padding:14px">
+          <div class="item">
+            <div>
+              <div style="font-weight:950">Пользователь</div>
+              <div class="muted small" style="margin-top:4px">${$("#username")?.textContent || "User"}</div>
+              <div class="muted small" style="margin-top:4px">TG ID: <b>${uid ?? "нет (браузер)"}</b></div>
+              ${isAdmin() ? `<div style="margin-top:10px"><span class="badge ok">ADMIN MODE</span></div>` : ``}
+            </div>
+            <span class="badge ok">OK</span>
+          </div>
+
+          <div class="hr"></div>
+
+          <div style="display:grid; gap:10px">
+            <button class="btn btn--primary" id="goCourses">Открыть курсы</button>
+            <button class="btn btn--ghost" id="goSupport">Сопровождение</button>
+          </div>
+        </div>
+      `;
+
+      $("#goCourses")?.addEventListener("click", ()=>showTab("courses"));
+      $("#goSupport")?.addEventListener("click", ()=>showTab("support"));
+    }
+
+    // ===== init =====
+    (function init(){
+      $("#greeting").textContent = nowGreeting();
+
+      if (tg){
+        tg.ready();
+        tg.expand();
+        try{ tg.setHeaderColor?.("#0b0d12"); }catch(e){}
+        try{ tg.setBackgroundColor?.("#0b0d12"); }catch(e){}
+        const user = tg.initDataUnsafe?.user;
+        if (user?.first_name) $("#username").textContent = user.first_name;
+        $("#closeBtn")?.addEventListener("click", ()=>tg.close());
+      } else {
+        $("#closeBtn").style.display = "none";
+      }
+
+      bindNav();
+      showTab("home");
+    })();
+
+  </script>
+</body>
+</html>
