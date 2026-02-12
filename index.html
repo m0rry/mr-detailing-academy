@@ -1235,40 +1235,5 @@
       bindNav();
       showTab("home");
     })();
-   <script>
-  // ===== HARD NAV FIX (works even after rerenders) =====
-  function showTab(tab) {
-    // 1) hide all
-    document.querySelectorAll(".screen").forEach(s => s.classList.remove("is-active"));
-
-    // 2) show target (fallback to home)
-    const target = document.getElementById("screen-" + tab);
-    (target || document.getElementById("screen-home"))?.classList.add("is-active");
-
-    // 3) bottom nav highlight
-    document.querySelectorAll(".nav__item").forEach(b => b.classList.remove("is-active"));
-    const navBtn = document.querySelector('.nav__item[data-tab="' + tab + '"]');
-    if (navBtn) navBtn.classList.add("is-active");
-
-    // 4) optional renders (don't crash if missing)
-    if (tab === "courses" && typeof renderCoursesList === "function") renderCoursesList();
-    if (tab === "progress" && typeof renderProgress === "function") renderProgress();
-    if (tab === "bonus" && typeof renderBonus === "function") renderBonus();
-    if (tab === "support" && typeof renderSupport === "function") renderSupport();
-    if (tab === "profile" && typeof renderProfile === "function") renderProfile();
-  }
-
-  // One click handler for everything (delegation)
-  document.addEventListener("click", (e) => {
-    const go = e.target.closest("[data-go]");
-    if (go) { e.preventDefault(); showTab(go.dataset.go); return; }
-
-    const tab = e.target.closest(".nav__item[data-tab]");
-    if (tab) { e.preventDefault(); showTab(tab.dataset.tab); return; }
-  });
-
-  // Ensure something is visible on load
-  window.addEventListener("load", () => showTab("home"));
-</script>
 </body>
 </html>
