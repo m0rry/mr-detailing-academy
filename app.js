@@ -314,10 +314,12 @@ function showTab(tab) {
   $$(".nav__item").forEach((b) => b.classList.remove("is-active"));
   $(`.nav__item[data-tab="${tab}"]`)?.classList.add("is-active");
 
-  if (tab === "courses") renderCoursesList();
-  if (tab === "progress") renderProgress();
-  if (tab === "bonus") renderBonus();
-  if (tab === "profile") renderProfile();
+if (tab === "courses") renderCoursesList();
+if (tab === "progress") renderProgress();
+if (tab === "bonus") renderBonus();
+if (tab === "support") renderSupport();
+if (tab === "profile") renderProfile();
+
 }
 
 /* bind nav buttons */
