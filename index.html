@@ -1,1 +1,223 @@
-mr detailing academy
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#0B0D12" />
+  <title>MR Detailing Academy</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body>
+  <div class="bg">
+    <div class="bg__blob bg__blob--1"></div>
+    <div class="bg__blob bg__blob--2"></div>
+    <div class="bg__blob bg__blob--3"></div>
+    <div class="bg__grain"></div>
+  </div>
+
+  <div class="app" id="app">
+    <!-- Top Bar -->
+    <header class="topbar">
+      <button class="icon-btn" id="closeBtn" aria-label="Close">×</button>
+
+      <div class="topbar__center">
+        <div class="muted" id="greeting">Доброе утро,</div>
+        <div class="title" id="username">MarkeyG</div>
+      </div>
+
+      <div class="topbar__right">
+        <div class="muted">Баланс</div>
+        <div class="balance"><span id="stars">100</span> ⭐</div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="content">
+      <!-- Quick row -->
+      <section class="section">
+        <div class="section__head">
+          <h2>Разделы</h2>
+          <span class="muted">scroll →</span>
+        </div>
+
+        <div class="hscroll">
+          <button class="mini glow" type="button">
+            <div class="mini__top">
+              <span class="mini__pill">SOON</span>
+            </div>
+            <div class="mini__title">База знаний</div>
+            <div class="mini__sub muted">таблицы / шпаргалки</div>
+          </button>
+
+          <button class="mini glow" type="button">
+            <div class="mini__top">
+              <span class="mini__pill">NEW</span>
+            </div>
+            <div class="mini__title">Feedback</div>
+            <div class="mini__sub muted">пожелания / баги</div>
+          </button>
+
+          <button class="mini glow" type="button">
+            <div class="mini__top">
+              <span class="mini__pill">PRO</span>
+            </div>
+            <div class="mini__title">Сопровождение</div>
+            <div class="mini__sub muted">чаты / помощь</div>
+          </button>
+
+          <button class="mini glow" type="button">
+            <div class="mini__top">
+              <span class="mini__pill">HOT</span>
+            </div>
+            <div class="mini__title">Рефералы</div>
+            <div class="mini__sub muted">скидки за друзей</div>
+          </button>
+        </div>
+      </section>
+
+      <!-- Cards grid -->
+      <section class="section">
+        <div class="section__head">
+          <h2>MR Detailing Academy</h2>
+          <span class="muted">parallax</span>
+        </div>
+
+        <div class="cards">
+          <!-- Wash (free) -->
+          <article class="p-card" data-parallax>
+            <div class="p-card__frame"></div>
+            <div class="p-card__bg p-card__bg--wash"></div>
+            <div class="p-card__shine"></div>
+
+            <div class="layer layer--glow"></div>
+            <div class="layer layer--object layer--wash"></div>
+            <div class="layer layer--particles"></div>
+
+            <div class="p-card__content">
+              <div class="tag tag--green">FREE</div>
+              <h3>Курс мойки</h3>
+              <p class="muted">Обязательная база. Откроет доступ к платным курсам.</p>
+              <div class="row">
+                <button class="btn" id="openWash">Открыть</button>
+                <button class="btn btn--ghost" id="previewWash">Превью</button>
+              </div>
+            </div>
+          </article>
+
+          <!-- Interior (locked) -->
+          <article class="p-card" data-parallax>
+            <div class="p-card__frame"></div>
+            <div class="p-card__bg p-card__bg--interior"></div>
+            <div class="p-card__shine"></div>
+
+            <div class="layer layer--glow"></div>
+            <div class="layer layer--object layer--interior"></div>
+            <div class="layer layer--particles"></div>
+
+            <div class="p-card__content">
+              <div class="tag tag--purple">LOCKED</div>
+              <h3>Химчистка салона</h3>
+              <p class="muted">Покупка/подписка. –50% за 3 друзей по реферальной ссылке.</p>
+              <div class="row">
+                <button class="btn btn--primary" id="buyInterior">⭐ Купить</button>
+                <button class="btn btn--ghost" id="refInterior">🎁 Скидка</button>
+              </div>
+            </div>
+          </article>
+
+          <!-- Polish -->
+          <article class="p-card" data-parallax>
+            <div class="p-card__frame"></div>
+            <div class="p-card__bg p-card__bg--polish"></div>
+            <div class="p-card__shine"></div>
+
+            <div class="layer layer--glow"></div>
+            <div class="layer layer--object layer--polish"></div>
+            <div class="layer layer--particles"></div>
+
+            <div class="p-card__content">
+              <div class="tag tag--muted">SOON</div>
+              <h3>Полировка</h3>
+              <p class="muted">Шаги, пасты/круги, температура, контроль риски.</p>
+              <div class="row">
+                <button class="btn btn--ghost" id="notifyPolish">🔔 Уведомить</button>
+              </div>
+            </div>
+          </article>
+
+          <!-- Protect -->
+          <article class="p-card" data-parallax>
+            <div class="p-card__frame"></div>
+            <div class="p-card__bg p-card__bg--protect"></div>
+            <div class="p-card__shine"></div>
+
+            <div class="layer layer--glow"></div>
+            <div class="layer layer--object layer--protect"></div>
+            <div class="layer layer--particles"></div>
+
+            <div class="p-card__content">
+              <div class="tag tag--muted">SOON</div>
+              <h3>Защиты</h3>
+              <p class="muted">Воск, синтетика, керамика. Подготовка и уход.</p>
+              <div class="row">
+                <button class="btn btn--ghost" id="notifyProtect">🔔 Уведомить</button>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- Big hero like screenshot -->
+      <section class="hero" data-parallax>
+        <div class="hero__bg"></div>
+        <div class="hero__frame"></div>
+
+        <div class="layer layer--glow hero__glow"></div>
+        <div class="layer hero__hands"></div>
+        <div class="layer hero__ring"></div>
+        <div class="layer layer--particles hero__particles"></div>
+
+        <div class="hero__content">
+          <h1>База детейлера</h1>
+          <p class="muted">
+            Всё по полочкам: химия, круги/пасты, схемы, ошибки и стандарты качества.
+          </p>
+          <button class="btn btn--primary">Посмотреть полностью</button>
+        </div>
+      </section>
+
+      <div class="spacer"></div>
+    </main>
+
+    <!-- Bottom Nav -->
+    <nav class="nav">
+      <button class="nav__item is-active" data-tab="home" type="button">
+        <span class="nav__icon">⌂</span>
+        <span class="nav__label">Главная</span>
+      </button>
+      <button class="nav__item" data-tab="courses" type="button">
+        <span class="nav__icon">▦</span>
+        <span class="nav__label">Курсы</span>
+      </button>
+      <button class="nav__item" data-tab="progress" type="button">
+        <span class="nav__icon">◔</span>
+        <span class="nav__label">Прогресс</span>
+      </button>
+      <button class="nav__item" data-tab="bonus" type="button">
+        <span class="nav__icon">✦</span>
+        <span class="nav__label">Бонусы</span>
+      </button>
+      <button class="nav__item" data-tab="profile" type="button">
+        <span class="nav__icon">⋯</span>
+        <span class="nav__label">Профиль</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- Telegram WebApp API -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
+
