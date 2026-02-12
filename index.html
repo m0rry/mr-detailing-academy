@@ -1,99 +1,53 @@
-const tg = window.Telegram?.WebApp;
-const $ = (q) => document.querySelector(q);
-const $$ = (q) => Array.from(document.querySelectorAll(q));
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#0B0D12" />
+  <title>MR Detailing Academy</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
 
-function safeSet(id, value) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = value;
-}
+<body>
+  <!-- Background blobs -->
+  <div class="bg">
+    <div class="bg__blob bg__blob--1"></div>
+    <div class="bg__blob bg__blob--2"></div>
+    <div class="bg__blob bg__blob--3"></div>
+    <div class="bg__grain"></div>
+  </div>
 
-const state = {
-  tab: "home",
-  user: { id: "local", name: "User" },
-  progress: JSON.parse(localStorage.getItem("mr_progress") || "{}"),
-};
+  <div class="app" id="app">
+    <!-- Top Bar -->
+    <header class="topbar">
+      <button class="icon-btn" id="closeBtn" aria-label="Close">×</button>
 
-function saveProgress() {
-  localStorage.setItem("mr_progress", JSON.stringify(state.progress));
-}
-function setProgress(key, value) {
-  state.progress[key] = value;
-  saveProgress();
-}
+      <div class="topbar__center">
+        <div class="muted" id="greeting">Доброе утро,</div>
+        <div class="title" id="username">MarkeyG</div>
+      </div>
 
-// ===== DATA (MVP) =====
-const academy = {
-  courses: [
-    {
-      id: "wash",
-      title: "Курс мойки",
-      desc: "Обязательная база. Откроет доступ к платным курсам.",
-      free: true,
-      modules: [
-        {
-          id: "wash_m1",
-          title: "Модуль 1 — Основы",
-          lessons: [
-            {
-              id: "wash_l1",
-              title: "Что такое детейлинг",
-              text: `Детейлинг — это системный уход: очистка + восстановление + защита.`,
-              test: {
-                q: "Детейлинг — это…",
-                options: [
-                  "Просто мойка",
-                  "Системный уход: очистка + восстановление + защита",
-                  "Только полировка",
-                ],
-                correct: 2,
-                explain: "Детейлинг включает очистку, восстановление и защиту.",
-              },
-            },
-            {
-              id: "wash_l2",
-              title: "Ошибки новичков",
-              text: `Топ ошибок: одна губка на всё, мойка по сухой пыли, сильная химия без контроля.`,
-              test: {
-                q: "Что чаще всего даёт микроцарапины?",
-                options: [
-                  "Одна губка/тряпка на всё",
-                  "Раздельные ведра и микрофибры",
-                  "Сушка воздухом",
-                ],
-                correct: 1,
-                explain: "Одна губка собирает абразив и царапает ЛКП.",
-              },
-            },
-          ],
-        },
-        {
-          id: "wash_m2",
-          title: "Модуль 2 — Процесс",
-          lessons: [
-            {
-              id: "wash_l3",
-              title: "Двухфазная мойка",
-              text: `Фаза 1 снимает основную грязь, фаза 2 безопасно домывает. Контакт — только после бесконтакта.`,
-              test: {
-                q: "Зачем нужна первая фаза?",
-                options: [
-                  "Чтобы снять грязь и снизить риск царапин",
-                  "Чтобы высушить кузов",
-                  "Чтобы быстрее перейти к контакту",
-                ],
-                correct: 1,
-                explain: "Фаза 1 снимает грязь, снижая абразив при контакте.",
-              },
-            },
-          ],
-        },
-      ],
-    },
-    {
-      id: "interior",
-      title: "Химчистка салона",
-      desc: "Покупка/подписка. –50% за 3 друзей.",
-      free: false,
-      modules: [
-        {
-          id: "int_m1",_
+      <div class="topbar__right">
+        <div class="muted">Баланс</div>
+        <div class="balance"><span id="stars">100</span> ⭐</div>
+      </div>
+    </header>
+
+    <!-- SCREENS -->
+    <main class="content">
+      <!-- HOME -->
+      <section class="screen is-active" id="screen-home">
+        <section class="section">
+          <div class="section__head">
+            <h2>Разделы</h2>
+            <span class="muted">scroll →</span>
+          </div>
+
+          <div class="hscroll">
+            <button class="mini glow" type="button" data-go="courses">
+              <div class="mini__top"><span class="mini__pill">START</span></div>
+              <div class="mini__title">Курсы</div>
+              <div class="mini__sub muted">модули / уроки</div>
+            </button>
+
+            <button class="mini glow" type="button" data-go="pr
