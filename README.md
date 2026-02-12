@@ -1,0 +1,1 @@
+# mr-detailing-academy
