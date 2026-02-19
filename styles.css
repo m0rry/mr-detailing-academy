@@ -1,16 +1,4 @@
 :root{
-  --font-main: Arial;
-  --font-he: "Noto Sans Hebrew" var(--font-main);
-}
-
-body{ font-family: var(--font-main); }
-
-/* Когда включён иврит */
-html.lang-he body{
-  font-family: var(--font-he);
-  direction: rtl;
-}
-
   --bg:#0b0f14;
   --panel:#101722;
   --panel2:#0e1420;
@@ -337,4 +325,21 @@ body{
 }
 .nav__item.is-active{
   color:var(--text);
-  border-color: rgba(110,231,255,
+  border-color: rgba(110,231,255,.22);
+  background: rgba(110,231,255,.06);
+}
+.nav__item span{ font-size:11px; }
+
+.code{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size:12px;
+  padding:10px;
+  border-radius: 14px;
+  border:1px dashed rgba(255,255,255,.14);
+  background: rgba(0,0,0,.20);
+  color: rgba(234,242,255,.92);
+  overflow:auto;
+}
+
+a{ color: rgba(110,231,255,.92); text-decoration:none; }
+a:hover{ text-decoration:underline; }
