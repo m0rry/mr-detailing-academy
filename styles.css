@@ -1,6 +1,6 @@
 :root{
-  --font-main: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Helvetica Neue", sans-serif;
-  --font-he: "Heebo", "Rubik", "Noto Sans Hebrew", var(--font-main);
+  --font-main: Arial;
+  --font-he: "Noto Sans Hebrew" var(--font-main);
 }
 
 body{ font-family: var(--font-main); }
