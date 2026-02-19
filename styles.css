@@ -1,31 +1,6 @@
 :root{
-  --font-main: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Helvetica Neue", sans-serif;
-  --font-he: "Heebo", "Rubik", "Noto Sans Hebrew", var(--font-main);
-}
-
-body{ font-family: var(--font-main); }
-
-/* Весь каркас приложения оставляем LTR, чтобы не ломался UI */
-html.lang-he body { direction: ltr; }
-  font-family: var(--font-he);
-}
-
-/* RTL только там, где текстовый контент */
-html.lang-he .screen,
-html.lang-he .panel,
-html.lang-he .card__title,
-html.lang-he .card__desc,
-html.lang-he .lesson,
-html.lang-he .course,
-html.lang-he .test,
-html.lang-he .hint {
-  text-align: right;
-}
-
-
   --bg:#0b0f14;
   --panel:#101722;
-  --panel2:#0e1420;
   --text:#eaf2ff;
   --muted:#a9bbd7;
   --line:rgba(255,255,255,.08);
@@ -36,18 +11,58 @@ html.lang-he .hint {
   --warn:#fbbf24;
   --shadow: 0 16px 40px rgba(0,0,0,.45);
   --r:18px;
+
+  --font-main: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Helvetica Neue", sans-serif;
+  --font-he: "Noto Sans Hebrew", "Arial Hebrew", Arial, sans-serif;
 }
 
 *{ box-sizing:border-box; }
 html,body{ height:100%; }
+html, body{ overflow-x:hidden; }
+
 body{
   margin:0;
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Helvetica Neue", sans-serif;
+  font-family: var(--font-main);
   background: radial-gradient(1000px 700px at 15% 10%, rgba(110,231,255,.16), transparent 60%),
               radial-gradient(900px 650px at 90% 0%, rgba(167,139,250,.18), transparent 55%),
               radial-gradient(900px 650px at 60% 90%, rgba(74,222,128,.10), transparent 55%),
               var(--bg);
   color:var(--text);
+}
+
+/* 🔥 SAFE RTL STRATEGY:
+   - We keep the app shell LTR so grids/nav don't flip
+   - We apply RTL only to content blocks when Hebrew mode is on
+*/
+html.lang-he body{
+  font-family: var(--font-he);
+}
+
+/* App shell stays LTR */
+html.lang-he .app,
+html.lang-he .topbar,
+html.lang-he .nav,
+html.lang-he .hero,
+html.lang-he .grid,
+html.lang-he .row,
+html.lang-he .subbar{
+  direction:ltr;
+}
+
+/* Content blocks become RTL (text + reading direction) */
+html.lang-he .screen,
+html.lang-he .panel,
+html.lang-he .card__title,
+html.lang-he .card__desc,
+html.lang-he .lead,
+html.lang-he .hint,
+html.lang-he .kicker,
+html.lang-he .list-item__title,
+html.lang-he .list-item__meta,
+html.lang-he .q__title,
+html.lang-he .result__text{
+  direction:rtl;
+  text-align:right;
 }
 
 .app{ min-height:100%; display:flex; flex-direction:column; }
@@ -116,19 +131,9 @@ body{
   .hero{ grid-template-columns: 1fr; }
 }
 
-.kicker{
-  color:var(--muted);
-  font-size:14px;
-}
-.title{
-  margin:.35rem 0 .25rem;
-  font-size:34px;
-  line-height:1.1;
-}
-.lead{
-  color:var(--muted);
-  margin:0 0 14px;
-}
+.kicker{ color:var(--muted); font-size:14px; }
+.title{ margin:.35rem 0 .25rem; font-size:34px; line-height:1.1; }
+.lead{ color:var(--muted); margin:0 0 14px; }
 
 .hero__actions{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
 
@@ -248,11 +253,7 @@ body{
   display:flex; align-items:center; gap:10px;
   margin-bottom:12px;
 }
-.subbar__title{
-  font-weight:900;
-  font-size:16px;
-  color: var(--text);
-}
+.subbar__title{ font-weight:900; font-size:16px; color: var(--text); }
 
 .course, .lesson, .test{ display:flex; flex-direction:column; gap:12px; }
 
@@ -269,9 +270,7 @@ body{
   background: linear-gradient(90deg, rgba(110,231,255,.55), rgba(167,139,250,.55));
 }
 
-.list{
-  display:flex; flex-direction:column; gap:8px;
-}
+.list{ display:flex; flex-direction:column; gap:8px; }
 .list-item{
   padding:12px;
   border-radius: var(--r);
