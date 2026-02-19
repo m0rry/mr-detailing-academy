@@ -225,12 +225,15 @@
     return cur;
   }
 
-  function setLang(newLang) {
-    state.lang = newLang === "he" ? "he" : "ru";
-    saveState();
-    applyI18n();
-    renderAll();
-  }
+ function setLang(newLang) {
+  state.lang = newLang === "he" ? "he" : "ru";
+  document.documentElement.classList.toggle("lang-he", state.lang === "he");
+  document.documentElement.setAttribute("lang", state.lang);
+  saveState();
+  applyI18n();
+  renderAll();
+}
+
 
   // ---------------------------
   // Screens routing
@@ -1287,6 +1290,9 @@
     if (!["ru","he"].includes(state.lang)) state.lang = "ru";
     $("#langToggle").textContent = state.lang.toUpperCase();
     applyI18n();
+     document.documentElement.classList.toggle("lang-he", state.lang === "he");
+document.documentElement.setAttribute("lang", state.lang);
+
 
     // default screen
     showScreen("home");
