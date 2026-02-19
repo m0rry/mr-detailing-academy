@@ -19,7 +19,6 @@ html.lang-he .lesson,
 html.lang-he .course,
 html.lang-he .test,
 html.lang-he .hint {
-  direction: rtl;
   text-align: right;
 }
 
