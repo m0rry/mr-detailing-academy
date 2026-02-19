@@ -1,24 +1,24 @@
 <!doctype html>
-<html lang="ru">
+<html lang="ru" dir="ltr">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>MR Detailing Academy</title>
-  <link rel="stylesheet" href="./styles.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;800;900&display=swap" rel="stylesheet">
 
+  <!-- Fonts: Noto Sans Hebrew -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@400;600;800;900&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="./styles.css" />
 </head>
 
 <body>
   <div class="app" id="app">
     <header class="topbar">
-      <button class="icon-btn" id="closeBtn" aria-label="Close">
-        ✕
-      </button>
+      <button class="icon-btn" id="closeBtn" type="button" aria-label="Close">✕</button>
 
-      <div class="brand" id="brandTap">
+      <div class="brand" id="brandTap" role="button" tabindex="0" aria-label="Brand">
         <div class="brand__logo">MR</div>
         <div class="brand__text">
           <div class="brand__title">Detailing Academy</div>
@@ -35,21 +35,17 @@
         <div class="hero">
           <div class="hero__left">
             <div class="kicker" id="greeting">Привет,</div>
-            <h1 class="title">
-              <span id="username">мастер</span> 👋
-            </h1>
+            <h1 class="title"><span id="username">мастер</span> 👋</h1>
             <p class="lead" id="homeLead">
               Курсы, тесты, база знаний и практические чек-листы — всё в одном месте.
             </p>
 
             <div class="hero__actions">
-              <button class="btn btn-primary" id="openCourses">Открыть курсы</button>
-              <button class="btn btn-ghost" id="openWiki">Детейлинг-вики</button>
+              <button class="btn btn-primary" id="openCourses" type="button">Открыть курсы</button>
+              <button class="btn btn-ghost" id="openWiki" type="button">Детейлинг-вики</button>
             </div>
 
-            <div class="stats" id="homeStats">
-              <!-- render -->
-            </div>
+            <div class="stats" id="homeStats"></div>
           </div>
 
           <div class="hero__right">
@@ -57,10 +53,10 @@
               <div class="glass-card__title" id="quickTitle">Быстрый старт</div>
               <div class="glass-card__list" id="quickList"></div>
               <button class="btn btn-secondary" id="openWash" type="button">
-                Я оплатил / завершил курс "Мойка" → открыть доступ
+                Я оплатил / завершил мойку → открыть доступ
               </button>
               <div class="hint" id="quickHint">
-                Если оплаты ещё нет — можно купить курс внутри вкладки “Курсы”.
+                Если оплаты ещё нет — можно купить курс во вкладке “Курсы”.
               </div>
             </div>
           </div>
@@ -92,33 +88,30 @@
         <div class="grid" id="coursesRoot"></div>
       </section>
 
-      <!-- COURSE DETAILS -->
+      <!-- COURSE -->
       <section class="screen" id="screen-course" data-screen="course">
         <div class="subbar">
-          <button class="btn btn-ghost" id="backToCourses">← Назад</button>
+          <button class="btn btn-ghost" id="backToCourses" type="button">← Назад</button>
           <div class="subbar__title" id="courseTitle">Курс</div>
         </div>
-
         <div class="course" id="courseRoot"></div>
       </section>
 
       <!-- LESSON -->
       <section class="screen" id="screen-lesson" data-screen="lesson">
         <div class="subbar">
-          <button class="btn btn-ghost" id="backToCourse">← Назад</button>
+          <button class="btn btn-ghost" id="backToCourse" type="button">← Назад</button>
           <div class="subbar__title" id="lessonTitle">Урок</div>
         </div>
-
         <div class="lesson" id="lessonRoot"></div>
       </section>
 
       <!-- TEST -->
       <section class="screen" id="screen-test" data-screen="test">
         <div class="subbar">
-          <button class="btn btn-ghost" id="backToLesson">← Назад</button>
+          <button class="btn btn-ghost" id="backToLesson" type="button">← Назад</button>
           <div class="subbar__title" id="testTitle">Тест</div>
         </div>
-
         <div class="test" id="testRoot"></div>
       </section>
 
@@ -162,13 +155,11 @@
           <div class="hr"></div>
 
           <div class="row">
-            <button class="btn btn-secondary" id="resetProgress">Сбросить прогресс</button>
-            <button class="btn btn-ghost" id="exportData">Экспорт данных</button>
+            <button class="btn btn-secondary" id="resetProgress" type="button">Сбросить прогресс</button>
+            <button class="btn btn-ghost" id="exportData" type="button">Экспорт данных</button>
           </div>
 
-          <div class="hint" id="profileHint">
-            Админ-панель: 7 раз нажми на логотип “MR” сверху.
-          </div>
+          <div class="hint" id="profileHint">Админ-панель: 7 раз нажми на логотип “MR” сверху.</div>
         </div>
 
         <div class="panel" style="margin-top:12px;">
@@ -180,15 +171,14 @@
       <!-- ADMIN -->
       <section class="screen" id="screen-admin" data-screen="admin">
         <div class="subbar">
-          <button class="btn btn-ghost" id="backFromAdmin">← Назад</button>
+          <button class="btn btn-ghost" id="backFromAdmin" type="button">← Назад</button>
           <div class="subbar__title" id="adminTitle">Админ</div>
         </div>
-
         <div class="panel" id="adminRoot"></div>
       </section>
     </main>
 
-    <nav class="nav">
+    <nav class="nav" aria-label="Navigation">
       <button class="nav__item is-active" data-tab="home" type="button">🏠<span id="navHome">Главная</span></button>
       <button class="nav__item" data-tab="courses" type="button">🎓<span id="navCourses">Курсы</span></button>
       <button class="nav__item" data-tab="progress" type="button">📈<span id="navProgress">Прогресс</span></button>
