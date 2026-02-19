@@ -1,4 +1,29 @@
 :root{
+  --font-main: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Helvetica Neue", sans-serif;
+  --font-he: "Heebo", "Rubik", "Noto Sans Hebrew", var(--font-main);
+}
+
+body{ font-family: var(--font-main); }
+
+/* Весь каркас приложения оставляем LTR, чтобы не ломался UI */
+html.lang-he body { direction: ltr; }
+  font-family: var(--font-he);
+}
+
+/* RTL только там, где текстовый контент */
+html.lang-he .screen,
+html.lang-he .panel,
+html.lang-he .card__title,
+html.lang-he .card__desc,
+html.lang-he .lesson,
+html.lang-he .course,
+html.lang-he .test,
+html.lang-he .hint {
+  direction: rtl;
+  text-align: right;
+}
+
+
   --bg:#0b0f14;
   --panel:#101722;
   --panel2:#0e1420;
