@@ -2,81 +2,112 @@
 <html lang="ru" dir="ltr">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="dark" />
   <title>MR Detailing Academy</title>
 
-  <!-- Fonts: Noto Sans Hebrew -->
+  <!-- Fonts: Inter (RU) + Noto Sans Hebrew (HE) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@400;600;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+Hebrew:wght@400;600;700;800&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="./styles.css" />
 </head>
 
 <body>
-  <div class="app" id="app">
+  <div class="app">
+    <!-- Top bar -->
     <header class="topbar">
-      <button class="icon-btn" id="closeBtn" type="button" aria-label="Close">✕</button>
+      <button id="closeBtn" class="icon-btn" type="button" aria-label="Close">✕</button>
 
-      <div class="brand" id="brandTap" role="button" tabindex="0" aria-label="Brand">
+      <div id="brandTap" class="brand">
         <div class="brand__logo">MR</div>
         <div class="brand__text">
           <div class="brand__title">Detailing Academy</div>
-          <div class="brand__subtitle" id="brandSubtitle">Внутренний мир детейлинга</div>
+          <div id="brandSubtitle" class="brand__subtitle">Внутренний мир детейлинга</div>
         </div>
       </div>
 
-      <button class="chip" id="langToggle" type="button">RU</button>
+      <button id="langToggle" class="pill" type="button">RU</button>
     </header>
 
-    <main class="main">
+    <!-- Screens -->
+    <main class="content">
       <!-- HOME -->
-      <section class="screen is-active" id="screen-home" data-screen="home">
-        <div class="hero">
-          <div class="hero__left">
-            <div class="kicker" id="greeting">Привет,</div>
-            <h1 class="title"><span id="username">мастер</span> 👋</h1>
-            <p class="lead" id="homeLead">
-              Курсы, тесты, база знаний и практические чек-листы — всё в одном месте.
-            </p>
-
-            <div class="hero__actions">
-              <button class="btn btn-primary" id="openCourses" type="button">Открыть курсы</button>
-              <button class="btn btn-ghost" id="openWiki" type="button">Детейлинг-вики</button>
-            </div>
-
-            <div class="stats" id="homeStats"></div>
+      <section id="screen-home" class="screen is-active">
+        <div class="hero card">
+          <div class="hero__hello">
+            <div class="muted" id="greeting">Привет,</div>
+            <div class="h1"><span id="username">мастер</span></div>
           </div>
 
-          <div class="hero__right">
-            <div class="glass-card">
-              <div class="glass-card__title" id="quickTitle">Быстрый старт</div>
-              <div class="glass-card__list" id="quickList"></div>
-              <button class="btn btn-secondary" id="openWash" type="button">
-                Я оплатил / завершил мойку → открыть доступ
-              </button>
-              <div class="hint" id="quickHint">
-                Если оплаты ещё нет — можно купить курс во вкладке “Курсы”.
-              </div>
-            </div>
+          <div class="lead" id="homeLead">
+            Курсы, тесты, база знаний и практические чек-листы — всё в одном месте.
           </div>
+
+          <div class="row">
+            <button id="openCourses" class="btn btn-primary" type="button">Открыть курсы</button>
+            <button id="openWiki" class="btn btn-ghost" type="button">Детейлинг-вики</button>
+          </div>
+
+          <div id="homeStats" class="stats"></div>
         </div>
 
-        <div class="section">
-          <div class="section__head">
-            <h2 class="section__title" id="homeSectionTitle">Рекомендуем сегодня</h2>
-          </div>
-          <div class="grid" id="homeRecommended"></div>
+        <div class="card">
+          <div class="h2" id="quickTitle">Быстрый старт</div>
+          <div class="muted" id="quickHint">Если оплаты ещё нет — можно купить курс внутри вкладки “Курсы”.</div>
+
+          <div class="spacer"></div>
+
+          <button id="openWash" class="btn btn-ghost w-full" type="button">
+            Я оплатил / завершил мойку → открыть доступ
+          </button>
+
+          <ul id="quickList" class="bullets"></ul>
+        </div>
+
+        <div class="card">
+          <div class="h2" id="homeSectionTitle">Рекомендуем сегодня</div>
+          <div id="recommendedRoot" class="grid"></div>
         </div>
       </section>
 
-      <!-- COURSES -->
-      <section class="screen" id="screen-courses" data-screen="courses">
-        <div class="section__head">
-          <h2 class="section__title" id="coursesTitle">Курсы</h2>
+      <!-- NEWS -->
+      <section id="screen-news" class="screen">
+        <div class="card">
+          <div class="h2" id="newsTitle">Новости</div>
+          <div class="muted" id="newsLead">Новинки и обновления из мира детейлинга (RSS).</div>
+
+          <div class="spacer"></div>
+
+          <div class="row row-wrap">
+            <label class="field">
+              <div class="field__label" id="newsSourcesLabel">Источники</div>
+              <select id="newsSourceSelect" class="select"></select>
+            </label>
+
+            <label class="field grow">
+              <div class="field__label" id="newsSearchLabel">Поиск</div>
+              <input id="newsSearch" class="input" type="search" placeholder="Керамика, PPF, полировка..." />
+            </label>
+          </div>
+
           <div class="row">
-            <input class="input" id="coursesSearch" placeholder="Поиск по курсам..." />
-            <select class="select" id="coursesFilter">
+            <button id="newsRefresh" class="btn btn-primary" type="button">Обновить</button>
+            <button id="newsClearCache" class="btn btn-ghost" type="button">Сбросить кэш</button>
+          </div>
+        </div>
+
+        <div id="newsRoot" class="stack"></div>
+      </section>
+
+      <!-- COURSES -->
+      <section id="screen-courses" class="screen">
+        <div class="card">
+          <div class="h2" id="coursesTitle">Курсы</div>
+          <div class="row row-wrap">
+            <input id="coursesSearch" class="input grow" type="search" placeholder="Поиск по курсам..." />
+            <select id="coursesFilter" class="select">
               <option value="all">Все</option>
               <option value="free">Бесплатные</option>
               <option value="paid">Платные</option>
@@ -84,106 +115,112 @@
             </select>
           </div>
         </div>
-
-        <div class="grid" id="coursesRoot"></div>
+        <div id="coursesRoot" class="stack"></div>
       </section>
 
       <!-- COURSE -->
-      <section class="screen" id="screen-course" data-screen="course">
-        <div class="subbar">
-          <button class="btn btn-ghost" id="backToCourses" type="button">← Назад</button>
-          <div class="subbar__title" id="courseTitle">Курс</div>
+      <section id="screen-course" class="screen">
+        <button id="backToCourses" class="back" type="button">← Назад</button>
+        <div class="card">
+          <div class="h2" id="courseTitle">Курс</div>
+          <div id="courseRoot" class="stack"></div>
         </div>
-        <div class="course" id="courseRoot"></div>
       </section>
 
       <!-- LESSON -->
-      <section class="screen" id="screen-lesson" data-screen="lesson">
-        <div class="subbar">
-          <button class="btn btn-ghost" id="backToCourse" type="button">← Назад</button>
-          <div class="subbar__title" id="lessonTitle">Урок</div>
+      <section id="screen-lesson" class="screen">
+        <button id="backToCourse" class="back" type="button">← Назад</button>
+        <div class="card">
+          <div class="h2" id="lessonTitle">Урок</div>
+          <div id="lessonRoot" class="stack"></div>
         </div>
-        <div class="lesson" id="lessonRoot"></div>
       </section>
 
       <!-- TEST -->
-      <section class="screen" id="screen-test" data-screen="test">
-        <div class="subbar">
-          <button class="btn btn-ghost" id="backToLesson" type="button">← Назад</button>
-          <div class="subbar__title" id="testTitle">Тест</div>
+      <section id="screen-test" class="screen">
+        <button id="backToLesson" class="back" type="button">← Назад</button>
+        <div class="card">
+          <div class="h2" id="testTitle">Тест</div>
+          <div id="testRoot" class="stack"></div>
+
+          <form id="testForm" class="stack"></form>
+
+          <div class="row">
+            <button id="submitTest" class="btn btn-primary" type="button">Проверить</button>
+            <button id="clearTest" class="btn btn-ghost" type="button">Очистить</button>
+          </div>
+
+          <div id="testResult" class="card card-inset"></div>
         </div>
-        <div class="test" id="testRoot"></div>
       </section>
 
       <!-- PROGRESS -->
-      <section class="screen" id="screen-progress" data-screen="progress">
-        <div class="section__head">
-          <h2 class="section__title" id="progressTitle">Прогресс</h2>
+      <section id="screen-progress" class="screen">
+        <div class="card">
+          <div class="h2" id="progressTitle">Прогресс</div>
         </div>
-        <div class="panel" id="progressRoot"></div>
+        <div id="progressRoot" class="stack"></div>
       </section>
 
       <!-- WIKI -->
-      <section class="screen" id="screen-wiki" data-screen="wiki">
-        <div class="section__head">
-          <h2 class="section__title" id="wikiTitle">Детейлинг-вики</h2>
-          <div class="row">
-            <input class="input" id="wikiSearch" placeholder="Поиск: полировка, PPF, керамика..." />
-            <select class="select" id="wikiCategory">
+      <section id="screen-wiki" class="screen">
+        <div class="card">
+          <div class="h2" id="wikiTitle">Детейлинг-вики</div>
+          <div class="row row-wrap">
+            <input id="wikiSearch" class="input grow" type="search" placeholder="Поиск: полировка, PPF, керамика..." />
+            <select id="wikiCategory" class="select">
               <option value="all">Все категории</option>
             </select>
           </div>
         </div>
-        <div class="grid" id="wikiRoot"></div>
+        <div id="wikiRoot" class="stack"></div>
       </section>
 
       <!-- PROFILE -->
-      <section class="screen" id="screen-profile" data-screen="profile">
-        <div class="section__head">
-          <h2 class="section__title" id="profileTitle">Профиль</h2>
-        </div>
+      <section id="screen-profile" class="screen">
+        <div class="card">
+          <div class="h2" id="profileTitle">Профиль</div>
 
-        <div class="panel">
           <div class="profile">
-            <div class="profile__avatar" id="profileAvatar">MR</div>
-            <div class="profile__info">
-              <div class="profile__name" id="profileName">Пользователь</div>
-              <div class="profile__meta" id="profileMeta">Telegram WebApp</div>
+            <div id="profileAvatar" class="avatar">MR</div>
+            <div>
+              <div id="profileName" class="profile__name">Пользователь</div>
+              <div id="profileMeta" class="muted">Telegram WebApp</div>
             </div>
           </div>
 
-          <div class="hr"></div>
-
           <div class="row">
-            <button class="btn btn-secondary" id="resetProgress" type="button">Сбросить прогресс</button>
-            <button class="btn btn-ghost" id="exportData" type="button">Экспорт данных</button>
+            <button id="resetProgress" class="btn btn-ghost" type="button">Сбросить прогресс</button>
+            <button id="exportData" class="btn btn-ghost" type="button">Экспорт данных</button>
           </div>
 
-          <div class="hint" id="profileHint">Админ-панель: 7 раз нажми на логотип “MR” сверху.</div>
-        </div>
+          <div class="muted" id="profileHint">Админ-панель: 7 раз нажми на логотип “MR” сверху.</div>
 
-        <div class="panel" style="margin-top:12px;">
-          <h3 class="h3" id="ownedTitle">Мои доступы</h3>
-          <div id="ownedRoot"></div>
+          <div class="spacer"></div>
+
+          <div class="h3" id="ownedTitle">Мои доступы</div>
+          <div id="ownedRoot" class="stack"></div>
         </div>
       </section>
 
       <!-- ADMIN -->
-      <section class="screen" id="screen-admin" data-screen="admin">
-        <div class="subbar">
-          <button class="btn btn-ghost" id="backFromAdmin" type="button">← Назад</button>
-          <div class="subbar__title" id="adminTitle">Админ</div>
+      <section id="screen-admin" class="screen">
+        <button id="backFromAdmin" class="back" type="button">← Назад</button>
+        <div class="card">
+          <div class="h2" id="adminTitle">Админ</div>
+          <div id="adminRoot" class="stack"></div>
         </div>
-        <div class="panel" id="adminRoot"></div>
       </section>
     </main>
 
-    <nav class="nav" aria-label="Navigation">
-      <button class="nav__item is-active" data-tab="home" type="button">🏠<span id="navHome">Главная</span></button>
-      <button class="nav__item" data-tab="courses" type="button">🎓<span id="navCourses">Курсы</span></button>
-      <button class="nav__item" data-tab="progress" type="button">📈<span id="navProgress">Прогресс</span></button>
-      <button class="nav__item" data-tab="wiki" type="button">📚<span id="navWiki">Вики</span></button>
-      <button class="nav__item" data-tab="profile" type="button">👤<span id="navProfile">Профиль</span></button>
+    <!-- Bottom nav -->
+    <nav class="nav">
+      <button class="nav__item is-active" data-tab="home" type="button"><span id="navHome">Главная</span></button>
+      <button class="nav__item" data-tab="news" type="button"><span id="navNews">Новости</span></button>
+      <button class="nav__item" data-tab="courses" type="button"><span id="navCourses">Курсы</span></button>
+      <button class="nav__item" data-tab="progress" type="button"><span id="navProgress">Прогресс</span></button>
+      <button class="nav__item" data-tab="wiki" type="button"><span id="navWiki">Вики</span></button>
+      <button class="nav__item" data-tab="profile" type="button"><span id="navProfile">Профиль</span></button>
     </nav>
   </div>
 
