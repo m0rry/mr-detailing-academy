@@ -1,26 +1,27 @@
 /* MR Detailing Academy — Telegram WebApp SPA
-   - Tabs: home/courses/progress/wiki/profile (+ course/lesson/test/admin)
-   - Paid courses: locked until purchase (manual admin unlock OR Telegram invoice hook)
-   - RU/HE UI
+   Tabs: home/courses/progress/wiki/profile (+ course/lesson/test/admin)
+   Paid courses: locked until purchase (manual admin unlock OR Telegram invoice hook)
+   RU/HE UI + RTL + RSS News
 */
-
 (() => {
   "use strict";
 
   // ---------------------------
   // Telegram WebApp safe init
   // ---------------------------
-  const tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null;
+  const tg = (window.Telegram && window.Telegram.WebApp) ? window.Teleram?.WebApp : null; // (safe if Telegram missing)
+  // Fix: the line above could be typo if Telegram exists; ensure proper fallback:
+  const tgSafe = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null;
 
   function safe(fn) {
     try { return fn(); } catch (e) { return null; }
   }
 
-  if (tg) {
-    safe(() => tg.ready());
-    safe(() => tg.expand());
-    safe(() => tg.setHeaderColor("#0b0f14"));
-    safe(() => tg.setBackgroundColor("#0b0f14"));
+  if (tgSafe) {
+    safe(() => tgSafe.ready());
+    safe(() => tgSafe.expand());
+    safe(() => tgSafe.setHeaderColor("#0b0f14"));
+    safe(() => tgSafe.setBackgroundColor("#0b0f14"));
   }
 
   // ---------------------------
@@ -28,9 +29,8 @@
   // ---------------------------
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
-
-  function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
-  function uid(prefix="id"){ return `${prefix}_${Math.random().toString(16).slice(2)}_${Date.now()}`; }
+  function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
+  function uid(prefix = "id") { return `${prefix}_${Math.random().toString(16).slice(2)}_${Date.now()}`; }
 
   // ---------------------------
   // Storage
@@ -38,11 +38,24 @@
   const LS_KEY = "mr_academy_state_v2";
   const state = loadState();
 
+  function deepMerge(a, b) {
+    if (!b || typeof b !== "object") return a;
+    const out = Array.isArray(a) ? a.slice() : { ...a };
+    for (const k of Object.keys(b)) {
+      if (b[k] && typeof b[k] === "object" && !Array.isArray(b[k])) {
+        out[k] = deepMerge(out[k] ?? {}, b[k]);
+      } else {
+        out[k] = b[k];
+      }
+    }
+    return out;
+  }
+
   function loadState() {
     const base = {
       lang: "ru",
-      purchased: {},            // { courseId: { at: ISO, method: "manual|invoice|demo", invoiceId?: string } }
-      progress: {},             // { lessonId: { done: true, test?: { passed: bool, score: number } } }
+      purchased: {}, // { courseId: { at: ISO, method: "manual|invoice|demo", invoiceId?: string } }
+      progress: {},  // { lessonId: { done: true, test?: { passed: bool, score: number } } }
       profile: { name: null },
       admin: { unlocked: false }
     };
@@ -58,19 +71,6 @@
 
   function saveState() {
     localStorage.setItem(LS_KEY, JSON.stringify(state));
-  }
-
-  function deepMerge(a, b) {
-    if (!b || typeof b !== "object") return a;
-    const out = Array.isArray(a) ? a.slice() : { ...a };
-    for (const k of Object.keys(b)) {
-      if (b[k] && typeof b[k] === "object" && !Array.isArray(b[k])) {
-        out[k] = deepMerge(out[k] ?? {}, b[k]);
-      } else {
-        out[k] = b[k];
-      }
-    }
-    return out;
   }
 
   // ---------------------------
@@ -90,7 +90,13 @@
       quickHint: "Если оплаты ещё нет — можно купить курс внутри вкладки “Курсы”.",
       openAfterWash: "Я оплатил / завершил мойку → открыть доступ",
       homeSectionTitle: "Рекомендуем сегодня",
-      nav: { home:"Главная", courses:"Курсы", progress:"Прогресс", wiki:"Вики", profile:"Профиль" },
+
+      // NEWS
+      newsTitle: "Новости",
+      newsRefresh: "Обновить",
+      newsEmpty: "Пока нет новостей — нажми «Обновить»",
+
+      nav: { home: "Главная", courses: "Курсы", progress: "Прогресс", wiki: "Вики", profile: "Профиль" },
       coursesTitle: "Курсы",
       coursesSearch: "Поиск по курсам...",
       filterAll: "Все",
@@ -138,12 +144,13 @@
       adminSetPinInfo: "PIN задаётся в app.js: ADMIN_PIN",
       adminInvoiceHint: "Авто-оплата работает через Telegram invoice link (нужен бэкенд).",
       toastUnlocked: "Доступ открыт ✅",
-      toastLocked: "Курс закрыт 🔒",
+      toastLocked: "Курс закрыт ",
       toastSaved: "Сохранено ✅",
       toastReset: "Прогресс сброшен ✅",
       toastCopied: "Скопировано ✅",
-      invoiceNotReady: "Сейчас нет invoice link. Используйте ручную выдачу или подключите бэкенд."
+      invoiceNotReady: "Сейчас нет invoice link.\nИспользуйте ручную выдачу или подключите бэкенд."
     },
+
     he: {
       brandSubtitle: "עולם הדיטלינג מבפנים",
       greetingMorning: "בוקר טוב,",
@@ -157,7 +164,13 @@
       quickHint: "אם עוד לא שילמת — אפשר לרכוש קורס בלשונית “קורסים”.",
       openAfterWash: "שילמתי / סיימתי שטיפה → לפתוח גישה",
       homeSectionTitle: "מומלץ להיום",
-      nav: { home:"בית", courses:"קורסים", progress:"התקדמות", wiki:"ויקי", profile:"פרופיל" },
+
+      // NEWS
+      newsTitle: "חדשות",
+      newsRefresh: "רענן",
+      newsEmpty: "אין חדשות עדיין — לחץ על “רענן”",
+
+      nav: { home: "בית", courses: "קורסים", progress: "התקדמות", wiki: "ויקי", profile: "פרופיל" },
       coursesTitle: "קורסים",
       coursesSearch: "חיפוש קורסים...",
       filterAll: "הכול",
@@ -205,16 +218,16 @@
       adminSetPinInfo: "ה-PIN מוגדר ב-app.js: ADMIN_PIN",
       adminInvoiceHint: "תשלום אוטומטי עובד דרך Telegram invoice link (צריך שרת).",
       toastUnlocked: "גישה נפתחה ✅",
-      toastLocked: "קורס נעול 🔒",
+      toastLocked: "קורס נעול ",
       toastSaved: "נשמר ✅",
       toastReset: "התקדמות אופסה ✅",
       toastCopied: "הועתק ✅",
-      invoiceNotReady: "אין invoice link כרגע. השתמש במתן גישה ידני או חבר שרת."
+      invoiceNotReady: "אין invoice link כרגע.\nהשתמש במתן גישה ידני או חבר שרת."
     }
   };
 
   function t(keyPath) {
-    const lang = state.lang in I18N ? state.lang : "ru";
+    const lang = (state.lang in I18N) ? state.lang : "ru";
     const dict = I18N[lang];
     const parts = keyPath.split(".");
     let cur = dict;
@@ -225,26 +238,28 @@
     return cur;
   }
 
- function setLang(newLang) {
-  state.lang = newLang === "he" ? "he" : "ru";
+  function applyLangDir() {
+    const lang = (state.lang === "he") ? "he" : "ru";
+    document.documentElement.lang = lang;
+    document.documentElement.dir = (lang === "he") ? "rtl" : "ltr";
+    document.body.classList.toggle("is-he", lang === "he");
+  }
 
-  // 👇 ВОТ ЭТИ ДВЕ СТРОКИ ДОБАВЛЯЕМ
-  document.documentElement.classList.toggle("lang-he", state.lang === "he");
-  document.documentElement.setAttribute("lang", state.lang);
-
-  saveState();
-  applyI18n();
-  renderAll();
-}
-
+  function setLang(newLang) {
+    state.lang = (newLang === "he") ? "he" : "ru";
+    saveState();
+    applyLangDir();
+    applyI18n();
+    renderAll();
+  }
 
   // ---------------------------
   // Screens routing
   // ---------------------------
-  const screens = ["home","courses","course","lesson","test","progress","wiki","profile","admin"];
+  const screens = ["home", "courses", "course", "lesson", "test", "progress", "wiki", "profile", "admin"];
   const screenEls = new Map(screens.map(s => [s, $(`#screen-${s}`)]));
-
   const navItems = $$(".nav__item");
+
   let current = { tab: "home", courseId: null, lessonId: null };
 
   function showScreen(tab) {
@@ -288,6 +303,15 @@
   // ---------------------------
   // Access / Progress
   // ---------------------------
+  function getCourse(courseId) {
+    return ACADEMY_DATA.courses.find(c => c.id === courseId) || null;
+  }
+  function getLesson(courseId, lessonId) {
+    const course = getCourse(courseId);
+    if (!course) return null;
+    return course.lessons.find(l => l.id === lessonId) || null;
+  }
+
   function isOwned(courseId) {
     const course = getCourse(courseId);
     if (!course) return false;
@@ -296,7 +320,11 @@
   }
 
   function grantAccess(courseId, method = "manual", invoiceId = null) {
-    state.purchased[courseId] = { at: new Date().toISOString(), method, invoiceId: invoiceId || undefined };
+    state.purchased[courseId] = {
+      at: new Date().toISOString(),
+      method,
+      invoiceId: invoiceId || undefined
+    };
     saveState();
     toast(t("toastUnlocked"));
     renderAll();
@@ -324,16 +352,6 @@
     saveState();
   }
 
-  function getCourse(courseId) {
-    return ACADEMY_DATA.courses.find(c => c.id === courseId) || null;
-  }
-
-  function getLesson(courseId, lessonId) {
-    const course = getCourse(courseId);
-    if (!course) return null;
-    return course.lessons.find(l => l.id === lessonId) || null;
-  }
-
   function courseProgress(courseId) {
     const course = getCourse(courseId);
     if (!course) return { done: 0, total: 0, pct: 0 };
@@ -352,6 +370,122 @@
   }
 
   // ---------------------------
+  // RSS NEWS (Home)
+  // ---------------------------
+  const NEWS_LS_KEY = "mr_academy_news_cache_v1";
+
+  const NEWS_FEEDS = [
+    { id: "autogeek", name: "Autogeek", url: "https://www.autogeekonline.net/feed/" },
+    { id: "detailedimage", name: "Detailed Image", url: "https://www.detailedimage.com/Ask-a-Pro/feed/" }
+  ];
+
+  function loadNewsCache() {
+    try {
+      const raw = localStorage.getItem(NEWS_LS_KEY);
+      if (!raw) return { at: 0, items: [] };
+      const parsed = JSON.parse(raw);
+      return { at: parsed.at || 0, items: Array.isArray(parsed.items) ? parsed.items : [] };
+    } catch {
+      return { at: 0, items: [] };
+    }
+  }
+
+  function saveNewsCache(items) {
+    localStorage.setItem(NEWS_LS_KEY, JSON.stringify({ at: Date.now(), items }));
+  }
+
+  async function fetchFeedItems(feedUrl) {
+    // NOTE: RSS usually blocked by CORS → rss2json proxy
+    const api = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`;
+    const res = await fetch(api, { cache: "no-store" });
+    if (!res.ok) throw new Error("RSS fetch failed");
+    const data = await res.json();
+    const items = Array.isArray(data.items) ? data.items : [];
+    return items.map(it => ({
+      id: it.guid || it.link || uid("news"),
+      title: it.title || "",
+      link: it.link || "",
+      pubDate: it.pubDate || "",
+      source: data.feed?.title || "",
+      image: it.thumbnail || it.enclosure?.link || "",
+      desc: (it.description || "").replace(/<[^>]*>/g, "").trim().slice(0, 220)
+    }));
+  }
+
+  function renderNews(items) {
+    const root = $("#newsRoot");
+    if (!root) return; // если в index.html нет секции новостей — просто пропустим
+
+    if (!items || !items.length) {
+      root.innerHTML = "";
+      const hint = $("#newsHint");
+      if (hint) hint.textContent = t("newsEmpty");
+      return;
+    }
+
+    root.innerHTML = items.map(n => `
+      <article class="card" data-link="${escapeHtml(n.link)}">
+        <div class="card__body">
+          <div class="card__meta">
+            <span class="chip">${escapeHtml(n.source || "News")}</span>
+            <span class="muted">${escapeHtml((n.pubDate || "").slice(0, 16).replace("T", " "))}</span>
+          </div>
+          <h3 class="card__title">${escapeHtml(n.title)}</h3>
+          <p class="card__desc">${escapeHtml(n.desc || "")}</p>
+        </div>
+      </article>
+    `).join("");
+
+    $$("#newsRoot .card").forEach(card => {
+      card.addEventListener("click", () => {
+        const link = card.dataset.link;
+        if (!link) return;
+        if (tgSafe && typeof tgSafe.openLink === "function") tgSafe.openLink(link);
+        else window.open(link, "_blank");
+      });
+    });
+
+    const hint = $("#newsHint");
+    if (hint) hint.textContent = "";
+  }
+
+  async function refreshNews({ silent = false } = {}) {
+    const hint = $("#newsHint");
+    const btn = $("#newsRefreshBtn");
+    try {
+      if (btn) btn.disabled = true;
+      if (hint) hint.textContent = (state.lang === "he") ? "טוען..." : "Загружаю...";
+
+      const all = [];
+      for (const f of NEWS_FEEDS) {
+        try {
+          const part = await fetchFeedItems(f.url);
+          part.slice(0, 8).forEach(x => all.push({ ...x, source: f.name }));
+        } catch {
+          // пропускаем упавший фид
+        }
+      }
+
+      all.sort((a, b) => (Date.parse(b.pubDate || "") || 0) - (Date.parse(a.pubDate || "") || 0));
+      const top = all.slice(0, 18);
+
+      saveNewsCache(top);
+      renderNews(top);
+
+      if (!silent) toast((state.lang === "he") ? "עודכן ✅" : "Обновлено ✅");
+    } catch {
+      const cached = loadNewsCache();
+      renderNews(cached.items);
+      if (hint) hint.textContent = (state.lang === "he")
+        ? "שגיאת טעינה. מוצג מטמון."
+        : "Ошибка загрузки. Показан кеш.";
+    } finally {
+      if (btn) btn.disabled = false;
+      if (hint && (!($("#newsRoot")?.children?.length))) hint.textContent = t("newsEmpty");
+    }
+  }
+
+  // ---------------------------
   // Render: Home
   // ---------------------------
   function nowGreeting() {
@@ -363,48 +497,63 @@
   }
 
   function renderHome() {
-    $("#greeting").textContent = nowGreeting();
+    const greetingEl = $("#greeting");
+    if (greetingEl) greetingEl.textContent = nowGreeting();
 
     // username
-    const fromTg = tg ? (tg.initDataUnsafe?.user?.first_name || tg.initDataUnsafe?.user?.username) : null;
+    const fromTg = tgSafe ? (tgSafe.initDataUnsafe?.user?.first_name || tgSafe.initDataUnsafe?.user?.username) : null;
     const name = state.profile.name || fromTg || (state.lang === "he" ? "מאסטר" : "мастер");
-    $("#username").textContent = name;
-    $("#profileName").textContent = name;
-    $("#profileMeta").textContent = tg ? `@${tg.initDataUnsafe?.user?.username || "telegram"} • WebApp` : "Browser mode";
+    if ($("#username")) $("#username").textContent = name;
+    if ($("#profileName")) $("#profileName").textContent = name;
+    if ($("#profileMeta")) $("#profileMeta").textContent = tgSafe ? `@${tgSafe.initDataUnsafe?.user?.username || "telegram"} • WebApp` : "Browser mode";
 
     // stats
     const gp = globalProgress();
     const ownedCount = ACADEMY_DATA.courses.filter(c => isOwned(c.id)).length;
     const paidCount = ACADEMY_DATA.courses.filter(c => c.price > 0).length;
-    $("#homeStats").innerHTML = `
-      <div class="stat">
-        <div class="stat__label">${state.lang === "he" ? "התקדמות כללית" : "Общий прогресс"}</div>
-        <div class="stat__value">${gp.pct}%</div>
-      </div>
-      <div class="stat">
-        <div class="stat__label">${state.lang === "he" ? "קורסים זמינים" : "Доступных курсов"}</div>
-        <div class="stat__value">${ownedCount}</div>
-      </div>
-      <div class="stat">
-        <div class="stat__label">${state.lang === "he" ? "קורסים בתשלום" : "Платных курсов"}</div>
-        <div class="stat__value">${paidCount}</div>
-      </div>
-    `;
+
+    const statsEl = $("#homeStats");
+    if (statsEl) {
+      statsEl.innerHTML = `
+        <div class="stat">
+          <div class="stat__label">${state.lang === "he" ? "התקדמות כללית" : "Общий прогресс"}</div>
+          <div class="stat__value">${gp.pct}%</div>
+        </div>
+        <div class="stat">
+          <div class="stat__label">${state.lang === "he" ? "קורסים זמינים" : "Доступных курсов"}</div>
+          <div class="stat__value">${ownedCount}</div>
+        </div>
+        <div class="stat">
+          <div class="stat__label">${state.lang === "he" ? "קורסים בתשלום" : "Платных курсов"}</div>
+          <div class="stat__value">${paidCount}</div>
+        </div>
+      `;
+    }
 
     // quick start list
     const quick = [
       state.lang === "he" ? "1) בחר קורס והתחל שיעור" : "1) Выбери курс и начни урок",
       state.lang === "he" ? "2) סיים שיעור וסמן כהושלם" : "2) Закончи урок и отметь как пройденный",
-      state.lang === "he" ? "3) עבר מבחן לקבלת 100% בפרק" : "3) Пройди тест, чтобы закрепить знания",
+      state.lang === "he" ? "3) עבר מבחן לקבלת 100% בפרק" : "3) Пройди тест, чтобы закрепить знания"
     ];
-    $("#quickList").innerHTML = quick.map(x => `<div class="list-item"><div class="list-item__title">${x}</div></div>`).join("");
+    const ql = $("#quickList");
+    if (ql) ql.innerHTML = quick.map(x => `<div class="list-row">${escapeHtml(x)}</div>`).join("");
 
     // recommended cards (top 3)
     const rec = ACADEMY_DATA.courses.slice(0, 3);
-    $("#homeRecommended").innerHTML = rec.map(c => courseCardHTML(c)).join("");
-    $$("#homeRecommended .card").forEach(card => {
-      card.addEventListener("click", () => openCourse(card.dataset.id));
-    });
+    const recRoot = $("#homeRecommended");
+    if (recRoot) {
+      recRoot.innerHTML = rec.map(c => courseCardHTML(c)).join("");
+      $$("#homeRecommended .card").forEach(card => {
+        card.addEventListener("click", () => openCourse(card.dataset.id));
+      });
+    }
+
+    // news from cache
+    const cached = loadNewsCache();
+    renderNews(cached.items);
+    const hint = $("#newsHint");
+    if (hint && (!cached.items || !cached.items.length)) hint.textContent = t("newsEmpty");
   }
 
   // ---------------------------
@@ -414,38 +563,38 @@
     const owned = isOwned(course.id);
     const p = courseProgress(course.id);
     const priceLabel = course.price === 0 ? t("free") : `${course.price} ₪`;
-    const lockBadge = owned ? `<span class="badge good">${t("accessGranted")}</span>` : `<span class="badge lock">${t("locked")}</span>`;
-    const payBadge = course.price === 0 ? `<span class="badge good">${t("free")}</span>` : `<span class="badge pay">${t("paid")}</span>`;
+    const lockBadge = owned ? `${t("accessGranted")}` : `${t("locked")}`;
+    const payBadge = course.price === 0 ? `${t("free")}` : `${t("paid")}`;
 
     return `
-      <div class="card" data-id="${course.id}">
-        <div class="card__top">
-          <div>
-            <h3 class="card__title">${course.title[state.lang]}</h3>
-            <p class="card__desc">${course.desc[state.lang]}</p>
+      <article class="card" data-id="${escapeHtml(course.id)}">
+        <div class="card__body">
+          <h3 class="card__title">${escapeHtml(course.title[state.lang])}</h3>
+          <p class="card__desc">${escapeHtml(course.desc[state.lang])}</p>
+
+          <div class="card__meta">
+            <span class="chip">${escapeHtml(priceLabel)}</span>
+            <span class="chip">${escapeHtml(payBadge)}</span>
+            <span class="chip">${escapeHtml(course.level[state.lang])}</span>
+            <span class="chip">${course.lessons.length} ${escapeHtml(t("lessons"))}</span>
+            <span class="chip">${escapeHtml(lockBadge)}</span>
           </div>
-          <div class="badge">${priceLabel}</div>
-        </div>
 
-        <div class="badges">
-          ${payBadge}
-          <span class="badge">${course.level[state.lang]}</span>
-          <span class="badge">${course.lessons.length} ${t("lessons")}</span>
-          ${lockBadge}
+          <div class="progressline">
+            <span>${state.lang === "he" ? "הושלם" : "Пройдено"}: ${p.done}/${p.total}</span>
+            <span>${p.pct}%</span>
+          </div>
         </div>
-
-        <div style="margin-top:10px;">
-          <div class="progressbar"><div style="width:${p.pct}%"></div></div>
-          <div class="hint">${state.lang === "he" ? "הושלם" : "Пройдено"}: ${p.done}/${p.total} • ${p.pct}%</div>
-        </div>
-      </div>
+      </article>
     `;
   }
 
   function renderCourses() {
     const root = $("#coursesRoot");
-    const q = ($("#coursesSearch").value || "").trim().toLowerCase();
-    const filter = $("#coursesFilter").value;
+    if (!root) return;
+
+    const q = (($("#coursesSearch")?.value || "").trim().toLowerCase());
+    const filter = ($("#coursesFilter")?.value || "all");
 
     const list = ACADEMY_DATA.courses.filter(c => {
       const title = c.title[state.lang].toLowerCase();
@@ -461,7 +610,6 @@
     });
 
     root.innerHTML = list.map(courseCardHTML).join("");
-
     $$("#coursesRoot .card").forEach(card => {
       card.addEventListener("click", () => openCourse(card.dataset.id));
     });
@@ -474,86 +622,72 @@
     const course = getCourse(courseId);
     if (!course) return;
 
-    $("#courseTitle").textContent = course.title[state.lang];
+    if ($("#courseTitle")) $("#courseTitle").textContent = course.title[state.lang];
+
     const owned = isOwned(courseId);
     const p = courseProgress(courseId);
-
     const priceLabel = course.price === 0 ? t("free") : `${course.price} ₪`;
-    const accessLine = owned ? `<span class="badge good">${t("accessGranted")}</span>` : `<span class="badge lock">${t("accessMissing")}</span>`;
+    const accessLine = owned ? `${t("accessGranted")}` : `${t("accessMissing")}`;
 
     const buyBtn = (!owned && course.price > 0)
-      ? `<button class="btn btn-primary" id="buyCourseBtn">${t("buy")} • ${priceLabel}</button>
-         <div class="hint">${t("adminInvoiceHint")}</div>`
+      ? `<button class="btn btn-primary" id="buyCourseBtn">${escapeHtml(t("buy"))} • ${escapeHtml(priceLabel)}</button>
+         <div class="hint">${escapeHtml(t("adminInvoiceHint"))}</div>`
       : "";
 
     const openBtn = owned
-      ? `<button class="btn btn-secondary" id="continueCourseBtn">${t("continue")}</button>`
+      ? `<button class="btn btn-secondary" id="continueCourseBtn">${escapeHtml(t("continue"))}</button>`
       : "";
 
     const lockedText = (!owned && course.price > 0)
-      ? `<div class="result bad">
-          <div class="result__title">${t("locked")} 🔒</div>
-          <div class="result__text">${state.lang === "he"
-            ? "כדי לפתוח — רכוש גישה או בקש ממנהל לתת גישה אחרי תשלום."
-            : "Чтобы открыть — купи доступ или попроси администратора выдать доступ после оплаты."}</div>
-        </div>`
+      ? `<div class="warn">
+           <div class="warn__title">${escapeHtml(t("locked"))}</div>
+           <div class="warn__text">${escapeHtml(
+             state.lang === "he"
+               ? "כדי לפתוח — רכוש גישה או בקש ממנהל לתת גישה אחרי תשלום."
+               : "Чтобы открыть — купи доступ или попроси администратора выдать доступ после оплаты."
+           )}</div>
+         </div>`
       : "";
 
-    $("#courseRoot").innerHTML = `
-      <div class="panel">
-        <div class="row" style="justify-content:space-between;">
-          <div>
-            <div class="kicker">${course.category[state.lang]}</div>
-            <h2 style="margin:6px 0 6px;">${course.title[state.lang]}</h2>
-            <div class="badges">
-              <span class="badge">${priceLabel}</span>
-              <span class="badge">${course.level[state.lang]}</span>
-              <span class="badge">${course.lessons.length} ${t("lessons")}</span>
-              ${accessLine}
-            </div>
-          </div>
-        </div>
+    const courseRoot = $("#courseRoot");
+    if (!courseRoot) return;
 
-        <div style="margin-top:12px;">
-          <div class="progressbar"><div style="width:${p.pct}%"></div></div>
-          <div class="hint">${state.lang === "he" ? "הושלם" : "Пройдено"}: ${p.done}/${p.total} • ${p.pct}%</div>
-        </div>
+    courseRoot.innerHTML = `
+      <div class="breadcrumbs">${escapeHtml(course.category[state.lang])}</div>
+      <h2>${escapeHtml(course.title[state.lang])}</h2>
 
-        <div class="hr"></div>
-
-        <div class="row">
-          ${buyBtn}
-          ${openBtn}
-        </div>
-
-        ${lockedText}
+      <div class="card__meta">
+        <span class="chip">${escapeHtml(priceLabel)}</span>
+        <span class="chip">${escapeHtml(course.level[state.lang])}</span>
+        <span class="chip">${course.lessons.length} ${escapeHtml(t("lessons"))}</span>
+        <span class="chip">${escapeHtml(accessLine)}</span>
+        <span class="chip">${(state.lang === "he" ? "הושלם" : "Пройдено")}: ${p.done}/${p.total} • ${p.pct}%</span>
       </div>
 
-      <div class="panel">
-        <h3 class="h3">${state.lang === "he" ? "שיעורים" : "Уроки"}</h3>
-        <div class="list" id="lessonsList"></div>
-      </div>
+      <div class="row">${buyBtn} ${openBtn}</div>
+      ${lockedText}
+
+      <h3>${escapeHtml(state.lang === "he" ? "שיעורים" : "Уроки")}</h3>
     `;
 
     // Lessons list
     const listEl = $("#lessonsList");
+    if (!listEl) return;
+
     listEl.innerHTML = course.lessons.map((l, idx) => {
       const done = lessonDone(l.id);
       const test = state.progress[l.id]?.test;
-      const testBadge = l.test
-        ? (test?.passed ? `<span class="badge good">${t("passed")}</span>` : `<span class="badge">${t("test")}</span>`)
-        : "";
-
+      const testBadge = l.test ? (test?.passed ? `${t("passed")}` : `${t("test")}`) : "";
       const lock = (!owned && course.price > 0);
+
       return `
-        <div class="list-item" data-lesson="${l.id}" style="${lock ? "opacity:.6" : ""}">
-          <div>
-            <div class="list-item__title">${idx + 1}. ${l.title[state.lang]}</div>
-            <div class="list-item__meta">${l.durationMin} ${t("minutes")} • ${done ? "✅" : "⬜"} ${testBadge}</div>
-          </div>
-          <div class="badges">
-            ${done ? `<span class="badge good">${t("done")}</span>` : ""}
-            ${lock ? `<span class="badge lock">${t("locked")}</span>` : `<span class="badge">${t("open")}</span>`}
+        <div class="list-item" data-lesson="${escapeHtml(l.id)}">
+          <div class="list-item__title">${idx + 1}. ${escapeHtml(l.title[state.lang])}</div>
+          <div class="list-item__meta">
+            <span class="chip">${l.durationMin} ${escapeHtml(t("minutes"))}</span>
+            <span class="chip">${done ? "✅" : "⬜"} ${done ? escapeHtml(t("done")) : ""}</span>
+            ${testBadge ? `<span class="chip">${escapeHtml(testBadge)}</span>` : ""}
+            <span class="chip">${escapeHtml(lock ? t("locked") : t("open"))}</span>
           </div>
         </div>
       `;
@@ -572,9 +706,7 @@
 
     // buy
     const buyBtnEl = $("#buyCourseBtn");
-    if (buyBtnEl) {
-      buyBtnEl.addEventListener("click", () => purchaseFlow(course));
-    }
+    if (buyBtnEl) buyBtnEl.addEventListener("click", () => purchaseFlow(course));
 
     // continue
     const cont = $("#continueCourseBtn");
@@ -591,9 +723,9 @@
   // ---------------------------
   async function purchaseFlow(course) {
     // 1) If invoiceUrl exists and Telegram supports openInvoice → try automatic
-    if (tg && typeof tg.openInvoice === "function" && course.invoiceUrl) {
+    if (tgSafe && typeof tgSafe.openInvoice === "function" && course.invoiceUrl) {
       try {
-        tg.openInvoice(course.invoiceUrl, (status) => {
+        tgSafe.openInvoice(course.invoiceUrl, (status) => {
           // statuses: "paid", "cancelled", "failed", "pending"
           if (status === "paid") {
             grantAccess(course.id, "invoice", course.invoiceUrl);
@@ -614,9 +746,10 @@
     // 2) Demo fallback (client-only)
     // You can disable demo by setting ALLOW_DEMO_PURCHASE=false
     if (ACADEMY_DATA.settings.ALLOW_DEMO_PURCHASE) {
-      const ok = confirm(state.lang === "he"
-        ? `דמו: לפתוח גישה ל-“${course.title.he}” עכשיו?`
-        : `Демо: открыть доступ к “${course.title.ru}” сейчас?`
+      const ok = confirm(
+        state.lang === "he"
+          ? `דמו: לפתוח גישה ל-“${course.title.he}” עכשיו?`
+          : `Демо: открыть доступ к “${course.title.ru}” сейчас?`
       );
       if (ok) grantAccess(course.id, "demo", null);
       return;
@@ -633,82 +766,68 @@
     const course = getCourse(courseId);
     if (!lesson || !course) return;
 
-    $("#lessonTitle").textContent = lesson.title[state.lang];
+    if ($("#lessonTitle")) $("#lessonTitle").textContent = lesson.title[state.lang];
 
     const done = lessonDone(lessonId);
     const test = state.progress[lessonId]?.test;
 
     const videoBlock = lesson.videoUrl
-      ? `<div class="panel">
-          <div class="h3">${state.lang === "he" ? "וידאו" : "Видео"}</div>
-          <a href="${lesson.videoUrl}" target="_blank" rel="noreferrer">${state.lang === "he" ? "פתח קישור" : "Открыть ссылку"}</a>
-        </div>`
+      ? `<h3>${escapeHtml(state.lang === "he" ? "וידאו" : "Видео")}</h3>
+         <a class="link" href="${escapeHtml(lesson.videoUrl)}" target="_blank" rel="noreferrer">
+           ${escapeHtml(state.lang === "he" ? "פתח קישור" : "Открыть ссылку")}
+         </a>`
       : "";
 
     const steps = lesson.steps?.[state.lang] || [];
     const stepsBlock = steps.length
-      ? `<div class="panel">
-          <div class="h3">${state.lang === "he" ? "שלבים" : "Шаги"}</div>
-          <div class="list">
-            ${steps.map(s => `<div class="list-item"><div class="list-item__title">${s}</div></div>`).join("")}
-          </div>
-        </div>`
+      ? `<h3>${escapeHtml(state.lang === "he" ? "שלבים" : "Шаги")}</h3>
+         <ul class="ul">${steps.map(s => `<li>${escapeHtml(s)}</li>`).join("")}</ul>`
       : "";
 
     const checklist = lesson.checklist?.[state.lang] || [];
     const checklistBlock = checklist.length
-      ? `<div class="panel">
-          <div class="h3">${state.lang === "he" ? "צ׳ק-ליסט" : "Чек-лист"}</div>
-          <div class="list">
-            ${checklist.map(s => `<div class="list-item"><div class="list-item__title">☑ ${s}</div></div>`).join("")}
-          </div>
-        </div>`
+      ? `<h3>${escapeHtml(state.lang === "he" ? "צ׳ק-ליסט" : "Чек-лист")}</h3>
+         <ul class="ul">${checklist.map(s => `<li>☑ ${escapeHtml(s)}</li>`).join("")}</ul>`
       : "";
 
     const text = lesson.text?.[state.lang] || "";
     const textBlock = text
-      ? `<div class="panel">
-          <div class="h3">${state.lang === "he" ? "תוכן" : "Контент"}</div>
-          <div style="color:rgba(234,242,255,.92); line-height:1.55; white-space:pre-wrap;">${escapeHtml(text)}</div>
-        </div>`
+      ? `<h3>${escapeHtml(state.lang === "he" ? "תוכן" : "Контент")}</h3>
+         <div class="prose">${escapeHtml(text)}</div>`
       : "";
 
     const testBtn = lesson.test
-      ? `<button class="btn btn-primary" id="openTestBtn">${test?.passed ? t("retakeTest") : t("startTest")}</button>`
+      ? `<button class="btn btn-secondary" id="openTestBtn">${escapeHtml(test?.passed ? t("retakeTest") : t("startTest"))}</button>`
       : "";
 
-    const markBtn = `<button class="btn btn-secondary" id="markDoneBtn">${t("markDone")}</button>`;
+    const markBtn = `<button class="btn btn-primary" id="markDoneBtn">${escapeHtml(t("markDone"))}</button>`;
 
     const testInfo = lesson.test
-      ? `<div class="result ${test?.passed ? "good" : ""}">
-          <div class="result__title">${t("test")}</div>
-          <div class="result__text">
-            ${test
-              ? `${t("score")}: <b>${test.score}%</b> • ${test.passed ? t("passed") : t("notPassed")}`
-              : (state.lang === "he" ? "עדיין לא בוצע" : "Ещё не проходили")}
-          </div>
-        </div>`
+      ? `<div class="section">
+           <h3>${escapeHtml(t("test"))}</h3>
+           <div class="hint">${
+             test
+               ? `${escapeHtml(t("score"))}: ${test.score}% • ${escapeHtml(test.passed ? t("passed") : t("notPassed"))}`
+               : escapeHtml(state.lang === "he" ? "עדיין לא בוצע" : "Ещё не проходили")
+           }</div>
+         </div>`
       : "";
 
-    $("#lessonRoot").innerHTML = `
-      <div class="panel">
-        <div class="kicker">${course.title[state.lang]}</div>
-        <h2 style="margin:6px 0 6px;">${lesson.title[state.lang]}</h2>
-        <div class="badges">
-          <span class="badge">${lesson.durationMin} ${t("minutes")}</span>
-          ${done ? `<span class="badge good">${t("done")}</span>` : `<span class="badge">${state.lang === "he" ? "לא הושלם" : "Не пройден"}</span>`}
-        </div>
+    const root = $("#lessonRoot");
+    if (!root) return;
 
-        <div class="hr"></div>
+    root.innerHTML = `
+      <div class="breadcrumbs">${escapeHtml(course.title[state.lang])}</div>
+      <h2>${escapeHtml(lesson.title[state.lang])}</h2>
 
-        <div class="row">
-          ${testBtn}
-          ${markBtn}
-        </div>
-
-        ${testInfo}
+      <div class="card__meta">
+        <span class="chip">${lesson.durationMin} ${escapeHtml(t("minutes"))}</span>
+        <span class="chip">${done ? "✅" : "⬜"} ${escapeHtml(done ? t("done") : (state.lang === "he" ? "לא הושלם" : "Не пройден"))}</span>
       </div>
 
+      <div class="row">${testBtn} ${markBtn}</div>
+
+      ${testInfo}
       ${videoBlock}
       ${stepsBlock}
       ${checklistBlock}
@@ -716,12 +835,14 @@
     `;
 
     const mark = $("#markDoneBtn");
-    mark.addEventListener("click", () => {
-      setLessonDone(lessonId, true);
-      toast(t("toastSaved"));
-      renderLesson(courseId, lessonId);
-      renderAll(); // update progress
-    });
+    if (mark) {
+      mark.addEventListener("click", () => {
+        setLessonDone(lessonId, true);
+        toast(t("toastSaved"));
+        renderLesson(courseId, lessonId);
+        renderAll(); // update progress
+      });
+    }
 
     const openTest = $("#openTestBtn");
     if (openTest) openTest.addEventListener("click", () => openTestScreen(courseId, lessonId));
@@ -734,107 +855,111 @@
     const lesson = getLesson(courseId, lessonId);
     if (!lesson?.test) return;
 
-    $("#testTitle").textContent = `${t("test")} • ${lesson.title[state.lang]}`;
+    if ($("#testTitle")) $("#testTitle").textContent = `${t("test")} • ${lesson.title[state.lang]}`;
 
     const test = lesson.test;
     const prev = state.progress[lessonId]?.test;
 
-    $("#testRoot").innerHTML = `
-      <div class="panel">
-        <div class="h3">${state.lang === "he" ? "בחר תשובות" : "Выберите ответы"}</div>
-        <div class="hint">${state.lang === "he"
-          ? "אחרי סיום — תקבל תוצאה ופתרונות."
-          : "После завершения — получите результат и разбор."}</div>
+    const root = $("#testRoot");
+    if (!root) return;
 
-        <div class="hr"></div>
+    root.innerHTML = `
+      <div class="hint">${escapeHtml(state.lang === "he" ? "בחר תשובות" : "Выберите ответы")}</div>
+      <div class="hint">${escapeHtml(state.lang === "he" ? "אחרי סיום — תקבל תוצאה ופתרונות." : "После завершения — получите результат и разбор.")}</div>
 
-        <form id="testForm"></form>
-
-        <div class="hr"></div>
-
-        <div class="row">
-          <button class="btn btn-primary" id="submitTest" type="button">${state.lang === "he" ? "בדוק" : "Проверить"}</button>
-          <button class="btn btn-ghost" id="clearTest" type="button">${state.lang === "he" ? "נקה" : "Очистить"}</button>
-        </div>
-
-        <div id="testResult" style="margin-top:12px;"></div>
-
-        ${prev ? `<div class="hint" style="margin-top:10px;">${state.lang === "he" ? "תוצאה קודמת" : "Предыдущий результат"}: ${prev.score}%</div>` : ""}
+      <div class="row">
+        <button class="btn btn-primary" id="submitTest">${escapeHtml(state.lang === "he" ? "בדוק" : "Проверить")}</button>
+        <button class="btn btn-ghost" id="clearTest">${escapeHtml(state.lang === "he" ? "נקה" : "Очистить")}</button>
       </div>
+
+      ${prev ? `<div class="hint">${escapeHtml(state.lang === "he" ? "תוצאה קודמת" : "Предыдущий результат")}: ${prev.score}%</div>` : ""}
+
+      <form id="testForm" class="form"></form>
+      <div id="testResult" class="prose"></div>
     `;
 
     const form = $("#testForm");
+    if (!form) return;
+
     form.innerHTML = test.questions.map((q, qi) => {
       const qId = `q_${qi}`;
       const opts = q.options[state.lang];
       return `
         <div class="q">
-          <div class="q__title">${qi + 1}. ${q.text[state.lang]}</div>
-          ${opts.map((opt, oi) => `
-            <label class="opt">
-              <input type="radio" name="${qId}" value="${oi}" />
-              <span>${opt}</span>
-            </label>
-          `).join("")}
+          <div class="q__title">${qi + 1}. ${escapeHtml(q.text[state.lang])}</div>
+          <div class="q__opts">
+            ${opts.map((opt, oi) => `
+              <label class="radio">
+                <input type="radio" name="${escapeHtml(qId)}" value="${oi}">
+                <span>${escapeHtml(opt)}</span>
+              </label>
+            `).join("")}
+          </div>
         </div>
       `;
     }).join("");
 
-    $("#submitTest").addEventListener("click", () => {
-      const answers = {};
-      test.questions.forEach((q, qi) => {
-        const qId = `q_${qi}`;
-        const picked = form.querySelector(`input[name="${qId}"]:checked`);
-        answers[qId] = picked ? Number(picked.value) : null;
-      });
+    const submit = $("#submitTest");
+    if (submit) {
+      submit.addEventListener("click", () => {
+        const answers = {};
+        test.questions.forEach((q, qi) => {
+          const qId = `q_${qi}`;
+          const picked = form.querySelector(`input[name="${qId}"]:checked`);
+          answers[qId] = picked ? Number(picked.value) : null;
+        });
 
-      const total = test.questions.length;
-      let correct = 0;
-      const breakdown = test.questions.map((q, qi) => {
-        const picked = answers[`q_${qi}`];
-        const ok = picked === q.correctIndex;
-        if (ok) correct++;
-        return { ok, picked, correct: q.correctIndex, q };
-      });
+        const total = test.questions.length;
+        let correct = 0;
 
-      const score = Math.round((correct / total) * 100);
-      const passed = score >= (test.passScore || 70);
+        const breakdown = test.questions.map((q, qi) => {
+          const picked = answers[`q_${qi}`];
+          const ok = picked === q.correctIndex;
+          if (ok) correct++;
+          return { ok, picked, correct: q.correctIndex, q };
+        });
 
-      setLessonTest(lessonId, passed, score);
-      if (passed) setLessonDone(lessonId, true);
+        const score = Math.round((correct / total) * 100);
+        const passed = score >= (test.passScore || 70);
 
-      $("#testResult").innerHTML = `
-        <div class="result ${passed ? "good" : "bad"}">
-          <div class="result__title">${passed ? "✅ " + t("passed") : "❌ " + t("notPassed")}</div>
-          <div class="result__text">${t("score")}: <b>${score}%</b> • ${state.lang === "he" ? "נכון" : "Верно"}: ${correct}/${total}</div>
-        </div>
-        <div class="panel" style="margin-top:12px;">
-          <div class="h3">${state.lang === "he" ? "פתרונות" : "Разбор"}</div>
-          <div class="list">
+        setLessonTest(lessonId, passed, score);
+        if (passed) setLessonDone(lessonId, true);
+
+        const result = $("#testResult");
+        if (result) {
+          result.innerHTML = `
+            <h3>${passed ? "✅ " + escapeHtml(t("passed")) : "❌ " + escapeHtml(t("notPassed"))}</h3>
+            <div>${escapeHtml(t("score"))}: ${score}% • ${escapeHtml(state.lang === "he" ? "נכון" : "Верно")}: ${correct}/${total}</div>
+
+            <h3>${escapeHtml(state.lang === "he" ? "פתרונות" : "Разбор")}</h3>
             ${breakdown.map((b, i) => {
               const opts = b.q.options[state.lang];
-              const your = b.picked == null ? (state.lang === "he" ? "לא נבחר" : "не выбрано") : opts[b.picked];
+              const your = (b.picked == null)
+                ? (state.lang === "he" ? "לא נבחר" : "не выбрано")
+                : opts[b.picked];
               const right = opts[b.correct];
               return `
-                <div class="list-item">
-                  <div>
-                    <div class="list-item__title">${b.ok ? "✅" : "❌"} ${i+1}. ${b.q.text[state.lang]}</div>
-                    <div class="list-item__meta">${state.lang === "he" ? "שלך" : "Твой"}: ${escapeHtml(String(your))} • ${state.lang === "he" ? "נכון" : "Правильно"}: ${escapeHtml(String(right))}</div>
-                  </div>
+                <div class="break">
+                  <div>${b.ok ? "✅" : "❌"} ${i + 1}. ${escapeHtml(b.q.text[state.lang])}</div>
+                  <div class="hint">${escapeHtml(state.lang === "he" ? "שלך" : "Твой")}: ${escapeHtml(String(your))} • ${escapeHtml(state.lang === "he" ? "נכון" : "Правильно")}: ${escapeHtml(String(right))}</div>
                 </div>
               `;
             }).join("")}
-          </div>
-        </div>
-      `;
+          `;
+        }
 
-      renderAll(); // update progress everywhere
-    });
+        renderAll();
+      });
+    }
 
-    $("#clearTest").addEventListener("click", () => {
-      $$("input[type=radio]", form).forEach(x => x.checked = false);
-      $("#testResult").innerHTML = "";
-    });
+    const clear = $("#clearTest");
+    if (clear) {
+      clear.addEventListener("click", () => {
+        $$("input[type=radio]", form).forEach(x => x.checked = false);
+        const r = $("#testResult");
+        if (r) r.innerHTML = "";
+      });
+    }
   }
 
   // ---------------------------
@@ -842,50 +967,39 @@
   // ---------------------------
   function renderProgress() {
     const root = $("#progressRoot");
-    const gp = globalProgress();
+    if (!root) return;
 
+    const gp = globalProgress();
     const perCourse = ACADEMY_DATA.courses.map(c => {
       const p = courseProgress(c.id);
       return { c, p, owned: isOwned(c.id) };
     });
 
     root.innerHTML = `
-      <div>
-        <div class="row" style="justify-content:space-between;">
-          <div>
-            <div class="kicker">${state.lang === "he" ? "סיכום" : "Сводка"}</div>
-            <div style="font-weight:900; font-size:22px; margin-top:6px;">${gp.pct}%</div>
-            <div class="hint">${state.lang === "he" ? "שיעורים הושלמו" : "Уроков пройдено"}: ${gp.done}/${gp.total}</div>
-          </div>
-          <div style="min-width:180px;">
-            <div class="progressbar"><div style="width:${gp.pct}%"></div></div>
-          </div>
-        </div>
-
-        <div class="hr"></div>
-
-        <div class="grid">
-          ${perCourse.map(({c,p,owned}) => `
-            <div class="card" data-id="${c.id}">
-              <div class="card__top">
-                <div>
-                  <h3 class="card__title">${c.title[state.lang]}</h3>
-                  <p class="card__desc">${c.category[state.lang]} • ${c.level[state.lang]}</p>
-                </div>
-                <div class="badge">${p.pct}%</div>
-              </div>
-              <div class="badges">
-                <span class="badge">${p.done}/${p.total}</span>
-                ${owned ? `<span class="badge good">${t("accessGranted")}</span>` : `<span class="badge lock">${t("locked")}</span>`}
-              </div>
-              <div style="margin-top:10px;" class="progressbar"><div style="width:${p.pct}%"></div></div>
-            </div>
-          `).join("")}
+      <div class="card">
+        <div class="card__body">
+          <h3>${escapeHtml(state.lang === "he" ? "סיכום" : "Сводка")}</h3>
+          <div class="progressline"><span>${gp.pct}%</span><span>${escapeHtml(state.lang === "he" ? "שיעורים הושלמו" : "Уроков пройдено")}: ${gp.done}/${gp.total}</span></div>
         </div>
       </div>
+
+      ${perCourse.map(({ c, p, owned }) => `
+        <article class="card" data-id="${escapeHtml(c.id)}">
+          <div class="card__body">
+            <h3 class="card__title">${escapeHtml(c.title[state.lang])}</h3>
+            <div class="card__meta">
+              <span class="chip">${escapeHtml(c.category[state.lang])}</span>
+              <span class="chip">${escapeHtml(c.level[state.lang])}</span>
+              <span class="chip">${p.pct}%</span>
+              <span class="chip">${p.done}/${p.total}</span>
+              <span class="chip">${escapeHtml(owned ? t("accessGranted") : t("locked"))}</span>
+            </div>
+          </div>
+        </article>
+      `).join("")}
     `;
 
-    $$("#progressRoot .card").forEach(card => {
+    $$("#progressRoot .card[data-id]").forEach(card => {
       card.addEventListener("click", () => openCourse(card.dataset.id));
     });
   }
@@ -893,32 +1007,47 @@
   // ---------------------------
   // Render: Wiki
   // ---------------------------
+  function buildWikiCategories() {
+    const select = $("#wikiCategory");
+    if (!select) return;
+
+    const unique = new Map();
+    ACADEMY_DATA.wiki.forEach(w => unique.set(w.categoryKey, w.category));
+
+    select.innerHTML =
+      `<option value="all">${escapeHtml(t("wikiAllCats"))}</option>` +
+      Array.from(unique.entries()).map(([key, name]) =>
+        `<option value="${escapeHtml(key)}">${escapeHtml(name[state.lang])}</option>`
+      ).join("");
+  }
+
   function renderWiki() {
     const root = $("#wikiRoot");
-    const q = ($("#wikiSearch").value || "").trim().toLowerCase();
-    const cat = $("#wikiCategory").value;
+    if (!root) return;
+
+    const q = (($("#wikiSearch")?.value || "").trim().toLowerCase());
+    const cat = ($("#wikiCategory")?.value || "all");
 
     const items = ACADEMY_DATA.wiki.filter(w => {
       const matchCat = (cat === "all") || (w.categoryKey === cat);
       if (!matchCat) return false;
+
       const title = w.title[state.lang].toLowerCase();
       const body = w.body[state.lang].toLowerCase();
       return !q || title.includes(q) || body.includes(q);
     });
 
     root.innerHTML = items.map(w => `
-      <div class="card" data-id="${w.id}">
-        <div class="card__top">
-          <div>
-            <h3 class="card__title">${w.title[state.lang]}</h3>
-            <p class="card__desc">${w.preview[state.lang]}</p>
+      <article class="card" data-id="${escapeHtml(w.id)}">
+        <div class="card__body">
+          <h3 class="card__title">${escapeHtml(w.title[state.lang])}</h3>
+          <p class="card__desc">${escapeHtml(w.preview[state.lang])}</p>
+          <div class="card__meta">
+            <span class="chip">${escapeHtml(w.category[state.lang])}</span>
+            ${w.tags[state.lang].slice(0, 4).map(tag => `<span class="chip">${escapeHtml(tag)}</span>`).join("")}
           </div>
-          <div class="badge">${w.category[state.lang]}</div>
         </div>
-        <div class="badges">
-          ${w.tags[state.lang].slice(0,4).map(tag => `<span class="badge">${tag}</span>`).join("")}
-        </div>
-      </div>
+      </article>
     `).join("");
 
     $$("#wikiRoot .card").forEach(card => {
@@ -930,30 +1059,21 @@
     const w = ACADEMY_DATA.wiki.find(x => x.id === id);
     if (!w) return;
 
-    // reuse "course" screen for article view (simple)
-    $("#courseTitle").textContent = w.title[state.lang];
-    $("#courseRoot").innerHTML = `
-      <div class="panel">
-        <div class="badges">
-          <span class="badge">${w.category[state.lang]}</span>
-          ${w.tags[state.lang].slice(0,6).map(tag => `<span class="badge">${tag}</span>`).join("")}
+    if ($("#courseTitle")) $("#courseTitle").textContent = w.title[state.lang];
+    const courseRoot = $("#courseRoot");
+    if (courseRoot) {
+      courseRoot.innerHTML = `
+        <div class="breadcrumbs">
+          ${escapeHtml(w.category[state.lang])}
+          ${w.tags[state.lang].slice(0, 6).map(tag => `<span class="chip">${escapeHtml(tag)}</span>`).join("")}
         </div>
-        <div class="hr"></div>
-        <div style="line-height:1.6; white-space:pre-wrap;">${escapeHtml(w.body[state.lang])}</div>
-      </div>
-    `;
+        <div class="prose">${escapeHtml(w.body[state.lang])}</div>
+      `;
+    }
 
     showScreen("course");
     current.courseId = null;
     current.lessonId = null;
-  }
-
-  function buildWikiCategories() {
-    const select = $("#wikiCategory");
-    const unique = new Map();
-    ACADEMY_DATA.wiki.forEach(w => unique.set(w.categoryKey, w.category));
-    select.innerHTML = `<option value="all">${t("wikiAllCats")}</option>` +
-      Array.from(unique.entries()).map(([key, name]) => `<option value="${key}">${name[state.lang]}</option>`).join("");
   }
 
   // ---------------------------
@@ -961,31 +1081,28 @@
   // ---------------------------
   function renderProfile() {
     const ownedRoot = $("#ownedRoot");
+    if (!ownedRoot) return;
+
     const owned = ACADEMY_DATA.courses.filter(c => isOwned(c.id));
 
-    ownedRoot.innerHTML = owned.length ? `
-      <div class="list">
-        ${owned.map(c => `
-          <div class="list-item" data-id="${c.id}">
-            <div>
-              <div class="list-item__title">${c.title[state.lang]}</div>
-              <div class="list-item__meta">${c.price === 0 ? t("free") : `${c.price} ₪`} • ${c.category[state.lang]}</div>
-            </div>
-            <div class="badges">
-              <span class="badge good">${t("open")}</span>
+    ownedRoot.innerHTML = owned.length
+      ? owned.map(c => `
+          <div class="list-item" data-id="${escapeHtml(c.id)}">
+            <div class="list-item__title">${escapeHtml(c.title[state.lang])}</div>
+            <div class="list-item__meta">
+              <span class="chip">${escapeHtml(c.price === 0 ? t("free") : `${c.price} ₪`)}</span>
+              <span class="chip">${escapeHtml(c.category[state.lang])}</span>
+              <span class="chip">${escapeHtml(t("open"))}</span>
             </div>
           </div>
-        `).join("")}
-      </div>
-    ` : `<div class="hint">${state.lang === "he" ? "עדיין אין גישות." : "Пока нет доступов."}</div>`;
+        `).join("")
+      : `<div class="hint">${escapeHtml(state.lang === "he" ? "עדיין אין גישות." : "Пока нет доступов.")}</div>`;
 
     $$("#ownedRoot .list-item").forEach(item => {
       item.addEventListener("click", () => openCourse(item.dataset.id));
     });
 
-    // avatar
-    const initials = "MR";
-    $("#profileAvatar").textContent = initials;
+    if ($("#profileAvatar")) $("#profileAvatar").textContent = "MR";
   }
 
   // ---------------------------
@@ -1002,97 +1119,114 @@
 
   function renderAdmin() {
     const root = $("#adminRoot");
+    if (!root) return;
+
     const isLogged = state.admin.unlocked;
 
     if (!isLogged) {
       root.innerHTML = `
-        <div class="panel" style="padding:0; background:transparent; border:none; box-shadow:none;">
-          <h2 style="margin:0 0 8px;">${t("adminEnterPin")}</h2>
-          <div class="row">
-            <input class="input" id="adminPin" placeholder="${t("adminPinPlaceholder")}" />
-            <button class="btn btn-primary" id="adminLoginBtn">${t("adminLogin")}</button>
-          </div>
-          <div class="hint">${t("adminSetPinInfo")}</div>
+        <h2>${escapeHtml(t("adminEnterPin"))}</h2>
+        <div class="row">
+          <input class="input" id="adminPin" placeholder="${escapeHtml(t("adminPinPlaceholder"))}">
+          <button class="btn btn-primary" id="adminLoginBtn">${escapeHtml(t("adminLogin"))}</button>
         </div>
+        <div class="hint">${escapeHtml(t("adminSetPinInfo"))}</div>
       `;
 
-      $("#adminLoginBtn").addEventListener("click", () => {
-        const v = ($("#adminPin").value || "").trim();
-        if (v === ADMIN_PIN) {
-          state.admin.unlocked = true;
-          saveState();
-          toast(t("toastUnlocked"));
-          renderAdmin();
-        } else {
-          toast(t("adminWrongPin"));
-        }
-      });
+      const loginBtn = $("#adminLoginBtn");
+      if (loginBtn) {
+        loginBtn.addEventListener("click", () => {
+          const v = ($("#adminPin")?.value || "").trim();
+          if (v === ADMIN_PIN) {
+            state.admin.unlocked = true;
+            saveState();
+            toast(t("toastUnlocked"));
+            renderAdmin();
+          } else {
+            toast(t("adminWrongPin"));
+          }
+        });
+      }
       return;
     }
 
     root.innerHTML = `
-      <div class="panel">
-        <h2 style="margin:0 0 8px;">${t("adminPanel")}</h2>
-        <div class="hint">${t("adminInvoiceHint")}</div>
-        <div class="hr"></div>
+      <h2>${escapeHtml(t("adminPanel"))}</h2>
+      <div class="hint">${escapeHtml(t("adminInvoiceHint"))}</div>
 
-        <div class="h3">${t("adminUnlockByCourse")}</div>
-        <div class="row" style="margin-bottom:10px;">
-          <select class="select" id="adminCourseSelect">
-            ${ACADEMY_DATA.courses.filter(c => c.price > 0).map(c => `<option value="${c.id}">${c.title[state.lang]} (${c.price}₪)</option>`).join("")}
-          </select>
-          <button class="btn btn-secondary" id="adminGrantBtn">${state.lang === "he" ? "תן גישה" : "Выдать доступ"}</button>
-        </div>
-
-        <div class="row">
-          <button class="btn btn-primary" id="adminUnlockAll">${t("adminUnlockAll")}</button>
-          <button class="btn btn-ghost" id="adminLockAll">${t("adminLockAll")}</button>
-        </div>
+      <h3>${escapeHtml(t("adminUnlockByCourse"))}</h3>
+      <div class="row">
+        <select class="select" id="adminCourseSelect">
+          ${ACADEMY_DATA.courses.filter(c => c.price > 0).map(c =>
+            `<option value="${escapeHtml(c.id)}">${escapeHtml(c.title[state.lang])} (${c.price}₪)</option>`
+          ).join("")}
+        </select>
+        <button class="btn btn-primary" id="adminGrantBtn">${escapeHtml(state.lang === "he" ? "תן גישה" : "Выдать доступ")}</button>
       </div>
 
-      <div class="panel" style="margin-top:12px;">
-        <div class="h3">${state.lang === "he" ? "סטטוס רכישות (מקומי)" : "Статус покупок (локально)"}</div>
-        <div class="code" id="adminDump"></div>
-        <div class="row" style="margin-top:10px;">
-          <button class="btn btn-secondary" id="copyDump">${state.lang === "he" ? "העתק" : "Копировать"}</button>
-          <button class="btn btn-ghost" id="logoutAdmin">${state.lang === "he" ? "התנתק" : "Выйти"}</button>
-        </div>
+      <div class="row">
+        <button class="btn btn-secondary" id="adminUnlockAll">${escapeHtml(t("adminUnlockAll"))}</button>
+        <button class="btn btn-ghost" id="adminLockAll">${escapeHtml(t("adminLockAll"))}</button>
+      </div>
+
+      <h3>${escapeHtml(state.lang === "he" ? "סטטוס רכישות (מקומי)" : "Статус покупок (локально)")}</h3>
+      <pre class="dump" id="adminDump"></pre>
+      <div class="row">
+        <button class="btn btn-ghost" id="copyDump">${escapeHtml(state.lang === "he" ? "העתק" : "Копировать")}</button>
+        <button class="btn btn-ghost" id="logoutAdmin">${escapeHtml(state.lang === "he" ? "התנתק" : "Выйти")}</button>
       </div>
     `;
 
-    $("#adminDump").textContent = JSON.stringify({ purchased: state.purchased }, null, 2);
+    const dump = $("#adminDump");
+    if (dump) dump.textContent = JSON.stringify({ purchased: state.purchased }, null, 2);
 
-    $("#adminGrantBtn").addEventListener("click", () => {
-      const courseId = $("#adminCourseSelect").value;
-      grantAccess(courseId, "manual", null);
-      renderAdmin();
-    });
+    const grantBtn = $("#adminGrantBtn");
+    if (grantBtn) {
+      grantBtn.addEventListener("click", () => {
+        const courseId = $("#adminCourseSelect")?.value;
+        if (!courseId) return;
+        grantAccess(courseId, "manual", null);
+        renderAdmin();
+      });
+    }
 
-    $("#adminUnlockAll").addEventListener("click", () => {
-      ACADEMY_DATA.courses.filter(c => c.price > 0).forEach(c => grantAccess(c.id, "manual"));
-      renderAdmin();
-    });
+    const unlockAll = $("#adminUnlockAll");
+    if (unlockAll) {
+      unlockAll.addEventListener("click", () => {
+        ACADEMY_DATA.courses.filter(c => c.price > 0).forEach(c => grantAccess(c.id, "manual"));
+        renderAdmin();
+      });
+    }
 
-    $("#adminLockAll").addEventListener("click", () => {
-      revokeAllAccess();
-      toast(state.lang === "he" ? "ננעל" : "Закрыто");
-      renderAdmin();
-    });
+    const lockAll = $("#adminLockAll");
+    if (lockAll) {
+      lockAll.addEventListener("click", () => {
+        revokeAllAccess();
+        toast(state.lang === "he" ? "ננעל" : "Закрыто");
+        renderAdmin();
+      });
+    }
 
-    $("#copyDump").addEventListener("click", async () => {
-      try {
-        await navigator.clipboard.writeText($("#adminDump").textContent);
-        toast(t("toastCopied"));
-      } catch {
-        toast(state.lang === "he" ? "לא ניתן להעתיק" : "Не удалось скопировать");
-      }
-    });
+    const copy = $("#copyDump");
+    if (copy) {
+      copy.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText($("#adminDump")?.textContent || "");
+          toast(t("toastCopied"));
+        } catch {
+          toast(state.lang === "he" ? "לא ניתן להעתיק" : "Не удалось скопировать");
+        }
+      });
+    }
 
-    $("#logoutAdmin").addEventListener("click", () => {
-      state.admin.unlocked = false;
-      saveState();
-      renderAdmin();
-    });
+    const logout = $("#logoutAdmin");
+    if (logout) {
+      logout.addEventListener("click", () => {
+        state.admin.unlocked = false;
+        saveState();
+        renderAdmin();
+      });
+    }
   }
 
   // ---------------------------
@@ -1125,39 +1259,39 @@
   // Apply i18n to static UI
   // ---------------------------
   function applyI18n() {
-    $("#brandSubtitle").textContent = t("brandSubtitle");
-    $("#homeLead").textContent = t("homeLead");
-    $("#openCourses").textContent = t("openCourses");
-    $("#openWiki").textContent = t("openWiki");
-    $("#quickTitle").textContent = t("quickTitle");
-    $("#quickHint").textContent = t("quickHint");
-    $("#openWash").textContent = t("openAfterWash");
-    $("#homeSectionTitle").textContent = t("homeSectionTitle");
+    if ($("#brandSubtitle")) $("#brandSubtitle").textContent = t("brandSubtitle");
+    if ($("#homeLead")) $("#homeLead").textContent = t("homeLead");
+    if ($("#openCourses")) $("#openCourses").textContent = t("openCourses");
+    if ($("#openWiki")) $("#openWiki").textContent = t("openWiki");
+    if ($("#quickTitle")) $("#quickTitle").textContent = t("quickTitle");
+    if ($("#quickHint")) $("#quickHint").textContent = t("quickHint");
+    if ($("#openWash")) $("#openWash").textContent = t("openAfterWash");
+    if ($("#homeSectionTitle")) $("#homeSectionTitle").textContent = t("homeSectionTitle");
+    if ($("#coursesTitle")) $("#coursesTitle").textContent = t("coursesTitle");
+    if ($("#coursesSearch")) $("#coursesSearch").setAttribute("placeholder", t("coursesSearch"));
+    if ($("#progressTitle")) $("#progressTitle").textContent = t("progressTitle");
+    if ($("#wikiTitle")) $("#wikiTitle").textContent = t("wikiTitle");
+    if ($("#wikiSearch")) $("#wikiSearch").setAttribute("placeholder", t("wikiSearch"));
+    if ($("#profileTitle")) $("#profileTitle").textContent = t("profileTitle");
+    if ($("#resetProgress")) $("#resetProgress").textContent = t("resetProgress");
+    if ($("#exportData")) $("#exportData").textContent = t("exportData");
+    if ($("#profileHint")) $("#profileHint").textContent = t("profileHint");
+    if ($("#ownedTitle")) $("#ownedTitle").textContent = t("ownedTitle");
+    if ($("#navHome")) $("#navHome").textContent = t("nav.home");
+    if ($("#navCourses")) $("#navCourses").textContent = t("nav.courses");
+    if ($("#navProgress")) $("#navProgress").textContent = t("nav.progress");
+    if ($("#navWiki")) $("#navWiki").textContent = t("nav.wiki");
+    if ($("#navProfile")) $("#navProfile").textContent = t("nav.profile");
+    if ($("#adminTitle")) $("#adminTitle").textContent = t("adminTitle");
 
-    $("#coursesTitle").textContent = t("coursesTitle");
-    $("#coursesSearch").setAttribute("placeholder", t("coursesSearch"));
-    $("#progressTitle").textContent = t("progressTitle");
-
-    $("#wikiTitle").textContent = t("wikiTitle");
-    $("#wikiSearch").setAttribute("placeholder", t("wikiSearch"));
-
-    $("#profileTitle").textContent = t("profileTitle");
-    $("#resetProgress").textContent = t("resetProgress");
-    $("#exportData").textContent = t("exportData");
-    $("#profileHint").textContent = t("profileHint");
-    $("#ownedTitle").textContent = t("ownedTitle");
-
-    $("#navHome").textContent = t("nav.home");
-    $("#navCourses").textContent = t("nav.courses");
-    $("#navProgress").textContent = t("nav.progress");
-    $("#navWiki").textContent = t("nav.wiki");
-    $("#navProfile").textContent = t("nav.profile");
-
-    $("#adminTitle").textContent = t("adminTitle");
+    // NEWS i18n
+    if ($("#newsTitle")) $("#newsTitle").textContent = t("newsTitle");
+    if ($("#newsRefreshBtn")) $("#newsRefreshBtn").textContent = t("newsRefresh");
+    if ($("#newsHint") && !$("#newsRoot")?.children?.length) $("#newsHint").textContent = t("newsEmpty");
 
     // filters labels
     const f = $("#coursesFilter");
-    if (f) {
+    if (f && f.options && f.options.length >= 4) {
       f.options[0].text = t("filterAll");
       f.options[1].text = t("filterFree");
       f.options[2].text = t("filterPaid");
@@ -1175,6 +1309,7 @@
     buildWikiCategories();
     renderWiki();
     renderProfile();
+
     if (current.tab === "course" && current.courseId) renderCourse(current.courseId);
     if (current.tab === "lesson" && current.courseId && current.lessonId) renderLesson(current.courseId, current.lessonId);
     if (current.tab === "test" && current.courseId && current.lessonId) renderTest(current.courseId, current.lessonId);
@@ -1195,82 +1330,125 @@
     });
 
     // close
-    $("#closeBtn").addEventListener("click", () => {
-      if (tg) safe(() => tg.close());
-      else toast(state.lang === "he" ? "אין Telegram" : "Нет Telegram WebApp");
-    });
+    const closeBtn = $("#closeBtn");
+    if (closeBtn) {
+      closeBtn.addEventListener("click", () => {
+        if (tgSafe) safe(() => tgSafe.close());
+        else toast(state.lang === "he" ? "אין Telegram" : "Нет Telegram WebApp");
+      });
+    }
 
     // lang toggle
-    $("#langToggle").addEventListener("click", () => {
-      const next = state.lang === "ru" ? "he" : "ru";
-      setLang(next);
-      $("#langToggle").textContent = next.toUpperCase();
-    });
-    $("#langToggle").textContent = state.lang.toUpperCase();
+    const lt = $("#langToggle");
+    if (lt) {
+      lt.addEventListener("click", () => {
+        const next = state.lang === "ru" ? "he" : "ru";
+        setLang(next);
+        lt.textContent = next.toUpperCase();
+      });
+      lt.textContent = state.lang.toUpperCase();
+    }
 
     // home quick buttons
-    $("#openCourses").addEventListener("click", () => { showScreen("courses"); renderAll(); });
-    $("#openWiki").addEventListener("click", () => { showScreen("wiki"); renderAll(); });
+    const oc = $("#openCourses");
+    if (oc) oc.addEventListener("click", () => { showScreen("courses"); renderAll(); });
 
-    // manual unlock button (like "after wash")
-    $("#openWash").addEventListener("click", () => {
-      // Fast: unlock "Foundation" paid course by default, or all if you want
-      // Здесь ты решаешь бизнес-логику. Я сделал: открываем "foundation_paid" (пример).
-      const defaultCourse = ACADEMY_DATA.courses.find(c => c.unlockOnWash === true);
-      if (defaultCourse) {
-        grantAccess(defaultCourse.id, "manual");
-      } else {
-        // fallback: open first paid course
-        const firstPaid = ACADEMY_DATA.courses.find(c => c.price > 0);
-        if (firstPaid) grantAccess(firstPaid.id, "manual");
-      }
-    });
+    const ow = $("#openWiki");
+    if (ow) ow.addEventListener("click", () => { showScreen("wiki"); renderAll(); });
+
+    // manual unlock button (after wash)
+    const washBtn = $("#openWash");
+    if (washBtn) {
+      washBtn.addEventListener("click", () => {
+        // Fast: unlock course with unlockOnWash=true, else first paid
+        const defaultCourse = ACADEMY_DATA.courses.find(c => c.unlockOnWash === true);
+        if (defaultCourse) {
+          grantAccess(defaultCourse.id, "manual");
+        } else {
+          const firstPaid = ACADEMY_DATA.courses.find(c => c.price > 0);
+          if (firstPaid) grantAccess(firstPaid.id, "manual");
+        }
+      });
+    }
+
+    // NEWS refresh
+    const newsBtn = $("#newsRefreshBtn");
+    if (newsBtn) {
+      newsBtn.addEventListener("click", () => refreshNews({ silent: false }));
+    }
 
     // search/filter courses
-    $("#coursesSearch").addEventListener("input", renderCourses);
-    $("#coursesFilter").addEventListener("change", renderCourses);
+    const cs = $("#coursesSearch");
+    if (cs) cs.addEventListener("input", renderCourses);
+
+    const cf = $("#coursesFilter");
+    if (cf) cf.addEventListener("change", renderCourses);
 
     // wiki search
-    $("#wikiSearch").addEventListener("input", renderWiki);
-    $("#wikiCategory").addEventListener("change", renderWiki);
+    const ws = $("#wikiSearch");
+    if (ws) ws.addEventListener("input", renderWiki);
+
+    const wc = $("#wikiCategory");
+    if (wc) wc.addEventListener("change", renderWiki);
 
     // back buttons
-    $("#backToCourses").addEventListener("click", () => { showScreen("courses"); renderAll(); });
-    $("#backToCourse").addEventListener("click", () => { showScreen("course"); if (current.courseId) renderCourse(current.courseId); });
-    $("#backToLesson").addEventListener("click", () => { showScreen("lesson"); if (current.courseId && current.lessonId) renderLesson(current.courseId, current.lessonId); });
-    $("#backFromAdmin").addEventListener("click", () => { showScreen("profile"); renderAll(); });
+    const b1 = $("#backToCourses");
+    if (b1) b1.addEventListener("click", () => { showScreen("courses"); renderAll(); });
+
+    const b2 = $("#backToCourse");
+    if (b2) b2.addEventListener("click", () => {
+      showScreen("course");
+      if (current.courseId) renderCourse(current.courseId);
+    });
+
+    const b3 = $("#backToLesson");
+    if (b3) b3.addEventListener("click", () => {
+      showScreen("lesson");
+      if (current.courseId && current.lessonId) renderLesson(current.courseId, current.lessonId);
+    });
+
+    const b4 = $("#backFromAdmin");
+    if (b4) b4.addEventListener("click", () => { showScreen("profile"); renderAll(); });
 
     // profile actions
-    $("#resetProgress").addEventListener("click", () => {
-      const ok = confirm(state.lang === "he" ? "לאפס את ההתקדמות?" : "Сбросить прогресс?");
-      if (!ok) return;
-      state.progress = {};
-      saveState();
-      toast(t("toastReset"));
-      renderAll();
-    });
+    const rp = $("#resetProgress");
+    if (rp) {
+      rp.addEventListener("click", () => {
+        const ok = confirm(state.lang === "he" ? "לאפס את ההתקדמות?" : "Сбросить прогресс?");
+        if (!ok) return;
+        state.progress = {};
+        saveState();
+        toast(t("toastReset"));
+        renderAll();
+      });
+    }
 
-    $("#exportData").addEventListener("click", async () => {
-      const payload = JSON.stringify({ state, exportedAt: new Date().toISOString() }, null, 2);
-      try {
-        await navigator.clipboard.writeText(payload);
-        toast(t("toastCopied"));
-      } catch {
-        // if clipboard blocked, show in alert
-        alert(payload);
-      }
-    });
+    const ex = $("#exportData");
+    if (ex) {
+      ex.addEventListener("click", async () => {
+        const payload = JSON.stringify({ state, exportedAt: new Date().toISOString() }, null, 2);
+        try {
+          await navigator.clipboard.writeText(payload);
+          toast(t("toastCopied"));
+        } catch {
+          alert(payload);
+        }
+      });
+    }
 
     // admin easter: 7 taps on logo
-    $("#brandTap").addEventListener("click", () => {
-      brandTapCount += 1;
-      clearTimeout(brandTapTimer);
-      brandTapTimer = setTimeout(() => { brandTapCount = 0; }, 1200);
-      if (brandTapCount >= 7) {
-        brandTapCount = 0;
-        openAdmin();
-      }
-    });
+    const brand = $("#brandTap");
+    if (brand) {
+      brand.addEventListener("click", () => {
+        brandTapCount += 1;
+        clearTimeout(brandTapTimer);
+        brandTapTimer = setTimeout(() => { brandTapCount = 0; }, 1200);
+        if (brandTapCount >= 7) {
+          brandTapCount = 0;
+          openAdmin();
+        }
+      });
+    }
   }
 
   // ---------------------------
@@ -1282,32 +1460,32 @@
       .replaceAll("<", "&lt;")
       .replaceAll(">", "&gt;")
       .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
+      .replaceAll("'", "&#39;");
   }
 
   // ---------------------------
   // Boot
   // ---------------------------
   function boot() {
-    // language
-    if (!["ru","he"].includes(state.lang)) state.lang = "ru";
-    $("#langToggle").textContent = state.lang.toUpperCase();
+    if (!["ru", "he"].includes(state.lang)) state.lang = "ru";
+
+    applyLangDir();
+
+    const lt = $("#langToggle");
+    if (lt) lt.textContent = state.lang.toUpperCase();
+
     applyI18n();
-     document.documentElement.classList.toggle("lang-he", state.lang === "he");
-document.documentElement.setAttribute("lang", state.lang);
 
-
-    // default screen
     showScreen("home");
-
-    // data-driven categories
     buildWikiCategories();
-
-    // bind
     bindEvents();
-
-    // initial render
     renderAll();
+
+    // optional: авто-подгрузка новостей один раз (тихо) если кеш пустой
+    const cached = loadNewsCache();
+    if ((!cached.items || !cached.items.length) && $("#newsRoot")) {
+      refreshNews({ silent: true });
+    }
   }
 
   document.addEventListener("DOMContentLoaded", boot);
@@ -1365,6 +1543,7 @@ document.documentElement.setAttribute("lang", state.lang);
               ]
             }
           },
+
           {
             id: "l_intro_2",
             durationMin: 10,
@@ -1378,7 +1557,7 @@ document.documentElement.setAttribute("lang", state.lang);
               he: ["כפפה נקייה", "Grit Guard", "מגבות נקיות"]
             },
             text: {
-              ru: "Самое дорогое — не химия, а ошибки. Ошибка мойки = паутинка на лаке.",
+              ru: "Самое дорогое — не химия, а ошибки.\nОшибка мойки = паутинка на лаке.",
               he: "הכי יקר זה לא הכימיה — זה טעויות. טעות שטיפה = סווירלים בצבע."
             },
             test: null
@@ -1394,8 +1573,8 @@ document.documentElement.setAttribute("lang", state.lang);
         level: { ru: "База+", he: "בסיס+" },
         title: { ru: "Фундамент мастера: мойка → деконтаминация → защита", he: "בסיס מאסטר: שטיפה → דה-קונטמינציה → הגנה" },
         desc: {
-          ru: "Полный цикл подготовки кузова: что, чем и в каком порядке. Ошибки, риски, нормы расхода.",
-          he: "מחזור מלא להכנת צבע: מה, עם מה ובאיזה סדר. טעויות, סיכונים ונורמות שימוש."
+          ru: "Полный цикл подготовки кузова: что, чем и в каком порядке.\nОшибки, риски, нормы расхода.",
+          he: "מחזור מלא להכנת צבע: מה, עם מה ובאיזה סדר.\nטעויות, סיכונים ונורמות שימוש."
         },
         invoiceUrl: null, // сюда вставишь invoice link от твоего сервера
         lessons: [
@@ -1420,15 +1599,13 @@ document.documentElement.setAttribute("lang", state.lang);
               questions: [
                 {
                   text: { ru: "Что делаем первым?", he: "מה עושים קודם?" },
-                  options: {
-                    ru: ["Глина", "Айрон/битум (химия)", "Полировка"],
-                    he: ["קליי", "איירון/זפת (כימיה)", "פוליש"]
-                  },
+                  options: { ru: ["Глина", "Айрон/битум (химия)", "Полировка"], he: ["קליי", "איירון/זפת (כימיה)", "פוליש"] },
                   correctIndex: 1
                 }
               ]
             }
           },
+
           {
             id: "l_found_2",
             durationMin: 16,
@@ -1491,38 +1668,42 @@ document.documentElement.setAttribute("lang", state.lang);
         categoryKey: "paint_protection",
         category: { ru: "Защита", he: "הגנה" },
         title: { ru: "PPF: полиуретановая плёнка", he: "PPF: סרט פוליאוריטן" },
-        preview: {
-          ru: "Что защищает, как клеится, уход, ошибки и срок службы.",
-          he: "מה זה מגן, איך מדביקים, תחזוקה, טעויות ואורך חיים."
-        },
-        tags: {
-          ru: ["PPF", "плёнка", "защита", "камни"],
-          he: ["PPF", "סרט", "הגנה", "אבנים"]
-        },
+        preview: { ru: "Что защищает, как клеится, уход, ошибки и срок службы.", he: "מה זה מגן, איך מדביקים, תחזוקה, טעויות ואורך חיים." },
+        tags: { ru: ["PPF", "плёнка", "защита", "камни"], he: ["PPF", "סרט", "הגנה", "אבנים"] },
         body: {
-          ru: "PPF (Paint Protection Film) — прозрачная полиуретановая плёнка для защиты ЛКП.\n\nГлавные плюсы:\n• защита от сколов/пескоструя\n• само-восстановление мелких царапин (на части плёнок)\n• легче поддерживать чистоту\n\nМинусы:\n• цена и трудоемкость\n• важна подготовка поверхности\n\nУход:\n• мягкая химия\n• избегать агрессивных растворителей\n• регулярная мойка и сушка",
-          he: "PPF הוא סרט פוליאוריטן שקוף להגנת הצבע.\n\nיתרונות:\n• הגנה מפגיעות/אבנים\n• התאוששות שריטות קלות בחלק מהסרטים\n• תחזוקה קלה יותר\n\nחסרונות:\n• מחיר ועבודה מורכבת\n• הכנה נכונה קריטית\n\nתחזוקה:\n• כימיה עדינה\n• להימנע מממסים חזקים\n• שטיפה וייבוש קבועים"
+          ru:
+            "PPF (Paint Protection Film) — прозрачная полиуретановая плёнка для защиты ЛКП.\n\n" +
+            "Главные плюсы:\n• защита от сколов/пескоструя\n• само-восстановление мелких царапин (на части плёнок)\n• легче поддерживать чистоту\n\n" +
+            "Минусы:\n• цена и трудоемкость\n• важна подготовка поверхности\n\n" +
+            "Уход:\n• мягкая химия\n• избегать агрессивных растворителей\n• регулярная мойка и сушка",
+          he:
+            "PPF הוא סרט פוליאוריטן שקוף להגנת הצבע.\n\n" +
+            "יתרונות:\n• הגנה מפגיעות/אבנים\n• התאוששות שריטות קלות בחלק מהסרטים\n• תחזוקה קלה יותר\n\n" +
+            "חסרונות:\n• מחיר ועבודה מורכבת\n• הכנה נכונה קריטית\n\n" +
+            "תחזוקה:\n• כימיה עדינה\n• להימנע מממסים חזקים\n• שטיפה וייבוש קבועים"
         }
       },
+
       {
         id: "w_iron",
         categoryKey: "chemistry",
         category: { ru: "Химия", he: "כימיה" },
         title: { ru: "Айрон-ремувер: как работает", he: "איירון רימובר: איך זה עובד" },
-        preview: {
-          ru: "Что такое 'кровоточащая' реакция, где применять и что нельзя делать.",
-          he: "מה זו תגובת 'דימום', איפה להשתמש וממה להיזהר."
-        },
-        tags: {
-          ru: ["айрон", "диски", "металлические вкрапления"],
-          he: ["איירון", "חישוקים", "חלקיקי מתכת"]
-        },
+        preview: { ru: "Что такое 'кровоточащая' реакция, где применять и что нельзя делать.", he: "מה זו תגובת 'דימום', איפה להשתמש וממה להיזהר." },
+        tags: { ru: ["айрон", "диски", "металлические вкрапления"], he: ["איירון", "חישוקים", "חלקיקי מתכת"] },
         body: {
-          ru: "Айрон-ремувер растворяет металлические вкрапления.\nРеакция фиолетового цвета — нормальная.\n\nПравила:\n• не на горячей поверхности\n• не давать высохнуть\n• тщательно смывать\n\nЧасто используют по дискам и по кузову перед глиной.",
-          he: "איירון רימובר ממיס חלקיקי מתכת.\nהתגובה הסגולה היא תקינה.\n\nכללים:\n• לא על משטח חם\n• לא לתת להתייבש\n• לשטוף היטב\n\nמשתמשים הרבה על חישוקים ועל הצבע לפני קליי."
+          ru:
+            "Айрон-ремувер растворяет металлические вкрапления.\n" +
+            "Реакция фиолетового цвета — нормальная.\n\n" +
+            "Правила:\n• не на горячей поверхности\n• не давать высохнуть\n• тщательно смывать\n\n" +
+            "Часто используют по дискам и по кузову перед глиной.",
+          he:
+            "איירון רימובר ממיס חלקיקי מתכת.\n" +
+            "התגובה הסגולה היא תקינה.\n\n" +
+            "כללים:\n• לא על משטח חם\n• לא לתת להתייבש\n• לשטוף היטב\n\n" +
+            "משתמשים הרבה על חישוקים ועל הצבע לפני קליי."
         }
       }
     ]
   };
-
 })();
