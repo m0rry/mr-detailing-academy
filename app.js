@@ -225,12 +225,18 @@
     return cur;
   }
 
-  function setLang(newLang) {
-    state.lang = newLang === "he" ? "he" : "ru";
-    saveState();
-    applyI18n();
-    renderAll();
-  }
+ function setLang(newLang) {
+  state.lang = newLang === "he" ? "he" : "ru";
+
+  // 👇 ВОТ ЭТИ ДВЕ СТРОКИ ДОБАВЛЯЕМ
+  document.documentElement.classList.toggle("lang-he", state.lang === "he");
+  document.documentElement.setAttribute("lang", state.lang);
+
+  saveState();
+  applyI18n();
+  renderAll();
+}
+
 
   // ---------------------------
   // Screens routing
