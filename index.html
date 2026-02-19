@@ -1,341 +1,199 @@
 <!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="theme-color" content="#0B0D12" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>MR Detailing Academy</title>
   <link rel="stylesheet" href="./styles.css" />
-
-  <!-- Мини-фиксы, чтобы ничего не перекрывало клики + премиум вид иконок -->
-  <style>
-    .bg, .bg * { pointer-events:none; }
-
-    .nav { z-index: 9999; }
-    .nav__item{ cursor:pointer; -webkit-tap-highlight-color:transparent; }
-    .nav__svg{
-      width:22px;height:22px;display:block;
-      color:rgba(255,255,255,.72);
-      transition: color .2s ease, transform .15s ease;
-    }
-    .nav__label{font-size:11px;margin-top:4px;opacity:.65}
-    .nav__item.is-active .nav__svg{color:#fff; transform: translateY(-1px);}
-    .nav__item.is-active .nav__label{opacity:1;}
-
-    /* Brand */
-    .brand{display:flex;align-items:center;gap:12px;}
-    .brand__logo{width:44px;height:44px;display:grid;place-items:center;}
-    .brand__text .title{line-height:1.05}
-    .brand__sub{margin-top:2px;font-size:11px;opacity:.7}
-    .logo{width:44px;height:44px;filter:drop-shadow(0 12px 18px rgba(143,107,255,.20));}
-  </style>
 </head>
 
 <body>
-  <!-- Background -->
-  <div class="bg">
-    <div class="bg__blob bg__blob--1"></div>
-    <div class="bg__blob bg__blob--2"></div>
-    <div class="bg__blob bg__blob--3"></div>
-    <div class="bg__grain"></div>
-  </div>
-
   <div class="app" id="app">
-    <!-- Top Bar -->
     <header class="topbar">
-      <button class="icon-btn" id="closeBtn" aria-label="Close">×</button>
+      <button class="icon-btn" id="closeBtn" aria-label="Close">
+        ✕
+      </button>
 
-      <!-- BRAND + NAME -->
-      <div class="topbar__center">
-        <div class="brand">
-          <div class="brand__logo" aria-label="MR Detailing Academy">
-            <!-- Premium Logo: MR monogram + droplet (SVG, no assets needed) -->
-            <svg class="logo" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" role="img">
-              <defs>
-                <linearGradient id="mr_g" x1="14" y1="10" x2="54" y2="56" gradientUnits="userSpaceOnUse">
-                  <stop stop-color="#9B7CFF"/>
-                  <stop offset="1" stop-color="#6C4DFF"/>
-                </linearGradient>
-                <filter id="mr_glow" x="-50%" y="-50%" width="200%" height="200%">
-                  <feGaussianBlur stdDeviation="3.2" result="b"/>
-                  <feMerge>
-                    <feMergeNode in="b"/>
-                    <feMergeNode in="SourceGraphic"/>
-                  </feMerge>
-                </filter>
-              </defs>
-
-              <!-- Glass tile -->
-              <rect x="6" y="6" width="52" height="52" rx="18" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.14)"/>
-
-              <!-- Droplet -->
-              <path filter="url(#mr_glow)"
-                    d="M44 19c0 9-8 14-8 20a8 8 0 0 0 16 0c0-6-8-11-8-20z"
-                    fill="url(#mr_g)" opacity=".95"/>
-
-              <!-- MR monogram (clean + premium) -->
-              <path d="M14.5 42V25.5c0-2 1.2-3 3-3h1.7c1.1 0 2.1.5 2.7 1.5l3.1 5 3.1-5c.6-1 1.6-1.5 2.7-1.5H36c1.8 0 3 1 3 3V42"
-                    stroke="rgba(255,255,255,.92)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M39 32.8h5.7c2.6 0 4.6-1.7 4.6-4.2S47.3 24.4 44.7 24.4H39V42"
-                    stroke="rgba(255,255,255,.92)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-
-          <div class="brand__text">
-            <div class="muted" id="greeting">Доброе утро,</div>
-            <div class="title" id="username">MarkeyG</div>
-            <div class="brand__sub">MR Detailing Academy</div>
-          </div>
+      <div class="brand" id="brandTap">
+        <div class="brand__logo">MR</div>
+        <div class="brand__text">
+          <div class="brand__title">Detailing Academy</div>
+          <div class="brand__subtitle" id="brandSubtitle">Внутренний мир детейлинга</div>
         </div>
       </div>
 
-      <div class="topbar__right">
-        <div class="muted">Баланс</div>
-        <div class="balance"><span id="stars">100</span> ⭐</div>
-      </div>
+      <button class="chip" id="langToggle" type="button">RU</button>
     </header>
 
-    <!-- SCREENS -->
-    <main class="content">
+    <main class="main">
       <!-- HOME -->
-      <section class="screen is-active" id="screen-home">
-        <section class="section">
-          <div class="section__head">
-            <h2>Разделы</h2>
-            <span class="muted">scroll →</span>
+      <section class="screen is-active" id="screen-home" data-screen="home">
+        <div class="hero">
+          <div class="hero__left">
+            <div class="kicker" id="greeting">Привет,</div>
+            <h1 class="title">
+              <span id="username">мастер</span> 👋
+            </h1>
+            <p class="lead" id="homeLead">
+              Курсы, тесты, база знаний и практические чек-листы — всё в одном месте.
+            </p>
+
+            <div class="hero__actions">
+              <button class="btn btn-primary" id="openCourses">Открыть курсы</button>
+              <button class="btn btn-ghost" id="openWiki">Детейлинг-вики</button>
+            </div>
+
+            <div class="stats" id="homeStats">
+              <!-- render -->
+            </div>
           </div>
 
-          <div class="hscroll">
-            <button class="mini glow" type="button" data-go="courses">
-              <div class="mini__top"><span class="mini__pill">START</span></div>
-              <div class="mini__title">Курсы</div>
-              <div class="mini__sub muted">модули / уроки</div>
-            </button>
-
-            <button class="mini glow" type="button" data-go="progress">
-              <div class="mini__top"><span class="mini__pill">LIVE</span></div>
-              <div class="mini__title">Прогресс</div>
-              <div class="mini__sub muted">проценты / статус</div>
-            </button>
-
-            <button class="mini glow" type="button" data-go="bonus">
-              <div class="mini__top"><span class="mini__pill">HOT</span></div>
-              <div class="mini__title">Бонусы</div>
-              <div class="mini__sub muted">рефералы / скидки</div>
-            </button>
-
-            <button class="mini glow" type="button" data-go="profile">
-              <div class="mini__top"><span class="mini__pill">ME</span></div>
-              <div class="mini__title">Профиль</div>
-              <div class="mini__sub muted">настройки</div>
-            </button>
-          </div>
-        </section>
-
-        <section class="section">
-          <div class="section__head">
-            <h2>MR Academy</h2>
-            <span class="muted">parallax</span>
-          </div>
-
-          <div class="cards">
-            <article class="p-card" data-parallax>
-              <div class="p-card__frame"></div>
-              <div class="p-card__bg p-card__bg--wash"></div>
-              <div class="p-card__shine"></div>
-
-              <div class="layer layer--glow"></div>
-              <div class="layer layer--object layer--wash"></div>
-              <div class="layer layer--particles"></div>
-
-              <div class="p-card__content">
-                <div class="tag tag--green">FREE</div>
-                <h3>Курс мойки</h3>
-                <p class="muted">База, которая открывает доступ к платным курсам.</p>
-                <div class="row">
-                  <button class="btn btn--primary" id="openWash">Начать</button>
-                  <button class="btn btn--ghost" data-go="courses">Все курсы</button>
-                </div>
+          <div class="hero__right">
+            <div class="glass-card">
+              <div class="glass-card__title" id="quickTitle">Быстрый старт</div>
+              <div class="glass-card__list" id="quickList"></div>
+              <button class="btn btn-secondary" id="openWash" type="button">
+                Я оплатил / завершил мойку → открыть доступ
+              </button>
+              <div class="hint" id="quickHint">
+                Если оплаты ещё нет — можно купить курс внутри вкладки “Курсы”.
               </div>
-            </article>
-
-            <article class="p-card" data-parallax>
-              <div class="p-card__frame"></div>
-              <div class="p-card__bg p-card__bg--interior"></div>
-              <div class="p-card__shine"></div>
-
-              <div class="layer layer--glow"></div>
-              <div class="layer layer--object layer--interior"></div>
-              <div class="layer layer--particles"></div>
-
-              <div class="p-card__content">
-                <div class="tag tag--purple">LOCKED</div>
-                <h3>Химчистка салона</h3>
-                <p class="muted">Доступ после “Мойки”. Оплата Stars — дальше.</p>
-                <div class="row">
-                  <button class="btn btn--ghost" data-go="courses">Список</button>
-                  <button class="btn btn--ghost" data-go="bonus">Скидка</button>
-                </div>
-              </div>
-            </article>
+            </div>
           </div>
-        </section>
+        </div>
 
-        <section class="hero" data-parallax>
-          <div class="hero__bg"></div>
-          <div class="hero__frame"></div>
-
-          <div class="layer layer--glow hero__glow"></div>
-          <div class="layer hero__hands"></div>
-          <div class="layer hero__ring"></div>
-          <div class="layer layer--particles hero__particles"></div>
-
-          <div class="hero__content">
-            <h1>MR Detailing Academy</h1>
-            <p class="muted">Урок → тест → результат → прогресс. Всё в одном приложении.</p>
-            <button class="btn btn--primary" data-go="courses">Открыть обучение</button>
+        <div class="section">
+          <div class="section__head">
+            <h2 class="section__title" id="homeSectionTitle">Рекомендуем сегодня</h2>
           </div>
-        </section>
-
-        <div class="spacer"></div>
+          <div class="grid" id="homeRecommended"></div>
+        </div>
       </section>
 
       <!-- COURSES -->
-      <section class="screen" id="screen-courses">
-        <section class="section">
-          <div class="section__head">
-            <h2>Курсы</h2>
-            <span class="muted">выбери курс</span>
+      <section class="screen" id="screen-courses" data-screen="courses">
+        <div class="section__head">
+          <h2 class="section__title" id="coursesTitle">Курсы</h2>
+          <div class="row">
+            <input class="input" id="coursesSearch" placeholder="Поиск по курсам..." />
+            <select class="select" id="coursesFilter">
+              <option value="all">Все</option>
+              <option value="free">Бесплатные</option>
+              <option value="paid">Платные</option>
+              <option value="owned">Доступные мне</option>
+            </select>
           </div>
-          <div class="cards" id="coursesRoot"></div>
-          <div class="spacer"></div>
-        </section>
+        </div>
+
+        <div class="grid" id="coursesRoot"></div>
+      </section>
+
+      <!-- COURSE DETAILS -->
+      <section class="screen" id="screen-course" data-screen="course">
+        <div class="subbar">
+          <button class="btn btn-ghost" id="backToCourses">← Назад</button>
+          <div class="subbar__title" id="courseTitle">Курс</div>
+        </div>
+
+        <div class="course" id="courseRoot"></div>
+      </section>
+
+      <!-- LESSON -->
+      <section class="screen" id="screen-lesson" data-screen="lesson">
+        <div class="subbar">
+          <button class="btn btn-ghost" id="backToCourse">← Назад</button>
+          <div class="subbar__title" id="lessonTitle">Урок</div>
+        </div>
+
+        <div class="lesson" id="lessonRoot"></div>
+      </section>
+
+      <!-- TEST -->
+      <section class="screen" id="screen-test" data-screen="test">
+        <div class="subbar">
+          <button class="btn btn-ghost" id="backToLesson">← Назад</button>
+          <div class="subbar__title" id="testTitle">Тест</div>
+        </div>
+
+        <div class="test" id="testRoot"></div>
       </section>
 
       <!-- PROGRESS -->
-      <section class="screen" id="screen-progress">
-        <section class="section">
-          <div class="section__head">
-            <h2>Прогресс</h2>
-            <span class="muted">по курсам</span>
-          </div>
-          <div class="glass" id="progressRoot"></div>
-          <div class="spacer"></div>
-        </section>
+      <section class="screen" id="screen-progress" data-screen="progress">
+        <div class="section__head">
+          <h2 class="section__title" id="progressTitle">Прогресс</h2>
+        </div>
+        <div class="panel" id="progressRoot"></div>
       </section>
 
-      <!-- BONUS -->
-      <section class="screen" id="screen-bonus">
-        <section class="section">
-          <div class="section__head">
-            <h2>Бонусы</h2>
-            <span class="muted">рефералы</span>
+      <!-- WIKI -->
+      <section class="screen" id="screen-wiki" data-screen="wiki">
+        <div class="section__head">
+          <h2 class="section__title" id="wikiTitle">Детейлинг-вики</h2>
+          <div class="row">
+            <input class="input" id="wikiSearch" placeholder="Поиск: полировка, PPF, керамика..." />
+            <select class="select" id="wikiCategory">
+              <option value="all">Все категории</option>
+            </select>
           </div>
-          <div class="glass" id="bonusRoot"></div>
-          <div class="spacer"></div>
-        </section>
+        </div>
+        <div class="grid" id="wikiRoot"></div>
       </section>
 
       <!-- PROFILE -->
-      <section class="screen" id="screen-profile">
-        <section class="section">
-          <div class="section__head">
-            <h2>Профиль</h2>
-            <span class="muted">настройки</span>
+      <section class="screen" id="screen-profile" data-screen="profile">
+        <div class="section__head">
+          <h2 class="section__title" id="profileTitle">Профиль</h2>
+        </div>
+
+        <div class="panel">
+          <div class="profile">
+            <div class="profile__avatar" id="profileAvatar">MR</div>
+            <div class="profile__info">
+              <div class="profile__name" id="profileName">Пользователь</div>
+              <div class="profile__meta" id="profileMeta">Telegram WebApp</div>
+            </div>
           </div>
-          <div class="glass" id="profileRoot"></div>
-          <div class="spacer"></div>
-        </section>
+
+          <div class="hr"></div>
+
+          <div class="row">
+            <button class="btn btn-secondary" id="resetProgress">Сбросить прогресс</button>
+            <button class="btn btn-ghost" id="exportData">Экспорт данных</button>
+          </div>
+
+          <div class="hint" id="profileHint">
+            Админ-панель: 7 раз нажми на логотип “MR” сверху.
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:12px;">
+          <h3 class="h3" id="ownedTitle">Мои доступы</h3>
+          <div id="ownedRoot"></div>
+        </div>
+      </section>
+
+      <!-- ADMIN -->
+      <section class="screen" id="screen-admin" data-screen="admin">
+        <div class="subbar">
+          <button class="btn btn-ghost" id="backFromAdmin">← Назад</button>
+          <div class="subbar__title" id="adminTitle">Админ</div>
+        </div>
+
+        <div class="panel" id="adminRoot"></div>
       </section>
     </main>
 
-    <!-- Bottom Nav (premium icons) -->
-    <nav class="nav" role="navigation" aria-label="Bottom Navigation">
-      <!-- HOME -->
-      <button class="nav__item is-active" data-tab="home" type="button" aria-label="Home">
-        <svg class="nav__svg" viewBox="0 0 24 24" fill="none">
-          <path d="M3 11.5L12 4l9 7.5"
-                stroke="currentColor" stroke-width="1.6"
-                stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M6.5 10.5V20h11V10.5"
-                stroke="currentColor" stroke-width="1.6"
-                stroke-linecap="round"/>
-        </svg>
-        <span class="nav__label">Главная</span>
-      </button>
-
-      <!-- COURSES -->
-      <button class="nav__item" data-tab="courses" type="button" aria-label="Courses">
-        <svg class="nav__svg" viewBox="0 0 24 24" fill="none">
-          <rect x="4" y="4" width="16" height="16" rx="3"
-                stroke="currentColor" stroke-width="1.6"/>
-          <path d="M8 9h8M8 13h8M8 17h5"
-                stroke="currentColor" stroke-width="1.6"
-                stroke-linecap="round"/>
-        </svg>
-        <span class="nav__label">Курсы</span>
-      </button>
-
-      <!-- PROGRESS -->
-      <button class="nav__item" data-tab="progress" type="button" aria-label="Progress">
-        <svg class="nav__svg" viewBox="0 0 24 24" fill="none">
-          <circle cx="12" cy="12" r="8"
-                  stroke="currentColor" stroke-width="1.6"/>
-          <path d="M12 7v5l3 2"
-                stroke="currentColor" stroke-width="1.6"
-                stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <span class="nav__label">Прогресс</span>
-      </button>
-
-      <!-- BONUS -->
-      <button class="nav__item" data-tab="bonus" type="button" aria-label="Bonuses">
-        <svg class="nav__svg" viewBox="0 0 24 24" fill="none">
-          <path d="M12 4l2.4 4.8 5.3.4-4 3.6 1.2 5.2L12 15.6 7.1 18l1.2-5.2-4-3.6 5.3-.4L12 4z"
-                stroke="currentColor" stroke-width="1.5"
-                stroke-linejoin="round"/>
-        </svg>
-        <span class="nav__label">Бонусы</span>
-      </button>
-
-      <!-- PROFILE -->
-      <button class="nav__item" data-tab="profile" type="button" aria-label="Profile">
-        <svg class="nav__svg" viewBox="0 0 24 24" fill="none">
-          <circle cx="12" cy="8" r="3.5"
-                  stroke="currentColor" stroke-width="1.6"/>
-          <path d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6"
-                stroke="currentColor" stroke-width="1.6"
-                stroke-linecap="round"/>
-        </svg>
-        <span class="nav__label">Профиль</span>
-      </button>
+    <nav class="nav">
+      <button class="nav__item is-active" data-tab="home" type="button">🏠<span id="navHome">Главная</span></button>
+      <button class="nav__item" data-tab="courses" type="button">🎓<span id="navCourses">Курсы</span></button>
+      <button class="nav__item" data-tab="progress" type="button">📈<span id="navProgress">Прогресс</span></button>
+      <button class="nav__item" data-tab="wiki" type="button">📚<span id="navWiki">Вики</span></button>
+      <button class="nav__item" data-tab="profile" type="button">👤<span id="navProfile">Профиль</span></button>
     </nav>
   </div>
 
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="./app.js"></script>
-
-  <!-- Fallback nav (чтобы кнопки работали даже если app.js упал) -->
-  <script>
-    (function () {
-      const screens = Array.from(document.querySelectorAll(".screen"));
-      const navBtns = Array.from(document.querySelectorAll(".nav__item"));
-      const goBtns = Array.from(document.querySelectorAll("[data-go]"));
-
-      function show(tab) {
-        screens.forEach(s => s.classList.remove("is-active"));
-        const target = document.getElementById("screen-" + tab);
-        if (target) target.classList.add("is-active");
-
-        navBtns.forEach(b => b.classList.remove("is-active"));
-        const active = document.querySelector('.nav__item[data-tab="' + tab + '"]');
-        if (active) active.classList.add("is-active");
-      }
-
-      navBtns.forEach(btn => btn.addEventListener("click", () => show(btn.dataset.tab)));
-      goBtns.forEach(btn => btn.addEventListener("click", () => show(btn.dataset.go)));
-    })();
-  </script>
 </body>
 </html>
 
