@@ -90,7 +90,7 @@ html.lang-he .result__text{
 }
 
 .brand__logo{
-  width:42px; height:42px; border-radius:14px;
+  width:55px; height:55px; border-radius:14px;
   display:grid; place-items:center;
   font-weight:900;
   background: linear-gradient(135deg, rgba(110,231,255,.25), rgba(167,139,250,.22));
