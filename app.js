@@ -547,7 +547,7 @@
   // NEWS (RSS)
   // ---------------------------
   const FEEDS = [
-    { id: "autogeek", name: "Autogeek", url: "https://www.autogeekonline.net/feed/" },
+    { id: "slimsdetailing", name: "SlimsDetailing", url: "https://www.slimsdetailing.co.uk/blogs/news" },
     { id: "detailedimage", name: "Detailed Image", url: "https://www.detailedimage.com/Ask-a-Pro/feed/" }
   ];
 
