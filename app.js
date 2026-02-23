@@ -131,14 +131,12 @@
       supportHint: "Совет: добавь фото/видео в чат, чтобы ответ был точнее.",
 
       wikiTitle: "Детейлинг-вики",
-      wikiSearch: "Поиск: полировка, PPF, керамика…",
+      wikiSearch: "Поиск: полировка, PPF, керамика, химчистка",
       wikiAllCats: "Все категории",
 
       profileTitle: "Профиль",
       accessTitle: "Доступы",
       export: "Экспорт",
-      resetLocal: "Сбросить локальные данные",
-      profileHint: "Админ: 7 раз нажми на логотип MR (сверху), затем открой профиль.",
       adminEnterPin: "Введите PIN администратора",
       adminLogin: "Войти",
       adminWrongPin: "Неверный PIN",
@@ -146,7 +144,7 @@
       adminGrant: "Выдать доступ",
       adminLockAll: "Сбросить доступы",
       adminLogout: "Выйти из админа",
-      copied: "Скопировано ✅",
+      copied: "Скопировано ✅-",
       resetDone: "Данные сброшены ✅",
       invoiceNotReady: "Авто-оплата будет позже (нужен бэкенд). Сейчас выдавай доступ вручную."
     },
@@ -208,8 +206,6 @@
       profileTitle: "פרופיל",
       accessTitle: "גישות",
       export: "ייצוא",
-      resetLocal: "איפוס נתונים מקומיים",
-      profileHint: "אדמין: לחץ 7 פעמים על לוגו MR למעלה, ואז פתח פרופיל.",
       adminEnterPin: "הזן PIN אדמין",
       adminLogin: "התחבר",
       adminWrongPin: "PIN שגוי",
