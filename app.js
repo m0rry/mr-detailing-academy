@@ -146,7 +146,7 @@
       adminLogout: "Выйти из админа",
       copied: "Скопировано ✅-",
       resetDone: "Данные сброшены ✅",
-      invoiceNotReady: "Авто-оплата будет позже (нужен бэкенд). Сейчас выдавай доступ вручную."
+      invoiceNotReady: "Comming Soon♥"
     },
 
     he: {
@@ -215,7 +215,7 @@
       adminLogout: "התנתק מאדמין",
       copied: "הועתק ✅",
       resetDone: "אופס ✅",
-      invoiceNotReady: "תשלום אוטומטי יגיע בהמשך (צריך שרת). כרגע תן גישה ידנית."
+      invoiceNotReady: "Comming Soon♥"
     }
   };
 
@@ -247,7 +247,7 @@
   // ---------------------------
   const DATA = {
     feeds: [
-      { id: "autogeek", name: "Autogeek", url: "https://www.autogeekonline.net/feed/" },
+      { id: "D", name: "Detailing", url: "https://detailingmsk.ru/news/" },
       { id: "detailedimage", name: "Detailed Image", url: "https://www.detailedimage.com/Ask-a-Pro/feed/" }
     ],
     courses: [
