@@ -1,5 +1,9 @@
-/* MR Detailing Academy — Telegram WebApp SPA
-   RU/HE + RTL, Courses (paid), Lessons, Tests, Progress, Wiki, Profile, Admin, News (RSS)
+/* MR Detailing Academy — Telegram WebApp SPA (stable v4)
+   Tabs (4): Home / Courses / Support / Wiki
+   Profile is accessed from top bar (👤), not a tab.
+   RU/HE + RTL, Noto Sans Hebrew for Hebrew.
+   Courses are content-driven (data in this file for now).
+   Paid access: demo/manual (client-side). For real payments connect Telegram Invoice via backend later.
 */
 (() => {
   "use strict";
@@ -22,7 +26,9 @@
   // ---------------------------
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
-  const uid = (p = "id") => `${p}_${Math.random().toString(16).slice(2)}_${Date.now()}`;
+
+  const LS_KEY = "mr_academy_state_v4";
+  const NEWS_LS_KEY = "mr_academy_news_cache_v1";
 
   function escapeHtml(str) {
     return String(str ?? "")
@@ -34,12 +40,26 @@
   }
 
   // ---------------------------
-  // Storage
+  // State
   // ---------------------------
-  const LS_KEY = "mr_academy_state_v3";
-  const NEWS_LS_KEY = "mr_academy_news_cache_v2";
-
   const state = loadState();
+
+  function loadState() {
+    const base = {
+      lang: "ru",
+      profile: { name: null },
+      access: { purchased: {} }, // courseId -> {at, method}
+      admin: { unlocked: false }
+    };
+    try {
+      const raw = localStorage.getItem(LS_KEY);
+      if (!raw) return base;
+      const parsed = JSON.parse(raw);
+      return deepMerge(base, parsed);
+    } catch {
+      return base;
+    }
+  }
 
   function deepMerge(a, b) {
     if (!b || typeof b !== "object") return a;
@@ -47,28 +67,9 @@
     for (const k of Object.keys(b)) {
       if (b[k] && typeof b[k] === "object" && !Array.isArray(b[k])) {
         out[k] = deepMerge(out[k] ?? {}, b[k]);
-      } else {
-        out[k] = b[k];
-      }
+      } else out[k] = b[k];
     }
     return out;
-  }
-
-  function loadState() {
-    const base = {
-      lang: "ru",
-      purchased: {}, // courseId -> {at, method}
-      progress: {},  // lessonId -> {done, test:{passed,score,at}}
-      profile: { name: null },
-      admin: { unlocked: false }
-    };
-    try {
-      const raw = localStorage.getItem(LS_KEY);
-      if (!raw) return base;
-      return deepMerge(base, JSON.parse(raw));
-    } catch {
-      return base;
-    }
   }
 
   function saveState() {
@@ -76,197 +77,159 @@
   }
 
   // ---------------------------
-  // I18N
+  // i18n
   // ---------------------------
   const I18N = {
     ru: {
       brandSubtitle: "Внутренний мир детейлинга",
+      homeLead: "Курсы, чек-листы и база знаний — без мусора. Чисто и по делу.",
+      homeSectionTitle: "Рекомендуемые курсы",
+      openCourses: "Открыть курсы",
+      openWiki: "Открыть вики",
+
+      navHome: "Главная",
+      navCourses: "Курсы",
+      navSupport: "Сопровождение",
+      navWiki: "Вики",
+
       greetingMorning: "Доброе утро,",
       greetingDay: "Добрый день,",
       greetingEvening: "Добрый вечер,",
       greetingNight: "Доброй ночи,",
-      homeLead: "Курсы, тесты, база знаний и практические чек-листы — всё в одном месте.",
-      openCourses: "Открыть курсы",
-      openWiki: "Детейлинг-вики",
-      quickTitle: "Быстрый старт",
-      quickHint: "Если оплаты ещё нет — можно купить курс внутри вкладки “Курсы”.",
-      openAfterWash: "Я оплатил / завершил мойку → открыть доступ",
-      homeSectionTitle: "Рекомендуем сегодня",
 
-      navHome: "Главная",
-      navNews: "Новости",
-      navCourses: "Курсы",
-      navProgress: "Прогресс",
-      navWiki: "Вики",
-      navProfile: "Профиль",
+      newsBlockTitle: "Новости и обновления",
+      newsBlockSubtitle: "Коротко и по делу: новинки, методы, продукты (RSS).",
+      newsSearch: "Поиск",
+      newsRefresh: "Обновить",
+      newsLoading: "Загружаю…",
+      newsEmpty: "Пока нет новостей. Нажми «Обновить».",
+      newsCacheShown: "Показан кеш (если сеть не отвечает).",
 
       coursesTitle: "Курсы",
-      coursesSearch: "Поиск по курсам...",
+      coursesSearch: "Поиск по курсам…",
       filterAll: "Все",
       filterFree: "Бесплатные",
       filterPaid: "Платные",
       filterOwned: "Доступные мне",
 
-      progressTitle: "Прогресс",
+      free: "Бесплатно",
+      locked: "Закрыто",
+      open: "Открыть",
+      buy: "Купить доступ",
+      accessGranted: "Доступ открыт",
+      accessMissing: "Нет доступа",
+
+      back: "← Назад",
+      lessons: "уроков",
+      minutes: "мин",
+
+      supportTitle: "Сопровождение",
+      supportSubtitle: "Помогаем по технологиям, химии, пастам, инструменту и ошибкам. Чем точнее опишешь — тем точнее ответ.",
+      supportFormTitle: "Заявка на помощь",
+      supportSent: "Текст заявки отправлен в Telegram (или скопирован).",
+      supportCopied: "Текст заявки скопирован ✅",
+      supportHint: "Совет: добавь фото/видео в чат, чтобы ответ был точнее.",
 
       wikiTitle: "Детейлинг-вики",
-      wikiSearch: "Поиск: полировка, PPF, керамика...",
+      wikiSearch: "Поиск: полировка, PPF, керамика…",
       wikiAllCats: "Все категории",
 
       profileTitle: "Профиль",
-      resetProgress: "Сбросить прогресс",
-      exportData: "Экспорт данных",
-      profileHint: "Админ-панель: 7 раз нажми на логотип “MR” сверху.",
-      ownedTitle: "Мои доступы",
-
-      adminTitle: "Админ",
-      back: "← Назад",
-
-      locked: "Закрыто",
-      free: "Бесплатно",
-      paid: "Платный",
-      buy: "Купить доступ",
-      open: "Открыть",
-      continue: "Продолжить",
-      lessons: "уроков",
-      minutes: "мин",
-      accessGranted: "Доступ выдан",
-      accessMissing: "Нет доступа",
-
-      test: "Тест",
-      startTest: "Начать тест",
-      retakeTest: "Пересдать тест",
-      passed: "Пройден",
-      notPassed: "Не пройден",
-      score: "Оценка",
-      markDone: "Отметить урок как пройденный",
-      done: "Готово",
-
+      accessTitle: "Доступы",
+      export: "Экспорт",
+      resetLocal: "Сбросить локальные данные",
+      profileHint: "Админ: 7 раз нажми на логотип MR (сверху), затем открой профиль.",
       adminEnterPin: "Введите PIN администратора",
-      adminPinPlaceholder: "PIN",
       adminLogin: "Войти",
       adminWrongPin: "Неверный PIN",
-      adminPanel: "Панель управления",
-      adminUnlockByCourse: "Выдать доступ к курсу (локально)",
-      adminUnlockAll: "Открыть все курсы (локально)",
-      adminLockAll: "Закрыть все курсы (локально)",
-      adminSetPinInfo: "PIN задаётся в app.js: ADMIN_PIN",
-      adminInvoiceHint: "Авто-оплата через Telegram invoice требует бэкенд (позже подключим).",
-
-      toastUnlocked: "Доступ открыт ✅",
-      toastSaved: "Сохранено ✅",
-      toastReset: "Прогресс сброшен ✅",
-      toastCopied: "Скопировано ✅",
-
-      newsTitle: "Новости",
-      newsRefresh: "Обновить",
-      newsClear: "Сбросить кэш",
-      newsSearch: "Поиск",
-      newsSources: "Источники",
-      newsEmpty: "Пока нет новостей — нажми «Обновить».",
-      newsLoading: "Загружаю…",
-      newsCacheShown: "Показан кеш.",
-      invoiceNotReady: "Сейчас нет invoice link.\nВыдай доступ вручную или подключи бэкенд."
+      adminPanel: "Админ-панель",
+      adminGrant: "Выдать доступ",
+      adminLockAll: "Сбросить доступы",
+      adminLogout: "Выйти из админа",
+      copied: "Скопировано ✅",
+      resetDone: "Данные сброшены ✅",
+      invoiceNotReady: "Авто-оплата будет позже (нужен бэкенд). Сейчас выдавай доступ вручную."
     },
 
     he: {
       brandSubtitle: "עולם הדיטלינג מבפנים",
+      homeLead: "קורסים, צ׳ק-ליסטים ובסיס ידע — בלי רעש. נקי ולעניין.",
+      homeSectionTitle: "קורסים מומלצים",
+      openCourses: "פתח קורסים",
+      openWiki: "פתח ויקי",
+
+      navHome: "בית",
+      navCourses: "קורסים",
+      navSupport: "ליווי",
+      navWiki: "ויקי",
+
       greetingMorning: "בוקר טוב,",
       greetingDay: "צהריים טובים,",
       greetingEvening: "ערב טוב,",
       greetingNight: "לילה טוב,",
-      homeLead: "קורסים, מבחנים, בסיס ידע וצ׳ק-ליסטים מעשיים — הכול במקום אחד.",
-      openCourses: "פתח קורסים",
-      openWiki: "ויקי דיטלינג",
-      quickTitle: "התחלה מהירה",
-      quickHint: "אם עוד לא שילמת — אפשר לרכוש קורס בלשונית “קורסים”.",
-      openAfterWash: "שילמתי / סיימתי שטיפה → לפתוח גישה",
-      homeSectionTitle: "מומלץ להיום",
 
-      navHome: "בית",
-      navNews: "חדשות",
-      navCourses: "קורסים",
-      navProgress: "התקדמות",
-      navWiki: "ויקי",
-      navProfile: "פרופיל",
+      newsBlockTitle: "חדשות ועדכונים",
+      newsBlockSubtitle: "קצר ולעניין: מוצרים, שיטות וטיפים (RSS).",
+      newsSearch: "חיפוש",
+      newsRefresh: "רענן",
+      newsLoading: "טוען…",
+      newsEmpty: "אין חדשות עדיין. לחץ “רענן”.",
+      newsCacheShown: "מוצג מטמון (אם הרשת לא זמינה).",
 
       coursesTitle: "קורסים",
-      coursesSearch: "חיפוש קורסים...",
+      coursesSearch: "חיפוש קורסים…",
       filterAll: "הכול",
       filterFree: "חינמי",
       filterPaid: "בתשלום",
       filterOwned: "יש לי גישה",
 
-      progressTitle: "התקדמות",
+      free: "חינמי",
+      locked: "נעול",
+      open: "פתח",
+      buy: "קנה גישה",
+      accessGranted: "גישה פתוחה",
+      accessMissing: "אין גישה",
+
+      back: "← חזרה",
+      lessons: "שיעורים",
+      minutes: "דק׳",
+
+      supportTitle: "ליווי",
+      supportSubtitle: "עזרה בטכנולוגיות, כימיה, פדים/פסטות, כלים וטעויות. ככל שתפרט יותר — התשובה תהיה מדויקת יותר.",
+      supportFormTitle: "בקשת עזרה",
+      supportSent: "הטקסט נשלח לטלגרם (או הועתק).",
+      supportCopied: "הועתק ✅",
+      supportHint: "טיפ: צרף תמונה/וידאו בצ׳אט כדי לקבל תשובה מדויקת.",
 
       wikiTitle: "ויקי דיטלינג",
-      wikiSearch: "חיפוש: פוליש, PPF, קרמי...",
+      wikiSearch: "חיפוש: פוליש, PPF, קרמי…",
       wikiAllCats: "כל הקטגוריות",
 
       profileTitle: "פרופיל",
-      resetProgress: "איפוס התקדמות",
-      exportData: "ייצוא נתונים",
-      profileHint: "פאנל אדמין: לחץ 7 פעמים על הלוגו “MR” למעלה.",
-      ownedTitle: "הגישות שלי",
-
-      adminTitle: "אדמין",
-      back: "← חזרה",
-
-      locked: "נעול",
-      free: "חינמי",
-      paid: "בתשלום",
-      buy: "קנה גישה",
-      open: "פתח",
-      continue: "המשך",
-      lessons: "שיעורים",
-      minutes: "דק׳",
-      accessGranted: "גישה ניתנה",
-      accessMissing: "אין גישה",
-
-      test: "מבחן",
-      startTest: "התחל מבחן",
-      retakeTest: "מבחן חוזר",
-      passed: "עבר",
-      notPassed: "לא עבר",
-      score: "ציון",
-      markDone: "סמן שיעור כהושלם",
-      done: "בוצע",
-
+      accessTitle: "גישות",
+      export: "ייצוא",
+      resetLocal: "איפוס נתונים מקומיים",
+      profileHint: "אדמין: לחץ 7 פעמים על לוגו MR למעלה, ואז פתח פרופיל.",
       adminEnterPin: "הזן PIN אדמין",
-      adminPinPlaceholder: "PIN",
       adminLogin: "התחבר",
       adminWrongPin: "PIN שגוי",
-      adminPanel: "לוח ניהול",
-      adminUnlockByCourse: "תן גישה לקורס (מקומי)",
-      adminUnlockAll: "פתח את כל הקורסים (מקומי)",
-      adminLockAll: "נעל את כל הקורסים (מקומי)",
-      adminSetPinInfo: "ה-PIN מוגדר ב-app.js: ADMIN_PIN",
-      adminInvoiceHint: "תשלום אוטומטי דרך Invoice דורש שרת (נחבר בהמשך).",
-
-      toastUnlocked: "גישה נפתחה ✅",
-      toastSaved: "נשמר ✅",
-      toastReset: "התקדמות אופסה ✅",
-      toastCopied: "הועתק ✅",
-
-      newsTitle: "חדשות",
-      newsRefresh: "רענן",
-      newsClear: "נקה מטמון",
-      newsSearch: "חיפוש",
-      newsSources: "מקורות",
-      newsEmpty: "אין חדשות עדיין — לחץ על “רענן”.",
-      newsLoading: "טוען…",
-      newsCacheShown: "מוצג מטמון.",
-      invoiceNotReady: "אין invoice link כרגע.\nתן גישה ידנית או חבר שרת."
+      adminPanel: "לוח אדמין",
+      adminGrant: "תן גישה",
+      adminLockAll: "אפס גישות",
+      adminLogout: "התנתק מאדמין",
+      copied: "הועתק ✅",
+      resetDone: "אופס ✅",
+      invoiceNotReady: "תשלום אוטומטי יגיע בהמשך (צריך שרת). כרגע תן גישה ידנית."
     }
   };
 
   function t(key) {
-    const lang = (state.lang === "he") ? "he" : "ru";
+    const lang = state.lang === "he" ? "he" : "ru";
     return I18N[lang]?.[key] ?? key;
   }
 
   // ---------------------------
-  // RTL apply (IMPORTANT: also toggle html.lang-he for your CSS)
+  // RTL / language
   // ---------------------------
   function applyLangDir() {
     const lang = (state.lang === "he") ? "he" : "ru";
@@ -275,8 +238,8 @@
     document.documentElement.classList.toggle("lang-he", lang === "he");
   }
 
-  function setLang(newLang) {
-    state.lang = (newLang === "he") ? "he" : "ru";
+  function setLang(lang) {
+    state.lang = (lang === "he") ? "he" : "ru";
     saveState();
     applyLangDir();
     applyI18n();
@@ -284,17 +247,138 @@
   }
 
   // ---------------------------
-  // Routing / Screens
+  // Data (content)
   // ---------------------------
-  const screens = ["home","news","courses","course","lesson","test","progress","wiki","profile","admin"];
-  const screenEls = new Map(screens.map(s => [s, $(`#screen-${s}`)]));
-  const navItems = $$(".nav__item");
+  const DATA = {
+    feeds: [
+      { id: "autogeek", name: "Autogeek", url: "https://www.autogeekonline.net/feed/" },
+      { id: "detailedimage", name: "Detailed Image", url: "https://www.detailedimage.com/Ask-a-Pro/feed/" }
+    ],
+    courses: [
+      {
+        id: "intro_free",
+        price: 0,
+        level: { ru: "Новичок", he: "מתחיל" },
+        category: { ru: "База", he: "בסיס" },
+        title: { ru: "Введение в детейлинг", he: "מבוא לדיטלינג" },
+        desc: { ru: "Термины, безопасная мойка, логика процессов. Без воды.", he: "מושגים, שטיפה בטוחה והיגיון תהליכים — בלי מים." },
+        lessons: [
+          {
+            id: "l_intro_1",
+            durationMin: 8,
+            title: { ru: "Что такое детейлинг", he: "מה זה דיטלינג" },
+            body: {
+              ru: "Детейлинг — это восстановление + защита.\n\nГлавный принцип: минимизировать риск.\n• Чистая химия\n• Чистые полотенца\n• Правильные контакты\n\nЕсли хочешь — дальше добавим фото/видео и задания.",
+              he: "דיטלינג הוא שיקום + הגנה.\n\nעקרון מרכזי: למזער סיכון.\n• כימיה נקייה\n• מגבות נקיות\n• מגע נכון\n\nאפשר להוסיף בהמשך תמונות/וידאו ומשימות."
+            },
+            bullets: {
+              ru: ["Детейлинг ≠ просто мойка", "Контроль риска важнее скорости", "План работ до старта"],
+              he: ["דיטלינג ≠ רק שטיפה", "ניהול סיכון חשוב יותר ממהירות", "תכנית עבודה לפני התחלה"]
+            }
+          },
+          {
+            id: "l_intro_2",
+            durationMin: 10,
+            title: { ru: "Безопасная мойка (алгоритм)", he: "שטיפה בטוחה (אלגוריתם)" },
+            body: {
+              ru: "Схема:\n1) Предпена\n2) Смыв\n3) Контактная мойка (2 ведра)\n4) Сушка\n\nНе дави рукавицей. Меняй воду чаще. Не вытирай грязь всухую.",
+              he: "סכמה:\n1) קצף מקדים\n2) שטיפה\n3) שטיפה במגע (2 דליים)\n4) ייבוש\n\nלא ללחוץ עם הכפפה. להחליף מים לעיתים. לא לנגב לכלוך יבש."
+            },
+            bullets: {
+              ru: ["Грязь снимаем химией, не тряпкой", "Сушка — отдельный этап", "Чистые полотенца решают"],
+              he: ["לכלוך מורידים בכימיה, לא במגבת", "ייבוש הוא שלב נפרד", "מגבות נקיות זה הכול"]
+            }
+          }
+        ]
+      },
+      {
+        id: "prep_paid",
+        price: 199,
+        level: { ru: "База+", he: "בסיס+" },
+        category: { ru: "Кузов", he: "צבע" },
+        title: { ru: "Подготовка кузова: деконтаминация и защита", he: "הכנת צבע: דה-קונטמינציה והגנה" },
+        desc: { ru: "Айрон, битум, глина, обезжиривание, защита. Что, зачем и в каком порядке.", he: "איירון, זפת, קליי, IPA והגנה — מה, למה ובאיזה סדר." },
+        invoiceUrl: null,
+        lessons: [
+          {
+            id: "l_prep_1",
+            durationMin: 14,
+            title: { ru: "Деконтаминация: айрон и битум", he: "דה-קונטמינציה: איירון וזפת" },
+            body: {
+              ru: "Порядок:\n• Айрон (диски/кузов)\n• Битум точечно\n\nПравила:\n— не на горячей панели\n— не давать высохнуть\n— тщательно смывать",
+              he: "סדר:\n• איירון (חישוקים/צבע)\n• זפת נקודתית\n\nכללים:\n— לא על משטח חם\n— לא לתת להתייבש\n— לשטוף היטב"
+            },
+            bullets: { ru: ["Сначала химия, потом глина", "Работаешь в тени", "Не экономь на смыве"], he: ["קודם כימיה ואז קליי", "עובדים בצל", "לא לחסוך בשטיפה"] }
+          },
+          {
+            id: "l_prep_2",
+            durationMin: 12,
+            title: { ru: "Глина и обезжиривание", he: "קליי ו-IPA" },
+            body: {
+              ru: "Глина — это механика. Всегда с лубрикантом.\n\nПосле глины — смыв и обезжиривание (под защиту).",
+              he: "קליי הוא מכני. תמיד עם לובריקנט.\n\nאחרי קליי — שטיפה ו-IPA (לפני הגנה)."
+            },
+            bullets: { ru: ["Не дави на глину", "Следи за чистотой кусочка", "Если упала — выбросить"], he: ["לא ללחוץ על הקליי", "לשמור על ניקיון", "נפל? לזרוק"] }
+          }
+        ]
+      }
+    ],
+    wiki: [
+      {
+        id: "w_ppf",
+        categoryKey: "protection",
+        category: { ru: "Защита", he: "הגנה" },
+        title: { ru: "PPF: что защищает и уход", he: "PPF: מה מגן ואיך מטפלים" },
+        preview: { ru: "Сколы, пескоструй, само-восстановление. Уход и ошибки.", he: "מכות, אבנים, טיפול וטעויות." },
+        body: { ru: "PPF — прозрачная полиуретановая плёнка.\n\nУход:\n• мягкая мойка\n• без агрессивных растворителей\n• аккуратная сушка", he: "PPF הוא סרט פוליאוריטן שקוף.\n\nתחזוקה:\n• שטיפה עדינה\n• בלי ממסים חזקים\n• ייבוש בעדינות" },
+        tags: { ru: ["PPF", "плёнка", "защита"], he: ["PPF", "סרט", "הגנה"] }
+      },
+      {
+        id: "w_iron",
+        categoryKey: "chemistry",
+        category: { ru: "Химия", he: "כימיה" },
+        title: { ru: "Айрон-ремувер: правила", he: "איירון רימובר: כללים" },
+        preview: { ru: "Почему “кровоточит”, где применять и чего нельзя.", he: "תגובה סגולה, איפה להשתמש וממה להיזהר." },
+        body: { ru: "Айрон растворяет металлические вкрапления.\n\nНельзя:\n— на горячей панели\n— давать высохнуть\n— тереть грязной тряпкой", he: "איירון ממיס חלקיקי מתכת.\n\nאסור:\n— על משטח חם\n— לתת להתייבש\n— לשפשף במגבת מלוכלכת" },
+        tags: { ru: ["айрон", "диски"], he: ["איירון", "חישוקים"] }
+      }
+    ],
+    supportCards: [
+      { key:"chem", icon:"🧪", title:{ru:"Подбор химии", he:"בחירת כימיה"}, desc:{ru:"Айрон/битум/АПС/шампуни — под задачу и бюджет.", he:"איירון/זפת/APC/שמפו — לפי משימה ותקציב."} },
+      { key:"polish", icon:"🌀", title:{ru:"Полировка и круги", he:"פוליש ופדים"}, desc:{ru:"Система паст/пэдов, температура, голограммы, финиш.", he:"מערכת פסטות/פדים, חום, הולוגרמות ופיניש."} },
+      { key:"interior", icon:"🧽", title:{ru:"Химчистка салона", he:"ניקוי פנים"}, desc:{ru:"Ткань/кожа, пятна, запахи, безопасность для детей.", he:"בד/עור, כתמים, ריחות, בטיחות לילדים."} },
+      { key:"ppf", icon:"🛡️", title:{ru:"PPF/винил", he:"PPF/ויניל"}, desc:{ru:"Ошибки клея, подготовка, уход, сколы.", he:"טעויות הדבקה, הכנה, תחזוקה, פגיעות."} }
+    ]
+  };
 
-  const current = { tab: "home", courseId: null, lessonId: null };
+  // ---------------------------
+  // Access (client-side, demo/manual)
+  // ---------------------------
+  function isOwned(courseId) {
+    const c = DATA.courses.find(x => x.id === courseId);
+    if (!c) return false;
+    if (c.price === 0) return true;
+    return Boolean(state.access.purchased[courseId]);
+  }
+
+  function grantAccess(courseId, method = "manual") {
+    state.access.purchased[courseId] = { at: new Date().toISOString(), method };
+    saveState();
+    toast(state.lang === "he" ? "נפתח ✅" : "Открыто ✅");
+    renderAll();
+  }
+
+  // ---------------------------
+  // Routing
+  // ---------------------------
+  const tabs = ["home","courses","support","wiki","course","lesson","profile"];
+  const screen = new Map(tabs.map(s => [s, $(`#screen-${s}`)]));
+  const navItems = $$(".nav__item");
+  const current = { tab:"home", courseId:null, lessonId:null, returnTab:"home" };
 
   function showScreen(tab) {
-    if (!screenEls.has(tab)) tab = "home";
-    screens.forEach(s => screenEls.get(s)?.classList.toggle("is-active", s === tab));
+    if (!screen.has(tab)) tab = "home";
+    tabs.forEach(s => screen.get(s)?.classList.toggle("is-active", s === tab));
     navItems.forEach(btn => btn.classList.toggle("is-active", btn.dataset.tab === tab));
     current.tab = tab;
     safe(() => window.scrollTo({ top: 0, behavior: "instant" }));
@@ -310,19 +394,22 @@
     if (!el) {
       el = document.createElement("div");
       el.id = "toast";
-      el.style.position = "fixed";
-      el.style.left = "50%";
-      el.style.bottom = "86px";
-      el.style.transform = "translateX(-50%)";
-      el.style.padding = "10px 12px";
-      el.style.borderRadius = "14px";
-      el.style.border = "1px solid rgba(255,255,255,.12)";
-      el.style.background = "rgba(10,14,20,.88)";
-      el.style.backdropFilter = "blur(10px)";
-      el.style.color = "rgba(234,242,255,.95)";
-      el.style.fontWeight = "900";
-      el.style.boxShadow = "0 12px 30px rgba(0,0,0,.45)";
-      el.style.zIndex = "999";
+      Object.assign(el.style, {
+        position:"fixed",
+        left:"50%",
+        bottom:"86px",
+        transform:"translateX(-50%)",
+        padding:"10px 12px",
+        borderRadius:"14px",
+        border:"1px solid rgba(255,255,255,.12)",
+        background:"rgba(10,14,20,.88)",
+        backdropFilter:"blur(10px)",
+        color:"rgba(234,242,255,.95)",
+        fontWeight:"900",
+        boxShadow:"0 12px 30px rgba(0,0,0,.45)",
+        zIndex:"999",
+        opacity:"0"
+      });
       document.body.appendChild(el);
     }
     el.textContent = msg;
@@ -331,235 +418,14 @@
   }
 
   // ---------------------------
-  // DATA (контент можно расширять здесь)
+  // News (RSS) on Home
   // ---------------------------
-  const DATA = {
-    settings: {
-      ALLOW_DEMO_PURCHASE: true
-    },
-    courses: [
-      {
-        id: "intro_free",
-        price: 0,
-        unlockOnWash: false,
-        category: { ru: "База", he: "בסיס" },
-        level: { ru: "Новичок", he: "מתחיל" },
-        title: { ru: "Введение в детейлинг", he: "מבוא לדיטלינג" },
-        desc: {
-          ru: "Термины, подходы, безопасная мойка и философия качества.",
-          he: "מושגים, שטיפה בטוחה ופילוסופיית איכות."
-        },
-        invoiceUrl: null,
-        lessons: [
-          {
-            id: "l_intro_1",
-            durationMin: 8,
-            title: { ru: "Что такое детейлинг и зачем он нужен", he: "מה זה דיטלינג ולמה זה חשוב" },
-            text: {
-              ru: "Детейлинг — это набор процедур по восстановлению и защите авто.\nКлюч: минимальный риск, повторяемый результат, правильная химия и инструменты.",
-              he: "דיטלינג הוא סט פעולות לשיקום והגנה על הרכב.\nהמפתח: מינימום סיכון, תוצאה עקבית וכימיה/כלים נכונים."
-            },
-            steps: {
-              ru: ["Детейлинг ≠ мойка", "Цель — сохранить ЛКП/салон", "Системность и контроль риска"],
-              he: ["דיטלינג ≠ שטיפה", "מטרה — לשמור על צבע/פנים", "שיטתיות וניהול סיכונים"]
-            },
-            checklist: {
-              ru: ["Оценка состояния", "Фото/видео дефектов", "План работ"],
-              he: ["הערכת מצב", "תיעוד פגמים", "תכנית עבודה"]
-            },
-            test: {
-              passScore: 70,
-              questions: [
-                {
-                  text: { ru: "Главная цель детейлинга:", he: "המטרה העיקרית של דיטלינג:" },
-                  options: {
-                    ru: ["Сделать быстро", "Сохранить/улучшить состояние с контролем риска", "Только блеск"],
-                    he: ["לעשות מהר", "לשמר/לשפר מצב עם ניהול סיכונים", "רק ברק"]
-                  },
-                  correctIndex: 1
-                }
-              ]
-            }
-          },
-          {
-            id: "l_intro_2",
-            durationMin: 10,
-            title: { ru: "Безопасная мойка: базовый алгоритм", he: "שטיפה בטוחה: אלגוריתם בסיסי" },
-            text: {
-              ru: "Самое дорогое — не химия, а ошибки. Ошибка мойки = паутинка на лаке.",
-              he: "הכי יקר זה לא הכימיה — זה טעויות. טעות שטיפה = סווירלים בצבע."
-            },
-            steps: {
-              ru: ["Предпена", "Два ведра / минимум контакта", "Сушка без царапин"],
-              he: ["קצף מקדים", "שתי דליים / מינימום מגע", "ייבוש ללא שריטות"]
-            },
-            checklist: {
-              ru: ["Чистая рукавица", "Grit guard", "Чистые полотенца"],
-              he: ["כפפה נקייה", "Grit Guard", "מגבות נקיות"]
-            },
-            test: null
-          }
-        ]
-      },
-      {
-        id: "foundation_paid",
-        price: 199,
-        unlockOnWash: true,
-        category: { ru: "Практика", he: "פרקטיקה" },
-        level: { ru: "База+", he: "בסיס+" },
-        title: { ru: "Фундамент мастера: мойка → деконтаминация → защита", he: "בסיס מאסטר: שטיפה → דה-קונטמינציה → הגנה" },
-        desc: {
-          ru: "Полный цикл подготовки кузова: что, чем и в каком порядке. Ошибки, риски, нормы расхода.",
-          he: "מחזור מלא להכנת צבע: מה, עם מה ובאיזה סדר. טעויות וסיכונים."
-        },
-        invoiceUrl: null, // позже поставим invoice link
-        lessons: [
-          {
-            id: "l_found_1",
-            durationMin: 14,
-            title: { ru: "Деконтаминация: айрон, битум, глина", he: "דה-קונטמינציה: איירון, זפת, קליי" },
-            text: {
-              ru: "Порядок важен: сначала химическая деконтаминация, потом механика (глина).",
-              he: "הסדר חשוב: קודם דה-קונטמינציה כימית, אחר כך מכנית (קליי)."
-            },
-            steps: {
-              ru: ["Айрон по дискам/кузову", "Битум точечно", "Глина с лубрикантом"],
-              he: ["איירון לחישוקים/צבע", "זפת נקודתית", "קליי עם לובריקנט"]
-            },
-            checklist: {
-              ru: ["Не на горячей панели", "Не давать высохнуть", "Смывать вовремя"],
-              he: ["לא על משטח חם", "לא לתת להתייבש", "לשטוף בזמן"]
-            },
-            test: {
-              passScore: 70,
-              questions: [
-                {
-                  text: { ru: "Что делаем первым?", he: "מה עושים קודם?" },
-                  options: { ru: ["Глина", "Айрон/битум (химия)", "Полировка"], he: ["קליי", "איירון/זפת (כימיה)", "פוליש"] },
-                  correctIndex: 1
-                }
-              ]
-            }
-          },
-          {
-            id: "l_found_2",
-            durationMin: 16,
-            title: { ru: "Защиты: воск, силанты, керамика", he: "הגנות: וקס, סילנט, קרמי" },
-            text: {
-              ru: "Воск — быстро и красиво, но недолго. Силант — дольше. Керамика — максимум стойкости при правильной подготовке.",
-              he: "וקס — מהיר ויפה אבל פחות עמיד. סילנט — עמיד יותר. קרמי — עמידות מקסימלית עם הכנה נכונה."
-            },
-            steps: {
-              ru: ["Подготовка поверхности", "Нанесение по инструкции", "Уход после нанесения"],
-              he: ["הכנת פני שטח", "יישום לפי הוראות", "תחזוקה לאחר יישום"]
-            },
-            checklist: {
-              ru: ["Чистые аппликаторы", "Выдержка", "Первые мойки аккуратно"],
-              he: ["אפליקטורים נקיים", "זמן התקשות", "שטיפות ראשונות בזהירות"]
-            },
-            test: null
-          }
-        ]
-      }
-    ],
-    wiki: [
-      {
-        id: "w_ppf",
-        categoryKey: "protection",
-        category: { ru: "Защита", he: "הגנה" },
-        title: { ru: "PPF: полиуретановая плёнка", he: "PPF: סרט פוליאוריטן" },
-        preview: { ru: "Что защищает, как клеится, уход и ошибки.", he: "מה זה מגן, איך מדביקים ותחזוקה." },
-        tags: { ru: ["PPF", "плёнка", "защита"], he: ["PPF", "סרט", "הגנה"] },
-        body: {
-          ru: "PPF — прозрачная плёнка для защиты ЛКП от сколов и пескоструя.\n\nУход: мягкая химия, без агрессивных растворителей.",
-          he: "PPF הוא סרט שקוף להגנת הצבע מפגיעות.\n\nתחזוקה: כימיה עדינה, בלי ממסים חזקים."
-        }
-      },
-      {
-        id: "w_iron",
-        categoryKey: "chemistry",
-        category: { ru: "Химия", he: "כימיה" },
-        title: { ru: "Айрон-ремувер: как работает", he: "איירון רימובר: איך זה עובד" },
-        preview: { ru: "Реакция 'кровоточит', где применять и что нельзя делать.", he: "תגובה סגולה, איפה להשתמש וממה להיזהר." },
-        tags: { ru: ["айрон", "диски"], he: ["איירון", "חישוקים"] },
-        body: {
-          ru: "Айрон растворяет металлические вкрапления.\nПравила: не на горячей поверхности, не давать высохнуть, тщательно смывать.",
-          he: "איירון ממיס חלקיקי מתכת.\nכללים: לא על משטח חם, לא לתת להתייבש, לשטוף היטב."
-        }
-      }
-    ]
-  };
-
-  // ---------------------------
-  // Access / Progress helpers
-  // ---------------------------
-  const getCourse = (id) => DATA.courses.find(c => c.id === id) || null;
-  const getLesson = (courseId, lessonId) => getCourse(courseId)?.lessons.find(l => l.id === lessonId) || null;
-
-  function isOwned(courseId) {
-    const c = getCourse(courseId);
-    if (!c) return false;
-    if (c.price === 0) return true;
-    return Boolean(state.purchased[courseId]);
-  }
-
-  function grantAccess(courseId, method = "manual") {
-    state.purchased[courseId] = { at: new Date().toISOString(), method };
-    saveState();
-    toast(t("toastUnlocked"));
-    renderAll();
-  }
-
-  function lessonDone(lessonId) {
-    return Boolean(state.progress[lessonId]?.done);
-  }
-
-  function setLessonDone(lessonId, done = true) {
-    state.progress[lessonId] = state.progress[lessonId] || {};
-    state.progress[lessonId].done = done;
-    saveState();
-  }
-
-  function setLessonTest(lessonId, passed, score) {
-    state.progress[lessonId] = state.progress[lessonId] || {};
-    state.progress[lessonId].test = { passed, score, at: new Date().toISOString() };
-    saveState();
-  }
-
-  function courseProgress(courseId) {
-    const c = getCourse(courseId);
-    if (!c) return { done: 0, total: 0, pct: 0 };
-    const total = c.lessons.length;
-    const done = c.lessons.filter(l => lessonDone(l.id)).length;
-    const pct = total ? Math.round((done / total) * 100) : 0;
-    return { done, total, pct };
-  }
-
-  function globalProgress() {
-    const all = DATA.courses.flatMap(c => c.lessons);
-    const total = all.length;
-    const done = all.filter(l => lessonDone(l.id)).length;
-    const pct = total ? Math.round((done / total) * 100) : 0;
-    return { done, total, pct };
-  }
-
-  // ---------------------------
-  // NEWS (RSS)
-  // ---------------------------
-  const FEEDS = [
-    { id: "slimsdetailing", name: "SlimsDetailing", url: "https://www.slimsdetailing.co.uk/blogs/news" },
-    { id: "detailedimage", name: "Detailed Image", url: "https://www.detailedimage.com/Ask-a-Pro/feed/" }
-  ];
-
   function loadNewsCache() {
     try {
       const raw = localStorage.getItem(NEWS_LS_KEY);
       if (!raw) return { at: 0, items: [] };
       const parsed = JSON.parse(raw);
-      return {
-        at: parsed.at || 0,
-        items: Array.isArray(parsed.items) ? parsed.items : []
-      };
+      return { at: parsed.at || 0, items: Array.isArray(parsed.items) ? parsed.items : [] };
     } catch {
       return { at: 0, items: [] };
     }
@@ -570,59 +436,65 @@
   }
 
   async function fetchFeedItems(feed) {
-    // RSS often blocked by CORS => use rss2json proxy
     const api = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feed.url)}`;
     const res = await fetch(api, { cache: "no-store" });
     if (!res.ok) throw new Error("rss failed");
     const data = await res.json();
     const items = Array.isArray(data.items) ? data.items : [];
     return items.map(it => ({
-      id: it.guid || it.link || uid("news"),
-      feedId: feed.id,
+      id: it.guid || it.link || `${feed.id}_${Math.random().toString(16).slice(2)}`,
       feedName: feed.name,
       title: it.title || "",
       link: it.link || "",
       pubDate: it.pubDate || "",
-      desc: (it.description || "").replace(/<[^>]*>/g, "").trim().slice(0, 240)
+      desc: (it.description || "").replace(/<[^>]*>/g, "").trim().slice(0, 220)
     }));
   }
 
-  function renderNewsCards(items) {
+  function renderNews(items) {
     const root = $("#newsRoot");
+    const hint = $("#newsHint");
     if (!root) return;
 
     if (!items?.length) {
       root.innerHTML = "";
-      const hint = $("#newsHint");
       if (hint) hint.textContent = t("newsEmpty");
       return;
     }
 
-    root.innerHTML = items.map(n => `
-      <article class="card" data-link="${escapeHtml(n.link)}">
-        <div class="card__title">${escapeHtml(n.title)}</div>
-        <p class="card__desc">${escapeHtml(n.desc || "")}</p>
-        <div class="badges">
-          <span class="badge">${escapeHtml(n.feedName)}</span>
-          <span class="badge">${escapeHtml((n.pubDate || "").slice(0, 16).replace("T"," "))}</span>
+    const q = ($("#newsSearch")?.value || "").trim().toLowerCase();
+    const filtered = q
+      ? items.filter(n =>
+          (n.title || "").toLowerCase().includes(q) ||
+          (n.desc || "").toLowerCase().includes(q) ||
+          (n.feedName || "").toLowerCase().includes(q)
+        )
+      : items;
+
+    root.innerHTML = filtered.slice(0, 8).map(n => `
+      <div class="news-item" data-link="${escapeHtml(n.link)}">
+        <div class="news-item__title">${escapeHtml(n.title)}</div>
+        <div class="news-item__meta">
+          <span>${escapeHtml(n.feedName)}</span>
+          <span>•</span>
+          <span>${escapeHtml((n.pubDate || "").slice(0, 16).replace("T"," "))}</span>
         </div>
-      </article>
+      </div>
     `).join("");
 
-    $$("#newsRoot .card").forEach(card => {
-      card.addEventListener("click", () => {
-        const link = card.dataset.link;
+    $$("#newsRoot .news-item").forEach(el => {
+      el.addEventListener("click", () => {
+        const link = el.dataset.link;
         if (!link) return;
         if (tg && typeof tg.openLink === "function") tg.openLink(link);
         else window.open(link, "_blank");
       });
     });
 
-    const hint = $("#newsHint");
-    if (hint) hint.textContent = "";
+    if (hint) hint.textContent = filtered.length ? "" : t("newsEmpty");
   }
 
-  async function refreshNews({ silent = false } = {}) {
+  async function refreshNews({ silent=false } = {}) {
     const hint = $("#newsHint");
     const btn = $("#newsRefreshBtn");
     try {
@@ -630,196 +502,45 @@
       if (hint) hint.textContent = t("newsLoading");
 
       const all = [];
-      for (const f of FEEDS) {
+      for (const f of DATA.feeds) {
         try {
           const part = await fetchFeedItems(f);
-          part.slice(0, 12).forEach(x => all.push(x));
+          part.slice(0, 10).forEach(x => all.push(x));
         } catch {
-          // skip feed
+          // skip
         }
       }
 
-      all.sort((a, b) => (Date.parse(b.pubDate || "") || 0) - (Date.parse(a.pubDate || "") || 0));
+      all.sort((a,b) => (Date.parse(b.pubDate||"")||0) - (Date.parse(a.pubDate||"")||0));
       const top = all.slice(0, 24);
-
       saveNewsCache(top);
-      renderNewsScreen();
+      renderNews(top);
       if (!silent) toast(state.lang === "he" ? "עודכן ✅" : "Обновлено ✅");
     } catch {
       const cached = loadNewsCache();
-      renderNewsCards(cached.items);
+      renderNews(cached.items);
       if (hint) hint.textContent = t("newsCacheShown");
     } finally {
       if (btn) btn.disabled = false;
     }
   }
 
-  function renderNewsScreen() {
-    const cached = loadNewsCache();
-    let items = cached.items || [];
-
-    const src = $("#newsSourceSelect")?.value || "all";
-    if (src !== "all") items = items.filter(x => x.feedId === src);
-
-    const q = ($("#newsSearch")?.value || "").trim().toLowerCase();
-    if (q) {
-      items = items.filter(x =>
-        (x.title || "").toLowerCase().includes(q) ||
-        (x.desc || "").toLowerCase().includes(q) ||
-        (x.feedName || "").toLowerCase().includes(q)
-      );
-    }
-
-    renderNewsCards(items);
-    const hint = $("#newsHint");
-    if (hint && !items.length) hint.textContent = t("newsEmpty");
-  }
-
-  function clearNewsCache() {
-    localStorage.removeItem(NEWS_LS_KEY);
-    renderNewsCards([]);
-    toast(state.lang === "he" ? "נוקה ✅" : "Кэш очищен ✅");
-  }
-
   // ---------------------------
-  // UI text / i18n apply
-  // ---------------------------
-  function applyI18n() {
-    // top / home
-    if ($("#brandSubtitle")) $("#brandSubtitle").textContent = t("brandSubtitle");
-    if ($("#homeLead")) $("#homeLead").textContent = t("homeLead");
-    if ($("#openCourses")) $("#openCourses").textContent = t("openCourses");
-    if ($("#openWiki")) $("#openWiki").textContent = t("openWiki");
-    if ($("#quickTitle")) $("#quickTitle").textContent = t("quickTitle");
-    if ($("#quickHint")) $("#quickHint").textContent = t("quickHint");
-    if ($("#openWash")) $("#openWash").textContent = t("openAfterWash");
-    if ($("#homeSectionTitle")) $("#homeSectionTitle").textContent = t("homeSectionTitle");
-
-    // nav labels
-    if ($("#navHome")) $("#navHome").textContent = t("navHome");
-    if ($("#navNews")) $("#navNews").textContent = t("navNews");
-    if ($("#navCourses")) $("#navCourses").textContent = t("navCourses");
-    if ($("#navProgress")) $("#navProgress").textContent = t("navProgress");
-    if ($("#navWiki")) $("#navWiki").textContent = t("navWiki");
-    if ($("#navProfile")) $("#navProfile").textContent = t("navProfile");
-
-    // courses
-    if ($("#coursesTitle")) $("#coursesTitle").textContent = t("coursesTitle");
-    if ($("#coursesSearch")) $("#coursesSearch").setAttribute("placeholder", t("coursesSearch"));
-    const f = $("#coursesFilter");
-    if (f && f.options?.length >= 4) {
-      f.options[0].text = t("filterAll");
-      f.options[1].text = t("filterFree");
-      f.options[2].text = t("filterPaid");
-      f.options[3].text = t("filterOwned");
-    }
-
-    // progress/wiki/profile/admin
-    if ($("#progressTitle")) $("#progressTitle").textContent = t("progressTitle");
-    if ($("#wikiTitle")) $("#wikiTitle").textContent = t("wikiTitle");
-    if ($("#wikiSearch")) $("#wikiSearch").setAttribute("placeholder", t("wikiSearch"));
-    if ($("#profileTitle")) $("#profileTitle").textContent = t("profileTitle");
-    if ($("#resetProgress")) $("#resetProgress").textContent = t("resetProgress");
-    if ($("#exportData")) $("#exportData").textContent = t("exportData");
-    if ($("#profileHint")) $("#profileHint").textContent = t("profileHint");
-    if ($("#ownedTitle")) $("#ownedTitle").textContent = t("ownedTitle");
-    if ($("#adminTitle")) $("#adminTitle").textContent = t("adminTitle");
-
-    // news
-    if ($("#newsTitle")) $("#newsTitle").textContent = t("newsTitle");
-    if ($("#newsRefreshBtn")) $("#newsRefreshBtn").textContent = t("newsRefresh");
-    if ($("#newsClearBtn")) $("#newsClearBtn").textContent = t("newsClear");
-    if ($("#newsSearch")) $("#newsSearch").setAttribute("placeholder", t("newsSearch"));
-    if ($("#newsSourcesLabel")) $("#newsSourcesLabel").textContent = t("newsSources");
-  }
-
-  // ---------------------------
-  // Render: Home
-  // ---------------------------
-  function nowGreeting() {
-    const h = new Date().getHours();
-    if (h >= 5 && h < 12) return t("greetingMorning");
-    if (h >= 12 && h < 18) return t("greetingDay");
-    if (h >= 18 && h < 22) return t("greetingEvening");
-    return t("greetingNight");
-  }
-
-  function renderHome() {
-    if ($("#greeting")) $("#greeting").textContent = nowGreeting();
-
-    const fromTg = tg ? (tg.initDataUnsafe?.user?.first_name || tg.initDataUnsafe?.user?.username) : null;
-    const name = state.profile.name || fromTg || (state.lang === "he" ? "מאסטר" : "мастер");
-    if ($("#username")) $("#username").textContent = name;
-    if ($("#profileName")) $("#profileName").textContent = name;
-
-    if ($("#profileMeta")) {
-      $("#profileMeta").textContent = tg
-        ? `@${tg.initDataUnsafe?.user?.username || "telegram"} • WebApp`
-        : "Browser mode";
-    }
-
-    const gp = globalProgress();
-    const ownedCount = DATA.courses.filter(c => isOwned(c.id)).length;
-    const paidCount = DATA.courses.filter(c => c.price > 0).length;
-
-    const statsEl = $("#homeStats");
-    if (statsEl) {
-      statsEl.innerHTML = `
-        <div class="stat">
-          <div class="stat__label">${escapeHtml(state.lang === "he" ? "התקדמות כללית" : "Общий прогресс")}</div>
-          <div class="stat__value">${gp.pct}%</div>
-        </div>
-        <div class="stat">
-          <div class="stat__label">${escapeHtml(state.lang === "he" ? "קורסים זמינים" : "Доступных курсов")}</div>
-          <div class="stat__value">${ownedCount}</div>
-        </div>
-        <div class="stat">
-          <div class="stat__label">${escapeHtml(state.lang === "he" ? "קורסים בתשלום" : "Платных курсов")}</div>
-          <div class="stat__value">${paidCount}</div>
-        </div>
-      `;
-    }
-
-    const quick = [
-      state.lang === "he" ? "1) בחר קורס והתחל שיעור" : "1) Выбери курс и начни урок",
-      state.lang === "he" ? "2) סיים שיעור וסמן כהושלם" : "2) Закончи урок и отметь как пройденный",
-      state.lang === "he" ? "3) עבר מבחן כדי לקבע ידע" : "3) Пройди тест, чтобы закрепить знания"
-    ];
-    if ($("#quickList")) $("#quickList").innerHTML = quick.map(x => `<div>${escapeHtml(x)}</div>`).join("");
-
-    // recommended (first 3)
-    const rec = DATA.courses.slice(0, 3);
-    const recRoot = $("#homeRecommended");
-    if (recRoot) {
-      recRoot.innerHTML = rec.map(courseCardHTML).join("");
-      $$("#homeRecommended .card").forEach(card => {
-        card.addEventListener("click", () => openCourse(card.dataset.id));
-      });
-    }
-  }
-
-  // ---------------------------
-  // Render: Courses
+  // Courses
   // ---------------------------
   function courseCardHTML(course) {
     const owned = isOwned(course.id);
-    const p = courseProgress(course.id);
-
     const priceBadge = course.price === 0 ? t("free") : `${course.price} ₪`;
-    const payBadge = course.price === 0 ? t("free") : t("paid");
-    const lockBadge = owned ? t("accessGranted") : t("locked");
-
     return `
       <article class="card" data-id="${escapeHtml(course.id)}">
         <div class="card__title">${escapeHtml(course.title[state.lang])}</div>
         <p class="card__desc">${escapeHtml(course.desc[state.lang])}</p>
         <div class="badges">
-          <span class="badge">${escapeHtml(priceBadge)}</span>
-          <span class="badge ${course.price === 0 ? "good" : "pay"}">${escapeHtml(payBadge)}</span>
+          <span class="badge">${escapeHtml(course.category[state.lang])}</span>
           <span class="badge">${escapeHtml(course.level[state.lang])}</span>
+          <span class="badge ${course.price===0 ? "good" : "pay"}">${escapeHtml(priceBadge)}</span>
+          <span class="badge ${owned ? "good" : "lock"}">${escapeHtml(owned ? t("accessGranted") : t("locked"))}</span>
           <span class="badge">${course.lessons.length} ${escapeHtml(t("lessons"))}</span>
-          <span class="badge ${owned ? "good" : "lock"}">${escapeHtml(lockBadge)}</span>
-          <span class="badge">${escapeHtml(state.lang === "he" ? "הושלם" : "Пройдено")}: ${p.done}/${p.total} • ${p.pct}%</span>
         </div>
       </article>
     `;
@@ -836,7 +557,6 @@
       const matchQ = !q ||
         c.title[state.lang].toLowerCase().includes(q) ||
         c.desc[state.lang].toLowerCase().includes(q);
-
       if (!matchQ) return false;
 
       const owned = isOwned(c.id);
@@ -852,28 +572,25 @@
     });
   }
 
-  // ---------------------------
-  // Course / Lesson / Test
-  // ---------------------------
   function openCourse(courseId) {
-    const course = getCourse(courseId);
+    const course = DATA.courses.find(c => c.id === courseId);
     if (!course) return;
 
     current.courseId = courseId;
     current.lessonId = null;
+    current.returnTab = "courses";
 
     showScreen("course");
     renderCourse(courseId);
   }
 
   function renderCourse(courseId) {
-    const course = getCourse(courseId);
+    const course = DATA.courses.find(c => c.id === courseId);
     if (!course) return;
 
     if ($("#courseTitle")) $("#courseTitle").textContent = course.title[state.lang];
 
     const owned = isOwned(courseId);
-    const p = courseProgress(courseId);
     const priceLabel = course.price === 0 ? t("free") : `${course.price} ₪`;
 
     const courseRoot = $("#courseRoot");
@@ -884,26 +601,25 @@
         <div class="badges">
           <span class="badge">${escapeHtml(priceLabel)}</span>
           <span class="badge">${escapeHtml(course.level[state.lang])}</span>
-          <span class="badge">${escapeHtml(owned ? t("accessGranted") : t("accessMissing"))}</span>
-          <span class="badge">${escapeHtml(state.lang === "he" ? "הושלם" : "Пройдено")}: ${p.done}/${p.total} • ${p.pct}%</span>
+          <span class="badge ${owned ? "good" : "lock"}">${escapeHtml(owned ? t("accessGranted") : t("accessMissing"))}</span>
         </div>
         <div class="hr"></div>
         ${(!owned && course.price > 0) ? `
-          <div class="result bad">
-            <div class="result__title">${escapeHtml(t("locked"))}</div>
-            <div class="result__text">${escapeHtml(state.lang === "he"
-              ? "כדי לפתוח — קנה גישה או בקש אדמין אחרי תשלום."
+          <div class="card__desc" style="white-space:pre-line;">
+            ${escapeHtml(state.lang === "he"
+              ? "כדי לפתוח — קנה גישה או בקש ממנהל אחרי תשלום."
               : "Чтобы открыть — купи доступ или попроси админа выдать доступ после оплаты."
-            )}</div>
+            )}
           </div>
           <div class="row" style="margin-top:10px;">
             <button class="btn btn-primary" id="buyCourseBtn" type="button">${escapeHtml(t("buy"))} • ${escapeHtml(priceLabel)}</button>
           </div>
-          <div class="hint">${escapeHtml(t("adminInvoiceHint"))}</div>
+          <div class="hint">${escapeHtml(t("invoiceNotReady"))}</div>
         ` : `
-          <div class="row">
-            <button class="btn btn-secondary" id="continueCourseBtn" type="button">${escapeHtml(t("continue"))}</button>
-          </div>
+          <div class="card__desc">${escapeHtml(state.lang === "he"
+            ? "בחר שיעור והתחל."
+            : "Выбери урок и начинай."
+          )}</div>
         `}
       `;
     }
@@ -912,49 +628,27 @@
     const listEl = $("#lessonsList");
     if (!listEl) return;
 
-    listEl.innerHTML = course.lessons.map((l, idx) => {
-      const done = lessonDone(l.id);
-      const hasTest = Boolean(l.test);
-      const testState = state.progress[l.id]?.test;
-      const testBadge = hasTest ? (testState?.passed ? t("passed") : t("test")) : "";
-
-      return `
-        <div class="list-item" data-lesson="${escapeHtml(l.id)}">
-          <div>
-            <div class="list-item__title">${idx + 1}. ${escapeHtml(l.title[state.lang])}</div>
-            <div class="list-item__meta">
-              ${l.durationMin} ${escapeHtml(t("minutes"))}
-              ${hasTest ? ` • ${escapeHtml(testBadge)}` : ""}
-              ${done ? ` • ✅ ${escapeHtml(t("done"))}` : ""}
-            </div>
-          </div>
-          <div class="badges" style="margin-top:0;">
-            <span class="badge ${owned ? "good" : "lock"}">${escapeHtml(owned ? t("open") : t("locked"))}</span>
-          </div>
+    listEl.innerHTML = course.lessons.map((l, idx) => `
+      <div class="list-item" data-lesson="${escapeHtml(l.id)}">
+        <div>
+          <div class="list-item__title">${idx + 1}. ${escapeHtml(l.title[state.lang])}</div>
+          <div class="list-item__meta">${l.durationMin} ${escapeHtml(t("minutes"))}</div>
         </div>
-      `;
-    }).join("");
+        <span class="badge ${owned || course.price===0 ? "good" : "lock"}">${escapeHtml((owned || course.price===0) ? t("open") : t("locked"))}</span>
+      </div>
+    `).join("");
 
     $$("#lessonsList .list-item").forEach(item => {
       item.addEventListener("click", () => {
-        if (!owned && course.price > 0) {
-          toast(t("locked"));
-          return;
-        }
+        if (!owned && course.price > 0) { toast(t("locked")); return; }
         openLesson(courseId, item.dataset.lesson);
       });
     });
 
-    // buttons
     $("#buyCourseBtn")?.addEventListener("click", () => purchaseFlow(course));
-    $("#continueCourseBtn")?.addEventListener("click", () => {
-      const next = course.lessons.find(l => !lessonDone(l.id)) || course.lessons[0];
-      openLesson(courseId, next.id);
-    });
   }
 
   function purchaseFlow(course) {
-    // invoice support (если добавишь invoiceUrl)
     if (tg && typeof tg.openInvoice === "function" && course.invoiceUrl) {
       try {
         tg.openInvoice(course.invoiceUrl, (status) => {
@@ -964,17 +658,11 @@
       } catch {}
     }
 
-    // demo fallback
-    if (DATA.settings.ALLOW_DEMO_PURCHASE) {
-      const ok = confirm(state.lang === "he"
-        ? `דמו: לפתוח גישה ל-“${course.title.he}”?`
-        : `Демо: открыть доступ к “${course.title.ru}”?`
-      );
-      if (ok) grantAccess(course.id, "demo");
-      return;
-    }
-
-    alert(t("invoiceNotReady"));
+    const ok = confirm(state.lang === "he"
+      ? `דמו: לפתוח גישה ל-“${course.title.he}”?`
+      : `Демо: открыть доступ к “${course.title.ru}”?`
+    );
+    if (ok) grantAccess(course.id, "demo");
   }
 
   function openLesson(courseId, lessonId) {
@@ -985,19 +673,13 @@
   }
 
   function renderLesson(courseId, lessonId) {
-    const course = getCourse(courseId);
-    const lesson = getLesson(courseId, lessonId);
+    const course = DATA.courses.find(c => c.id === courseId);
+    const lesson = course?.lessons.find(l => l.id === lessonId);
     if (!course || !lesson) return;
 
     if ($("#lessonTitle")) $("#lessonTitle").textContent = lesson.title[state.lang];
 
-    const done = lessonDone(lessonId);
-    const testState = state.progress[lessonId]?.test;
-
-    const steps = lesson.steps?.[state.lang] || [];
-    const checklist = lesson.checklist?.[state.lang] || [];
-    const text = lesson.text?.[state.lang] || "";
-
+    const bullets = lesson.bullets?.[state.lang] || [];
     const root = $("#lessonRoot");
     if (!root) return;
 
@@ -1006,198 +688,43 @@
         <div class="kicker">${escapeHtml(course.title[state.lang])}</div>
         <div class="badges">
           <span class="badge">${lesson.durationMin} ${escapeHtml(t("minutes"))}</span>
-          <span class="badge ${done ? "good" : ""}">${done ? "✅ " + escapeHtml(t("done")) : escapeHtml(state.lang === "he" ? "לא הושלם" : "Не пройден")}</span>
-          ${lesson.test ? `<span class="badge">${escapeHtml(t("test"))}</span>` : ""}
-          ${lesson.test && testState ? `<span class="badge">${escapeHtml(t("score"))}: ${testState.score}%</span>` : ""}
+          <span class="badge">${escapeHtml(course.level[state.lang])}</span>
         </div>
 
         <div class="hr"></div>
 
-        ${text ? `<div class="card__desc" style="white-space:pre-line;">${escapeHtml(text)}</div>` : ""}
+        <div class="card__desc" style="white-space:pre-line;">${escapeHtml(lesson.body?.[state.lang] || "")}</div>
 
-        ${steps.length ? `
+        ${bullets.length ? `
           <div class="hr"></div>
-          <div class="h3">${escapeHtml(state.lang === "he" ? "שלבים" : "Шаги")}</div>
+          <div class="h3">${escapeHtml(state.lang === "he" ? "עיקרי הדברים" : "Ключевые пункты")}</div>
           <div class="list">
-            ${steps.map(s => `<div class="list-item"><div class="list-item__title">${escapeHtml(s)}</div></div>`).join("")}
-          </div>
-        ` : ""}
-
-        ${checklist.length ? `
-          <div class="hr"></div>
-          <div class="h3">${escapeHtml(state.lang === "he" ? "צ׳ק-ליסט" : "Чек-лист")}</div>
-          <div class="list">
-            ${checklist.map(s => `<div class="list-item"><div class="list-item__title">☑ ${escapeHtml(s)}</div></div>`).join("")}
+            ${bullets.map(x => `
+              <div class="list-item">
+                <div class="list-item__title">• ${escapeHtml(x)}</div>
+              </div>
+            `).join("")}
           </div>
         ` : ""}
 
         <div class="hr"></div>
 
         <div class="row">
-          ${lesson.test ? `<button class="btn btn-secondary" id="openTestBtn" type="button">${escapeHtml(testState?.passed ? t("retakeTest") : t("startTest"))}</button>` : ""}
-          <button class="btn btn-primary" id="markDoneBtn" type="button">${escapeHtml(t("markDone"))}</button>
+          <button class="btn btn-secondary" id="nextLessonBtn" type="button">${escapeHtml(state.lang === "he" ? "השיעור הבא" : "Следующий урок")}</button>
         </div>
       </div>
     `;
 
-    $("#markDoneBtn")?.addEventListener("click", () => {
-      setLessonDone(lessonId, true);
-      toast(t("toastSaved"));
-      renderAll();
-      renderLesson(courseId, lessonId);
-    });
-
-    $("#openTestBtn")?.addEventListener("click", () => openTest(courseId, lessonId));
-  }
-
-  function openTest(courseId, lessonId) {
-    current.courseId = courseId;
-    current.lessonId = lessonId;
-    showScreen("test");
-    renderTest(courseId, lessonId);
-  }
-
-  function renderTest(courseId, lessonId) {
-    const lesson = getLesson(courseId, lessonId);
-    if (!lesson?.test) return;
-
-    if ($("#testTitle")) $("#testTitle").textContent = `${t("test")} • ${lesson.title[state.lang]}`;
-
-    const test = lesson.test;
-    const root = $("#testRoot");
-    if (!root) return;
-
-    root.innerHTML = `
-      <div class="panel">
-        <div class="row">
-          <button class="btn btn-primary" id="submitTest" type="button">${escapeHtml(state.lang === "he" ? "בדוק" : "Проверить")}</button>
-          <button class="btn btn-ghost" id="clearTest" type="button">${escapeHtml(state.lang === "he" ? "נקה" : "Очистить")}</button>
-        </div>
-
-        <div class="hr"></div>
-
-        <form id="testForm" class="list"></form>
-
-        <div class="hr"></div>
-
-        <div id="testResult"></div>
-      </div>
-    `;
-
-    const form = $("#testForm");
-    form.innerHTML = test.questions.map((q, qi) => {
-      const qId = `q_${qi}`;
-      const opts = q.options[state.lang];
-      return `
-        <div class="q">
-          <div class="q__title">${qi + 1}. ${escapeHtml(q.text[state.lang])}</div>
-          ${opts.map((opt, oi) => `
-            <label class="opt">
-              <input type="radio" name="${escapeHtml(qId)}" value="${oi}">
-              <span>${escapeHtml(opt)}</span>
-            </label>
-          `).join("")}
-        </div>
-      `;
-    }).join("");
-
-    $("#submitTest")?.addEventListener("click", () => {
-      const answers = [];
-      test.questions.forEach((_, qi) => {
-        const picked = form.querySelector(`input[name="q_${qi}"]:checked`);
-        answers.push(picked ? Number(picked.value) : null);
-      });
-
-      const total = test.questions.length;
-      let correct = 0;
-
-      const breakdown = test.questions.map((q, i) => {
-        const ok = answers[i] === q.correctIndex;
-        if (ok) correct++;
-        return { ok, q, picked: answers[i], correct: q.correctIndex };
-      });
-
-      const score = Math.round((correct / total) * 100);
-      const passed = score >= (test.passScore || 70);
-
-      setLessonTest(lessonId, passed, score);
-      if (passed) setLessonDone(lessonId, true);
-
-      const result = $("#testResult");
-      result.innerHTML = `
-        <div class="result ${passed ? "good" : "bad"}">
-          <div class="result__title">${passed ? "✅ " + escapeHtml(t("passed")) : "❌ " + escapeHtml(t("notPassed"))}</div>
-          <div class="result__text">${escapeHtml(t("score"))}: ${score}% • ${escapeHtml(state.lang === "he" ? "נכון" : "Верно")}: ${correct}/${total}</div>
-        </div>
-
-        <div class="hr"></div>
-
-        ${breakdown.map((b, i) => {
-          const opts = b.q.options[state.lang];
-          const your = (b.picked == null) ? (state.lang === "he" ? "לא נבחר" : "не выбрано") : opts[b.picked];
-          const right = opts[b.correct];
-          return `
-            <div class="result ${b.ok ? "good" : "bad"}">
-              <div class="result__title">${b.ok ? "✅" : "❌"} ${i + 1}. ${escapeHtml(b.q.text[state.lang])}</div>
-              <div class="result__text">${escapeHtml(state.lang === "he" ? "שלך" : "Твой")}: ${escapeHtml(your)} • ${escapeHtml(state.lang === "he" ? "נכון" : "Правильно")}: ${escapeHtml(right)}</div>
-            </div>
-          `;
-        }).join("")}
-      `;
-
-      renderAll();
-    });
-
-    $("#clearTest")?.addEventListener("click", () => {
-      $$("input[type=radio]", form).forEach(x => (x.checked = false));
-      $("#testResult").innerHTML = "";
+    $("#nextLessonBtn")?.addEventListener("click", () => {
+      const idx = course.lessons.findIndex(l => l.id === lessonId);
+      const next = course.lessons[idx + 1];
+      if (next) openLesson(courseId, next.id);
+      else toast(state.lang === "he" ? "סיימת ✅" : "Ты дошёл до конца ✅");
     });
   }
 
   // ---------------------------
-  // Render: Progress
-  // ---------------------------
-  function renderProgress() {
-    const root = $("#progressRoot");
-    if (!root) return;
-
-    const gp = globalProgress();
-    const blocks = [];
-
-    blocks.push(`
-      <article class="card">
-        <div class="card__title">${escapeHtml(state.lang === "he" ? "סיכום" : "Сводка")}</div>
-        <p class="card__desc">${escapeHtml(state.lang === "he" ? "התקדמות כללית" : "Общий прогресс")}: ${gp.done}/${gp.total} • ${gp.pct}%</p>
-        <div class="progressbar"><div style="width:${gp.pct}%;"></div></div>
-      </article>
-    `);
-
-    DATA.courses.forEach(c => {
-      const p = courseProgress(c.id);
-      blocks.push(`
-        <article class="card" data-course="${escapeHtml(c.id)}">
-          <div class="card__title">${escapeHtml(c.title[state.lang])}</div>
-          <p class="card__desc">${escapeHtml(c.desc[state.lang])}</p>
-          <div class="badges">
-            <span class="badge">${escapeHtml(c.category[state.lang])}</span>
-            <span class="badge">${escapeHtml(c.level[state.lang])}</span>
-            <span class="badge">${p.done}/${p.total} • ${p.pct}%</span>
-            <span class="badge ${isOwned(c.id) ? "good" : "lock"}">${escapeHtml(isOwned(c.id) ? t("accessGranted") : t("locked"))}</span>
-          </div>
-          <div class="progressbar"><div style="width:${p.pct}%;"></div></div>
-        </article>
-      `);
-    });
-
-    root.innerHTML = blocks.join("");
-
-    $$("#progressRoot .card[data-course]").forEach(card => {
-      card.addEventListener("click", () => openCourse(card.dataset.course));
-    });
-  }
-
-  // ---------------------------
-  // Render: Wiki
+  // Wiki
   // ---------------------------
   function buildWikiCategories() {
     const select = $("#wikiCategory");
@@ -1221,12 +748,13 @@
     const cat = $("#wikiCategory")?.value || "all";
 
     const items = DATA.wiki.filter(w => {
-      const matchCat = (cat === "all") || (w.categoryKey === cat);
-      if (!matchCat) return false;
-      const matchQ = !q ||
+      if (cat !== "all" && w.categoryKey !== cat) return false;
+      if (!q) return true;
+      return (
         w.title[state.lang].toLowerCase().includes(q) ||
-        w.body[state.lang].toLowerCase().includes(q);
-      return matchQ;
+        w.body[state.lang].toLowerCase().includes(q) ||
+        (w.tags?.[state.lang] || []).some(tag => tag.toLowerCase().includes(q))
+      );
     });
 
     root.innerHTML = items.map(w => `
@@ -1235,7 +763,7 @@
         <p class="card__desc">${escapeHtml(w.preview[state.lang])}</p>
         <div class="badges">
           <span class="badge">${escapeHtml(w.category[state.lang])}</span>
-          ${w.tags[state.lang].slice(0,4).map(tag => `<span class="badge">${escapeHtml(tag)}</span>`).join("")}
+          ${(w.tags?.[state.lang] || []).slice(0,4).map(tag => `<span class="badge">${escapeHtml(tag)}</span>`).join("")}
         </div>
       </article>
     `).join("");
@@ -1249,60 +777,137 @@
     const w = DATA.wiki.find(x => x.id === id);
     if (!w) return;
 
-    // reuse course screen as article viewer
-    current.courseId = null;
-    current.lessonId = null;
+    current.returnTab = "wiki";
+    showScreen("lesson");
 
-    if ($("#courseTitle")) $("#courseTitle").textContent = w.title[state.lang];
+    if ($("#lessonTitle")) $("#lessonTitle").textContent = w.title[state.lang];
 
-    const courseRoot = $("#courseRoot");
-    if (courseRoot) {
-      courseRoot.innerHTML = `
+    const root = $("#lessonRoot");
+    if (!root) return;
+
+    root.innerHTML = `
+      <div class="panel">
         <div class="kicker">${escapeHtml(w.category[state.lang])}</div>
         <div class="badges">
-          ${w.tags[state.lang].slice(0, 8).map(tag => `<span class="badge">${escapeHtml(tag)}</span>`).join("")}
+          ${(w.tags?.[state.lang] || []).slice(0, 10).map(tag => `<span class="badge">${escapeHtml(tag)}</span>`).join("")}
         </div>
         <div class="hr"></div>
         <div class="card__desc" style="white-space:pre-line;">${escapeHtml(w.body[state.lang])}</div>
-      `;
-    }
-    if ($("#lessonsList")) $("#lessonsList").innerHTML = "";
-
-    showScreen("course");
-  }
-
-  // ---------------------------
-  // Render: Profile + Owned
-  // ---------------------------
-  function renderProfile() {
-    const root = $("#ownedRoot");
-    if (!root) return;
-
-    const owned = DATA.courses.filter(c => isOwned(c.id));
-    root.innerHTML = owned.length ? owned.map(c => `
-      <div class="list-item" data-course="${escapeHtml(c.id)}">
-        <div>
-          <div class="list-item__title">${escapeHtml(c.title[state.lang])}</div>
-          <div class="list-item__meta">${escapeHtml(c.category[state.lang])} • ${escapeHtml(c.price === 0 ? t("free") : `${c.price} ₪`)}</div>
-        </div>
-        <span class="badge good">${escapeHtml(t("open"))}</span>
       </div>
-    `).join("") : `<div class="hint">${escapeHtml(state.lang === "he" ? "עדיין אין גישות." : "Пока нет доступов.")}</div>`;
-
-    $$("#ownedRoot .list-item").forEach(item => {
-      item.addEventListener("click", () => openCourse(item.dataset.course));
-    });
+    `;
   }
 
   // ---------------------------
-  // Admin
+  // Support
   // ---------------------------
-  const ADMIN_PIN = "7777"; // поменяй
+  function renderSupport() {
+    if ($("#supportTitle")) $("#supportTitle").textContent = t("supportTitle");
+    if ($("#supportSubtitle")) $("#supportSubtitle").textContent = t("supportSubtitle");
+    if ($("#supportFormTitle")) $("#supportFormTitle").textContent = t("supportFormTitle");
+
+    const cards = $("#supportCards");
+    if (cards) {
+      cards.innerHTML = DATA.supportCards.map(c => `
+        <article class="card" data-support="${escapeHtml(c.key)}" style="cursor:default;">
+          <div class="card__title">${escapeHtml(c.icon)} ${escapeHtml(c.title[state.lang])}</div>
+          <p class="card__desc">${escapeHtml(c.desc[state.lang])}</p>
+        </article>
+      `).join("");
+    }
+
+    const hint = $("#supportHint");
+    if (hint) hint.textContent = t("supportHint");
+  }
+
+  function buildSupportText() {
+    const topic = ($("#supportTopic")?.value || "").trim();
+    const msg = ($("#supportMessage")?.value || "").trim();
+    const user = tg?.initDataUnsafe?.user;
+    const who = user ? `@${user.username || ""} (${user.first_name || ""} ${user.last_name || ""})` : "Browser user";
+
+    const header = state.lang === "he" ? "🛠️ בקשת ליווי (MR Academy)" : "🛠️ Заявка на сопровождение (MR Academy)";
+    const lines = [
+      header,
+      `👤 ${who}`.trim(),
+      topic ? `🧾 ${topic}` : "",
+      "—",
+      msg || (state.lang === "he" ? "אין תיאור." : "Нет описания."),
+      "—",
+      state.lang === "he" ? "📎 צרף כאן תמונה/וידאו בצ׳אט." : "📎 Прикрепи фото/видео в чате."
+    ].filter(Boolean);
+
+    return lines.join("\n");
+  }
+
+  async function sendSupport() {
+    const text = buildSupportText();
+
+    if (tg && typeof tg.sendData === "function") {
+      try {
+        tg.sendData(JSON.stringify({ type: "support", text }));
+        toast(t("supportSent"));
+        return;
+      } catch {}
+    }
+
+    try {
+      await navigator.clipboard.writeText(text);
+      toast(t("supportCopied"));
+    } catch {
+      alert(text);
+    }
+  }
+
+  async function copySupport() {
+    const text = buildSupportText();
+    try {
+      await navigator.clipboard.writeText(text);
+      toast(t("supportCopied"));
+    } catch {
+      alert(text);
+    }
+  }
+
+  // ---------------------------
+  // Profile + Admin
+  // ---------------------------
+  const ADMIN_PIN = "7777";
   let brandTapCount = 0;
   let brandTapTimer = null;
 
-  function openAdmin() {
-    showScreen("admin");
+  function renderProfile() {
+    if ($("#profileTitle")) $("#profileTitle").textContent = t("profileTitle");
+    if ($("#accessTitle")) $("#accessTitle").textContent = t("accessTitle");
+    if ($("#exportData")) $("#exportData").textContent = t("export");
+    if ($("#resetLocal")) $("#resetLocal").textContent = t("resetLocal");
+    if ($("#profileHint")) $("#profileHint").textContent = t("profileHint");
+
+    const fromTg = tg ? (tg.initDataUnsafe?.user?.first_name || tg.initDataUnsafe?.user?.username) : null;
+    const name = state.profile.name || fromTg || (state.lang === "he" ? "מאסטר" : "мастер");
+    if ($("#profileName")) $("#profileName").textContent = name;
+
+    if ($("#profileMeta")) {
+      $("#profileMeta").textContent = tg ? `@${tg.initDataUnsafe?.user?.username || "telegram"} • WebApp` : "Browser mode";
+    }
+
+    const root = $("#ownedRoot");
+    if (root) {
+      const owned = DATA.courses.filter(c => isOwned(c.id));
+      root.innerHTML = owned.length ? owned.map(c => `
+        <div class="list-item" data-course="${escapeHtml(c.id)}">
+          <div>
+            <div class="list-item__title">${escapeHtml(c.title[state.lang])}</div>
+            <div class="list-item__meta">${escapeHtml(c.category[state.lang])} • ${escapeHtml(c.price===0 ? t("free") : `${c.price} ₪`)}</div>
+          </div>
+          <span class="badge good">${escapeHtml(t("open"))}</span>
+        </div>
+      `).join("") : `<div class="hint">${escapeHtml(state.lang==="he" ? "אין גישות עדיין." : "Пока нет доступов.")}</div>`;
+
+      $$("#ownedRoot .list-item").forEach(item => {
+        item.addEventListener("click", () => openCourse(item.dataset.course));
+      });
+    }
+
     renderAdmin();
   }
 
@@ -1312,201 +917,268 @@
 
     if (!state.admin.unlocked) {
       root.innerHTML = `
+        <div class="hr"></div>
         <div class="h3">${escapeHtml(t("adminEnterPin"))}</div>
         <div class="row">
-          <input class="input" id="adminPin" placeholder="${escapeHtml(t("adminPinPlaceholder"))}">
+          <input class="input" id="adminPin" placeholder="PIN" />
           <button class="btn btn-primary" id="adminLoginBtn" type="button">${escapeHtml(t("adminLogin"))}</button>
         </div>
-        <div class="hint">${escapeHtml(t("adminSetPinInfo"))}</div>
       `;
       $("#adminLoginBtn")?.addEventListener("click", () => {
         const v = ($("#adminPin")?.value || "").trim();
         if (v === ADMIN_PIN) {
           state.admin.unlocked = true;
           saveState();
-          toast(t("toastUnlocked"));
+          toast(state.lang==="he" ? "אדמין ✅" : "Админ ✅");
           renderAdmin();
         } else toast(t("adminWrongPin"));
       });
       return;
     }
 
+    const paid = DATA.courses.filter(c => c.price > 0);
     root.innerHTML = `
-      <div class="h3">${escapeHtml(t("adminPanel"))}</div>
-      <div class="hint">${escapeHtml(t("adminInvoiceHint"))}</div>
-
       <div class="hr"></div>
+      <div class="h3">${escapeHtml(t("adminPanel"))}</div>
 
-      <div class="h3">${escapeHtml(t("adminUnlockByCourse"))}</div>
       <div class="row">
         <select class="select" id="adminCourseSelect">
-          ${DATA.courses.filter(c => c.price > 0).map(c => `<option value="${escapeHtml(c.id)}">${escapeHtml(c.title[state.lang])} (${c.price}₪)</option>`).join("")}
+          ${paid.map(c => `<option value="${escapeHtml(c.id)}">${escapeHtml(c.title[state.lang])} (${c.price}₪)</option>`).join("")}
         </select>
-        <button class="btn btn-primary" id="adminGrantBtn" type="button">${escapeHtml(state.lang === "he" ? "תן גישה" : "Выдать доступ")}</button>
+        <button class="btn btn-primary" id="adminGrantBtn" type="button">${escapeHtml(t("adminGrant"))}</button>
       </div>
 
       <div class="row" style="margin-top:10px;">
-        <button class="btn btn-secondary" id="adminUnlockAll" type="button">${escapeHtml(t("adminUnlockAll"))}</button>
-        <button class="btn btn-ghost" id="adminLockAll" type="button">${escapeHtml(t("adminLockAll"))}</button>
-        <button class="btn btn-ghost" id="adminLogout" type="button">${escapeHtml(state.lang === "he" ? "התנתק" : "Выйти")}</button>
-      </div>
-
-      <div class="hr"></div>
-
-      <div class="h3">${escapeHtml(state.lang === "he" ? "רכישות (לוקלי)" : "Покупки (локально)")}</div>
-      <pre class="code" id="adminDump"></pre>
-
-      <div class="row">
-        <button class="btn btn-ghost" id="copyDump" type="button">${escapeHtml(state.lang === "he" ? "העתק" : "Копировать")}</button>
+        <button class="btn btn-ghost" id="adminLockAllBtn" type="button">${escapeHtml(t("adminLockAll"))}</button>
+        <button class="btn btn-ghost" id="adminLogoutBtn" type="button">${escapeHtml(t("adminLogout"))}</button>
       </div>
     `;
-
-    const dumpEl = $("#adminDump");
-    if (dumpEl) dumpEl.textContent = JSON.stringify({ purchased: state.purchased, progress: state.progress }, null, 2);
 
     $("#adminGrantBtn")?.addEventListener("click", () => {
       const cid = $("#adminCourseSelect")?.value;
       if (cid) grantAccess(cid, "manual");
-      renderAdmin();
     });
 
-    $("#adminUnlockAll")?.addEventListener("click", () => {
-      DATA.courses.filter(c => c.price > 0).forEach(c => grantAccess(c.id, "manual"));
-      renderAdmin();
-    });
-
-    $("#adminLockAll")?.addEventListener("click", () => {
-      state.purchased = {};
+    $("#adminLockAllBtn")?.addEventListener("click", () => {
+      state.access.purchased = {};
       saveState();
-      toast(state.lang === "he" ? "ננעל ✅" : "Закрыто ✅");
+      toast(state.lang==="he" ? "אופס ✅" : "Сброшено ✅");
       renderAll();
-      renderAdmin();
     });
 
-    $("#adminLogout")?.addEventListener("click", () => {
+    $("#adminLogoutBtn")?.addEventListener("click", () => {
       state.admin.unlocked = false;
       saveState();
       renderAdmin();
     });
+  }
 
-    $("#copyDump")?.addEventListener("click", async () => {
-      try {
-        await navigator.clipboard.writeText($("#adminDump")?.textContent || "");
-        toast(t("toastCopied"));
-      } catch {
-        alert($("#adminDump")?.textContent || "");
-      }
-    });
+  async function exportData() {
+    const payload = JSON.stringify({ state, exportedAt: new Date().toISOString() }, null, 2);
+    try {
+      await navigator.clipboard.writeText(payload);
+      toast(t("copied"));
+    } catch {
+      alert(payload);
+    }
+  }
+
+  function resetLocal() {
+    const ok = confirm(state.lang==="he" ? "לאפס את הנתונים המקומיים?" : "Сбросить локальные данные?");
+    if (!ok) return;
+    localStorage.removeItem(LS_KEY);
+    localStorage.removeItem(NEWS_LS_KEY);
+    toast(t("resetDone"));
+    location.reload();
   }
 
   // ---------------------------
-  // Render All
+  // Home
+  // ---------------------------
+  function nowGreeting() {
+    const h = new Date().getHours();
+    if (h >= 5 && h < 12) return t("greetingMorning");
+    if (h >= 12 && h < 18) return t("greetingDay");
+    if (h >= 18 && h < 22) return t("greetingEvening");
+    return t("greetingNight");
+  }
+
+  function renderHome() {
+    if ($("#brandSubtitle")) $("#brandSubtitle").textContent = t("brandSubtitle");
+    if ($("#homeLead")) $("#homeLead").textContent = t("homeLead");
+    if ($("#homeSectionTitle")) $("#homeSectionTitle").textContent = t("homeSectionTitle");
+    if ($("#newsBlockTitle")) $("#newsBlockTitle").textContent = t("newsBlockTitle");
+    if ($("#newsBlockSubtitle")) $("#newsBlockSubtitle").textContent = t("newsBlockSubtitle");
+    if ($("#newsSearch")) $("#newsSearch").setAttribute("placeholder", t("newsSearch"));
+    if ($("#newsRefreshBtn")) $("#newsRefreshBtn").textContent = t("newsRefresh");
+
+    if ($("#greeting")) $("#greeting").textContent = nowGreeting();
+
+    const fromTg = tg ? (tg.initDataUnsafe?.user?.first_name || tg.initDataUnsafe?.user?.username) : null;
+    const name = state.profile.name || fromTg || (state.lang === "he" ? "מאסטר" : "мастер");
+    if ($("#username")) $("#username").textContent = name;
+
+    if ($("#homeOpenCourses")) $("#homeOpenCourses").textContent = t("openCourses");
+    if ($("#homeOpenWiki")) $("#homeOpenWiki").textContent = t("openWiki");
+
+    const ownedCount = DATA.courses.filter(c => isOwned(c.id)).length;
+    const paidCount = DATA.courses.filter(c => c.price > 0).length;
+    const statsEl = $("#homeStats");
+    if (statsEl) {
+      const a = state.lang==="he" ? "קורסים זמינים" : "Доступных курсов";
+      const b = state.lang==="he" ? "קורסים בתשלום" : "Платных курсов";
+      const c = state.lang==="he" ? "תכנים בויקי" : "Статей в вики";
+      statsEl.innerHTML = `
+        <div class="stat"><div class="stat__label">${escapeHtml(a)}</div><div class="stat__value">${ownedCount}</div></div>
+        <div class="stat"><div class="stat__label">${escapeHtml(b)}</div><div class="stat__value">${paidCount}</div></div>
+        <div class="stat"><div class="stat__label">${escapeHtml(c)}</div><div class="stat__value">${DATA.wiki.length}</div></div>
+      `;
+    }
+
+    const rec = DATA.courses.slice(0, 3);
+    const recRoot = $("#homeRecommended");
+    if (recRoot) {
+      recRoot.innerHTML = rec.map(courseCardHTML).join("");
+      $$("#homeRecommended .card").forEach(card => {
+        card.addEventListener("click", () => openCourse(card.dataset.id));
+      });
+    }
+
+    const cached = loadNewsCache();
+    renderNews(cached.items);
+
+    const tooOld = (Date.now() - (cached.at || 0)) > (6 * 60 * 60 * 1000);
+    if (!cached.items?.length || tooOld) refreshNews({ silent: true });
+  }
+
+  // ---------------------------
+  // i18n apply for navigation + headers
+  // ---------------------------
+  function applyI18n() {
+    if ($("#navHome")) $("#navHome").textContent = t("navHome");
+    if ($("#navCourses")) $("#navCourses").textContent = t("navCourses");
+    if ($("#navSupport")) $("#navSupport").textContent = t("navSupport");
+    if ($("#navWiki")) $("#navWiki").textContent = t("navWiki");
+
+    if ($("#coursesTitle")) $("#coursesTitle").textContent = t("coursesTitle");
+    if ($("#coursesSearch")) $("#coursesSearch").setAttribute("placeholder", t("coursesSearch"));
+    const f = $("#coursesFilter");
+    if (f && f.options?.length >= 4) {
+      f.options[0].text = t("filterAll");
+      f.options[1].text = t("filterFree");
+      f.options[2].text = t("filterPaid");
+      f.options[3].text = t("filterOwned");
+    }
+
+    if ($("#wikiTitle")) $("#wikiTitle").textContent = t("wikiTitle");
+    if ($("#wikiSearch")) $("#wikiSearch").setAttribute("placeholder", t("wikiSearch"));
+
+    if ($("#backToCourses")) $("#backToCourses").textContent = t("back");
+    if ($("#backToCourse")) $("#backToCourse").textContent = t("back");
+    if ($("#backFromProfile")) $("#backFromProfile").textContent = t("back");
+
+    // support placeholders (keep RU placeholder if user didn't type yet)
+    if ($("#supportSendBtn")) $("#supportSendBtn").textContent = (state.lang==="he" ? "שלח" : "Отправить");
+    if ($("#supportCopyBtn")) $("#supportCopyBtn").textContent = (state.lang==="he" ? "העתק" : "Скопировать");
+    if ($("#supportTopic") && !$("#supportTopic").value) $("#supportTopic").setAttribute("placeholder", state.lang==="he" ? "נושא" : "Тема");
+  }
+
+  // ---------------------------
+  // Render all
   // ---------------------------
   function renderAll() {
     renderHome();
     renderCourses();
-    renderProgress();
     buildWikiCategories();
     renderWiki();
-    renderProfile();
-    if (current.tab === "news") renderNewsScreen();
+    renderSupport();
     if (current.tab === "course" && current.courseId) renderCourse(current.courseId);
     if (current.tab === "lesson" && current.courseId && current.lessonId) renderLesson(current.courseId, current.lessonId);
-    if (current.tab === "test" && current.courseId && current.lessonId) renderTest(current.courseId, current.lessonId);
-    if (current.tab === "admin") renderAdmin();
+    if (current.tab === "profile") renderProfile();
   }
 
   // ---------------------------
   // Events
   // ---------------------------
   function bindEvents() {
-    // bottom nav
     navItems.forEach(btn => {
       btn.addEventListener("click", () => {
         const tab = btn.dataset.tab;
         showScreen(tab);
+        current.returnTab = tab;
         renderAll();
-        if (tab === "news") {
-          // if cache empty -> silent refresh
-          const cached = loadNewsCache();
-          if (!cached.items?.length) refreshNews({ silent: true });
-        }
       });
     });
 
-    // close
-    $("#closeBtn")?.addEventListener("click", () => {
-      if (tg) safe(() => tg.close());
-    });
+    $("#closeBtn")?.addEventListener("click", () => { if (tg) safe(() => tg.close()); });
 
-    // language toggle
     $("#langToggle")?.addEventListener("click", () => {
       setLang(state.lang === "ru" ? "he" : "ru");
       $("#langToggle").textContent = (state.lang === "he") ? "HE" : "RU";
     });
 
-    // home quick links
-    $("#openCourses")?.addEventListener("click", () => { showScreen("courses"); renderAll(); });
-    $("#openWiki")?.addEventListener("click", () => { showScreen("wiki"); renderAll(); });
-
-    // wash -> unlock first unlockOnWash or first paid
-    $("#openWash")?.addEventListener("click", () => {
-      const c = DATA.courses.find(x => x.unlockOnWash) || DATA.courses.find(x => x.price > 0);
-      if (c) grantAccess(c.id, "manual");
+    $("#profileBtn")?.addEventListener("click", () => {
+      current.returnTab = current.tab;
+      showScreen("profile");
+      renderProfile();
     });
 
-    // courses search/filter
-    $("#coursesSearch")?.addEventListener("input", renderCourses);
-    $("#coursesFilter")?.addEventListener("change", renderCourses);
-
-    // back buttons
-    $("#backToCourses")?.addEventListener("click", () => { showScreen("courses"); renderAll(); });
-    $("#backToCourse")?.addEventListener("click", () => { showScreen("course"); renderCourse(current.courseId); });
-    $("#backToLesson")?.addEventListener("click", () => { showScreen("lesson"); renderLesson(current.courseId, current.lessonId); });
-    $("#backFromAdmin")?.addEventListener("click", () => { showScreen("profile"); renderAll(); });
-
-    // wiki
-    $("#wikiSearch")?.addEventListener("input", renderWiki);
-    $("#wikiCategory")?.addEventListener("change", renderWiki);
-
-    // profile actions
-    $("#resetProgress")?.addEventListener("click", () => {
-      const ok = confirm(state.lang === "he" ? "לאפס את ההתקדמות?" : "Сбросить прогресс?");
-      if (!ok) return;
-      state.progress = {};
-      saveState();
-      toast(t("toastReset"));
+    $("#homeOpenCourses")?.addEventListener("click", () => {
+      showScreen("courses");
+      current.returnTab = "courses";
       renderAll();
     });
 
-    $("#exportData")?.addEventListener("click", async () => {
-      const payload = JSON.stringify({ state, exportedAt: new Date().toISOString() }, null, 2);
-      try {
-        await navigator.clipboard.writeText(payload);
-        toast(t("toastCopied"));
-      } catch {
-        alert(payload);
-      }
+    $("#homeOpenWiki")?.addEventListener("click", () => {
+      showScreen("wiki");
+      current.returnTab = "wiki";
+      renderAll();
     });
 
-    $("#openAdminFromProfile")?.addEventListener("click", openAdmin);
+    $("#newsRefreshBtn")?.addEventListener("click", () => refreshNews({ silent: false }));
+    $("#newsSearch")?.addEventListener("input", () => {
+      const cached = loadNewsCache();
+      renderNews(cached.items);
+    });
 
-    // admin easter (7 taps)
+    $("#coursesSearch")?.addEventListener("input", renderCourses);
+    $("#coursesFilter")?.addEventListener("change", renderCourses);
+
+    $("#backToCourses")?.addEventListener("click", () => {
+      showScreen("courses");
+      renderAll();
+    });
+
+    $("#backToCourse")?.addEventListener("click", () => {
+      showScreen("course");
+      renderCourse(current.courseId);
+    });
+
+    $("#backFromProfile")?.addEventListener("click", () => {
+      showScreen(current.returnTab || "home");
+      renderAll();
+    });
+
+    $("#wikiSearch")?.addEventListener("input", renderWiki);
+    $("#wikiCategory")?.addEventListener("change", renderWiki);
+
+    $("#supportSendBtn")?.addEventListener("click", sendSupport);
+    $("#supportCopyBtn")?.addEventListener("click", copySupport);
+
+    $("#exportData")?.addEventListener("click", exportData);
+    $("#resetLocal")?.addEventListener("click", resetLocal);
+
     $("#brandTap")?.addEventListener("click", () => {
       brandTapCount += 1;
       clearTimeout(brandTapTimer);
       brandTapTimer = setTimeout(() => { brandTapCount = 0; }, 1200);
       if (brandTapCount >= 7) {
         brandTapCount = 0;
-        openAdmin();
+        state.admin.unlocked = true;
+        saveState();
+        toast(state.lang==="he" ? "אדמין ✅" : "Админ ✅");
       }
     });
-
-    // news actions
-    $("#newsRefreshBtn")?.addEventListener("click", () => refreshNews({ silent: false }));
-    $("#newsClearBtn")?.addEventListener("click", clearNewsCache);
-    $("#newsSearch")?.addEventListener("input", renderNewsScreen);
-    $("#newsSourceSelect")?.addEventListener("change", renderNewsScreen);
   }
 
   // ---------------------------
@@ -1516,9 +1188,7 @@
     if (!["ru","he"].includes(state.lang)) state.lang = "ru";
     applyLangDir();
     applyI18n();
-
-    // initial
-    $("#langToggle") && ($("#langToggle").textContent = (state.lang === "he") ? "HE" : "RU");
+    if ($("#langToggle")) $("#langToggle").textContent = (state.lang === "he") ? "HE" : "RU";
 
     showScreen("home");
     bindEvents();
