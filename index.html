@@ -1,8 +1,5 @@
 <!doctype html>
 <html lang="ru" dir="ltr">
-  <style>
-  .nav, .nav * { -webkit-user-select: none; user-select: none; }
-</style>
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
@@ -35,6 +32,7 @@
       </div>
 
       <button id="langToggle" class="chip" type="button">RU</button>
+      <button id="profileBtn" class="icon-btn" aria-label="profile">👤</button>
     </header>
 
     <!-- MAIN -->
@@ -52,18 +50,29 @@
             <p class="lead" id="homeLead"></p>
 
             <div class="hero__actions">
-              <button class="btn btn-primary" id="openCourses" type="button"></button>
-              <button class="btn btn-secondary" id="openWiki" type="button"></button>
+              <button class="btn btn-primary" id="homeOpenCourses" type="button"></button>
+              <button class="btn btn-secondary" id="homeOpenWiki" type="button"></button>
             </div>
 
             <div class="stats" id="homeStats"></div>
           </div>
 
           <div class="glass-card">
-            <div class="glass-card__title" id="quickTitle"></div>
-            <div class="glass-card__list" id="quickList"></div>
-            <button class="btn" id="openWash" type="button"></button>
-            <div class="hint" id="quickHint"></div>
+            <div class="glass-card__title" id="newsBlockTitle"></div>
+            <div class="kicker" id="newsBlockSubtitle"></div>
+
+            <div class="hr"></div>
+
+            <div class="row">
+              <input class="input" id="newsSearch" placeholder="Поиск" />
+              <button class="btn btn-ghost" id="newsRefreshBtn" type="button">Обновить</button>
+            </div>
+
+            <div class="hint" id="newsHint" style="margin-top:10px;"></div>
+
+            <div class="hr"></div>
+
+            <div id="newsRoot" class="stack"></div>
           </div>
         </div>
 
@@ -72,42 +81,6 @@
             <h2 class="section__title" id="homeSectionTitle"></h2>
           </div>
           <div id="homeRecommended" class="grid"></div>
-        </section>
-      </section>
-
-      <!-- NEWS -->
-      <section class="screen" id="screen-news">
-        <div class="section__head">
-          <h2 class="section__title" id="newsTitle">Новости</h2>
-          <div class="row">
-            <button class="btn btn-ghost" id="newsRefreshBtn" type="button">Обновить</button>
-            <button class="btn btn-ghost" id="newsClearBtn" type="button">Сбросить кэш</button>
-          </div>
-        </div>
-
-        <div class="panel">
-          <div class="kicker" id="newsSubtitle">Новинки и обновления из мира детейлинга (RSS).</div>
-
-          <div class="hr"></div>
-
-          <div class="row">
-            <label class="kicker" style="min-width:110px;" id="newsSourcesLabel">Источники</label>
-            <select class="select" id="newsSourceSelect">
-              <option value="all">All</option>
-              <option value="autogeek">Car Detailing</option>
-              <option value="detailedimage">Detailed Image</option>
-            </select>
-          </div>
-
-          <div class="row" style="margin-top:10px;">
-            <input class="input" id="newsSearch" placeholder="Поиск" />
-          </div>
-
-          <div class="hint" id="newsHint" style="margin-top:10px;"></div>
-        </div>
-
-        <section class="section">
-          <div id="newsRoot" class="grid"></div>
         </section>
       </section>
 
@@ -154,21 +127,34 @@
         <div id="lessonRoot" class="lesson"></div>
       </section>
 
-      <!-- TEST -->
-      <section class="screen" id="screen-test">
-        <div class="subbar">
-          <button class="btn btn-ghost" id="backToLesson" type="button">← Назад</button>
-          <div class="subbar__title" id="testTitle">Тест</div>
-        </div>
-        <div id="testRoot" class="test"></div>
-      </section>
-
-      <!-- PROGRESS -->
-      <section class="screen" id="screen-progress">
+      <!-- SUPPORT -->
+      <section class="screen" id="screen-support">
         <div class="section__head">
-          <h2 class="section__title" id="progressTitle"></h2>
+          <h2 class="section__title" id="supportTitle"></h2>
         </div>
-        <div id="progressRoot" class="grid"></div>
+
+        <div class="panel">
+          <div class="kicker" id="supportSubtitle"></div>
+          <div class="hr"></div>
+
+          <div class="grid" id="supportCards"></div>
+
+          <div class="hr"></div>
+
+          <div class="h3" id="supportFormTitle"></div>
+          <div class="row">
+            <input class="input" id="supportTopic" placeholder="Тема" />
+          </div>
+          <div class="row" style="margin-top:10px;">
+            <textarea class="textarea" id="supportMessage" placeholder="Опиши ситуацию: авто, год, что делал, какую химию/пасту использовал, что получилось."></textarea>
+          </div>
+          <div class="row" style="margin-top:10px;">
+            <button class="btn btn-primary" id="supportSendBtn" type="button">Отправить</button>
+            <button class="btn btn-ghost" id="supportCopyBtn" type="button">Скопировать</button>
+          </div>
+
+          <div class="hint" id="supportHint" style="margin-top:10px;"></div>
+        </div>
       </section>
 
       <!-- WIKI -->
@@ -189,10 +175,11 @@
         </section>
       </section>
 
-      <!-- PROFILE -->
+      <!-- PROFILE (not in bottom nav) -->
       <section class="screen" id="screen-profile">
-        <div class="section__head">
-          <h2 class="section__title" id="profileTitle"></h2>
+        <div class="subbar">
+          <button class="btn btn-ghost" id="backFromProfile" type="button">← Назад</button>
+          <div class="subbar__title" id="profileTitle">Профиль</div>
         </div>
 
         <div class="panel">
@@ -206,43 +193,32 @@
 
           <div class="hr"></div>
 
-          <div class="row">
-            <button class="btn btn-ghost" id="resetProgress" type="button">Сбросить прогресс</button>
-            <button class="btn btn-ghost" id="exportData" type="button">Экспорт данных</button>
-          </div>
-
-          <div class="hint" id="profileHint">Админ-панель: 7 раз нажми на логотип “MR” сверху.</div>
-
-          <div class="hr"></div>
-
-          <div class="h3" id="ownedTitle">Мои доступы</div>
+          <div class="h3" id="accessTitle">Доступы</div>
           <div id="ownedRoot" class="list"></div>
 
           <div class="hr"></div>
 
-          <button class="btn btn-secondary" id="openAdminFromProfile" type="button">Админ</button>
-        </div>
-      </section>
+          <div class="row">
+            <button class="btn btn-ghost" id="exportData" type="button">Экспорт</button>
+            <button class="btn btn-ghost" id="resetLocal" type="button">Сбросить локальные данные</button>
+          </div>
 
-      <!-- ADMIN -->
-      <section class="screen" id="screen-admin">
-        <div class="subbar">
-          <button class="btn btn-ghost" id="backFromAdmin" type="button">← Назад</button>
-          <div class="subbar__title" id="adminTitle">Админ</div>
+          <div class="hint" id="profileHint"></div>
+
+          <div class="hr"></div>
+
+          <div id="adminRoot"></div>
         </div>
-        <div id="adminRoot" class="panel"></div>
       </section>
 
     </main>
 
-    <!-- BOTTOM NAV -->
+    <!-- BOTTOM NAV (4 tabs) -->
     <nav class="nav">
       <button class="nav__item is-active" data-tab="home" type="button"><span id="navHome">Главная</span></button>
-      <button class="nav__item" data-tab="news" type="button"><span id="navNews">Новости</span></button>
       <button class="nav__item" data-tab="courses" type="button"><span id="navCourses">Курсы</span></button>
-      <button class="nav__item" data-tab="progress" type="button"><span id="navProgress">Прогресс</span></button>
+      <button class="nav__item" data-tab="support" type="button"><span id="navSupport">Сопровождение</span></button>
       <button class="nav__item" data-tab="wiki" type="button"><span id="navWiki">Вики</span></button>
-      <button class="nav__item" data-tab="profile" type="button"><span id="navProfile">Профиль</span></button>
     </nav>
 
   </div>
