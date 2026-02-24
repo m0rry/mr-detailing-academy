@@ -129,6 +129,7 @@ export function Home({ t, state, setState }){
                   ? 'Оригинальные заметки по практикам студий региона.'
                   : 'הערות מקוריות מפרקטיקות סטודיו באזור.'}
               </div>
+<HEAD>
             </div>
             <div className="cardBody">
               <div className="hScroll">
@@ -143,6 +144,22 @@ export function Home({ t, state, setState }){
                 {state.lang==='ru'
                   ? 'Дальше добавим реальные кейсы (без персональных данных).'
                   : 'בהמשך נוסיף מקרי אמת (בלי נתונים אישיים).'}
+=======
+              <div className="cardBody">
+                <div className="list">
+                  {MARKET_NOTES.map(m => (
+                    <div key={m.id} className="item">
+                      <div style={{ fontWeight: 700 }}>{m[state.lang].title}</div>
+                      <div className="p" style={{ marginTop: 6 }}>{m[state.lang].text}</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="small" style={{ marginTop: 10 }}>
+                  {state.lang==='ru'
+                    ? 'Мы можем предоставить готовые кейсы бизнеса (без персональных данных клиентов.)'
+                    : 'אנחנו יכולים לספק מקרי בוחן עסקיים מוכנים (ללא נתונים אישיים של לקוחות).'}
+                </div>
+>>>>>>> 31ca91c98fd348a9223bc339ee54a6e9c8ba9de5
               </div>
             </div>
           </div>
