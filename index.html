@@ -1,228 +1,117 @@
-<!doctype html>
-<html lang="ru" dir="ltr">
+<!DOCTYPE html>
+<html lang="ru">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="theme-color" content="#0b0f14" />
-  <title>MR Detailing Academy</title>
-
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-  <!-- Hebrew font -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@400;600;800;900&display=swap" rel="stylesheet">
-
-  <link rel="stylesheet" href="./styles.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MR Detailing Academy Premium</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
-  <div class="app">
 
-    <!-- TOP BAR -->
-    <header class="topbar">
-      <button id="closeBtn" class="icon-btn" aria-label="close">✕</button>
+<header class="header">
+  <div class="brand">
+    <div class="logo">MR</div>
+    <div>
+      <div class="title">Detailing Academy</div>
+      <div class="subtitle">Digital Education Platform</div>
+    </div>
+  </div>
+</header>
 
-      <div class="brand" id="brandTap" role="button" aria-label="brand">
-        <div class="brand__logo">MR</div>
-        <div>
-          <div class="brand__title">Detailing Academy</div>
-          <div class="brand__subtitle" id="brandSubtitle">Внутренний мир детейлинга</div>
-        </div>
-      </div>
+<nav class="nav">
+  <button onclick="showTab('home')">Главная</button>
+  <button onclick="showTab('courses')">Курсы</button>
+  <button onclick="showTab('knowledge')">База знаний</button>
+  <button onclick="showTab('support')">Сопровождение</button>
+</nav>
 
-      <button id="langToggle" class="chip" type="button">RU</button>
-      <button id="profileBtn" class="icon-btn" aria-label="profile">👤</button>
-    </header>
+<main>
 
-    <!-- MAIN -->
-    <main class="main">
+<section id="home" class="tab active">
+  <h1>Профессиональная цифровая академия детейлинга</h1>
+  <div class="dashboard">
+    <div class="card">
+      <h3>Статус мастера</h3>
+      <p>Уровень: <strong>Практик</strong></p>
+      <p>Открыто курсов: 3</p>
+    </div>
+    <div class="card pro-highlight">
+      <h3>PRO Академия</h3>
+      <p>Коммерческие стандарты, глубокая коррекция, работа с деликатными лаками.</p>
+    </div>
+    <div class="card">
+      <h3>Продолжить обучение</h3>
+      <p>Коррекция лакокрасочного покрытия — Модуль 2</p>
+    </div>
+  </div>
+</section>
 
-      <!-- HOME -->
-      <section class="screen is-active" id="screen-home">
-        <div class="hero">
-          <div class="panel">
-            <div class="kicker">
-              <span id="greeting">Привет,</span>
-              <span id="username">мастер</span>
-            </div>
-            <h1 class="title">MR Detailing Academy</h1>
-            <p class="lead" id="homeLead"></p>
+<section id="courses" class="tab">
+  <h1>Программы обучения</h1>
 
-            <div class="hero__actions">
-              <button class="btn btn-primary" id="homeOpenCourses" type="button"></button>
-              <button class="btn btn-secondary" id="homeOpenWiki" type="button"></button>
-            </div>
-
-            <div class="stats" id="homeStats"></div>
-          </div>
-
-          <div class="glass-card">
-            <div class="glass-card__title" id="newsBlockTitle"></div>
-            <div class="kicker" id="newsBlockSubtitle"></div>
-
-            <div class="hr"></div>
-
-            <div class="row">
-              <input class="input" id="newsSearch" placeholder="Поиск" />
-              <button class="btn btn-ghost" id="newsRefreshBtn" type="button">Обновить</button>
-            </div>
-
-            <div class="hint" id="newsHint" style="margin-top:10px;"></div>
-
-            <div class="hr"></div>
-
-            <div id="newsRoot" class="stack"></div>
-          </div>
-        </div>
-
-        <section class="section">
-          <div class="section__head">
-            <h2 class="section__title" id="homeSectionTitle"></h2>
-          </div>
-          <div id="homeRecommended" class="grid"></div>
-        </section>
-      </section>
-
-      <!-- COURSES -->
-      <section class="screen" id="screen-courses">
-        <div class="section__head">
-          <h2 class="section__title" id="coursesTitle"></h2>
-        </div>
-
-        <div class="row">
-          <input class="input" id="coursesSearch" placeholder="" />
-          <select class="select" id="coursesFilter">
-            <option value="all">Все</option>
-            <option value="free">Бесплатные</option>
-            <option value="paid">Платные</option>
-            <option value="owned">Доступные мне</option>
-          </select>
-        </div>
-
-        <section class="section">
-          <div id="coursesRoot" class="grid"></div>
-        </section>
-      </section>
-
-      <!-- COURSE -->
-      <section class="screen" id="screen-course">
-        <div class="subbar">
-          <button class="btn btn-ghost" id="backToCourses" type="button">← Назад</button>
-          <div class="subbar__title" id="courseTitle">Курс</div>
-        </div>
-
-        <div class="course">
-          <div id="courseRoot" class="panel"></div>
-          <div id="lessonsList" class="list"></div>
-        </div>
-      </section>
-
-      <!-- LESSON -->
-      <section class="screen" id="screen-lesson">
-        <div class="subbar">
-          <button class="btn btn-ghost" id="backToCourse" type="button">← Назад</button>
-          <div class="subbar__title" id="lessonTitle">Урок</div>
-        </div>
-        <div id="lessonRoot" class="lesson"></div>
-      </section>
-
-      <!-- SUPPORT -->
-      <section class="screen" id="screen-support">
-        <div class="section__head">
-          <h2 class="section__title" id="supportTitle"></h2>
-        </div>
-
-        <div class="panel">
-          <div class="kicker" id="supportSubtitle"></div>
-          <div class="hr"></div>
-
-          <div class="grid" id="supportCards"></div>
-
-          <div class="hr"></div>
-
-          <div class="h3" id="supportFormTitle"></div>
-          <div class="row">
-            <input class="input" id="supportTopic" placeholder="Тема" />
-          </div>
-          <div class="row" style="margin-top:10px;">
-            <textarea class="textarea" id="supportMessage" placeholder="Опиши ситуацию: авто, год, что делал, какую химию/пасту использовал, что получилось."></textarea>
-          </div>
-          <div class="row" style="margin-top:10px;">
-            <button class="btn btn-primary" id="supportSendBtn" type="button">Отправить</button>
-            <button class="btn btn-ghost" id="supportCopyBtn" type="button">Скопировать</button>
-          </div>
-
-          <div class="hint" id="supportHint" style="margin-top:10px;"></div>
-        </div>
-      </section>
-
-      <!-- WIKI -->
-      <section class="screen" id="screen-wiki">
-        <div class="section__head">
-          <h2 class="section__title" id="wikiTitle"></h2>
-        </div>
-
-        <div class="row">
-          <input class="input" id="wikiSearch" placeholder="" />
-          <select class="select" id="wikiCategory">
-            <option value="all">Все категории</option>
-          </select>
-        </div>
-
-        <section class="section">
-          <div id="wikiRoot" class="grid"></div>
-        </section>
-      </section>
-
-      <!-- PROFILE (not in bottom nav) -->
-      <section class="screen" id="screen-profile">
-        <div class="subbar">
-          <button class="btn btn-ghost" id="backFromProfile" type="button">← Назад</button>
-          <div class="subbar__title" id="profileTitle">Профиль</div>
-        </div>
-
-        <div class="panel">
-          <div class="profile">
-            <div class="profile__avatar" id="profileAvatar">MR</div>
-            <div>
-              <div class="profile__name" id="profileName">Пользователь</div>
-              <div class="profile__meta" id="profileMeta">Telegram WebApp</div>
-            </div>
-          </div>
-
-          <div class="hr"></div>
-
-          <div class="h3" id="accessTitle">Доступы</div>
-          <div id="ownedRoot" class="list"></div>
-
-          <div class="hr"></div>
-
-          <div class="row">
-            <button class="btn btn-ghost" id="exportData" type="button">Экспорт</button>
-            <button class="btn btn-ghost" id="resetLocal" type="button">Сбросить локальные данные</button>
-          </div>
-
-          <div class="hint" id="profileHint"></div>
-
-          <div class="hr"></div>
-
-          <div id="adminRoot"></div>
-        </div>
-      </section>
-
-    </main>
-
-    <!-- BOTTOM NAV (4 tabs) -->
-    <nav class="nav">
-      <button class="nav__item is-active" data-tab="home" type="button"><span id="navHome">Главная</span></button>
-      <button class="nav__item" data-tab="courses" type="button"><span id="navCourses">Курсы</span></button>
-      <button class="nav__item" data-tab="support" type="button"><span id="navSupport">Сопровождение</span></button>
-      <button class="nav__item" data-tab="wiki" type="button"><span id="navWiki">Вики</span></button>
-    </nav>
-
+  <div class="course">
+    <h2>Базовый курс детейлинга</h2>
+    <p>Безопасная мойка, деконтаминация, подготовка к защите.</p>
+    <ul>
+      <li>Двухфазная мойка</li>
+      <li>Удаление металлических частиц</li>
+      <li>Работа с глиной</li>
+      <li>Безопасная сушка</li>
+    </ul>
   </div>
 
-  <script src="./app.js"></script>
+  <div class="course pro">
+    <h2>PRO: Глубокая коррекция ЛКП</h2>
+    <p>Подбор абразивной системы, анализ толщины лака, коммерческая стратегия.</p>
+    <ul>
+      <li>Типы лака и их поведение</li>
+      <li>Комбинации паст и кругов</li>
+      <li>Температурный контроль</li>
+      <li>Финиш без голограмм</li>
+    </ul>
+  </div>
+
+</section>
+
+<section id="knowledge" class="tab">
+  <h1>База знаний MR</h1>
+
+  <h2>Автохимия</h2>
+  <p>APC — универсальный очиститель для пластика, текстиля и моторного отсека.</p>
+  <p>Iron remover — удаляет металлические частицы тормозной пыли.</p>
+  <p>Tar remover — безопасное удаление битума.</p>
+
+  <h2>Полировальные системы</h2>
+  <p>Жесткие круги — высокая абразивность.</p>
+  <p>Средние — универсальный этап.</p>
+  <p>Мягкие — финишная обработка.</p>
+
+  <h2>Оборудование</h2>
+  <ul>
+    <li>Орбитальная машинка (DA)</li>
+    <li>Роторная машинка</li>
+    <li>Измеритель толщины ЛКП</li>
+  </ul>
+
+  <h2>Материалы защиты</h2>
+  <ul>
+    <li>Керамические покрытия</li>
+    <li>PPF пленка</li>
+    <li>Силантовые составы</li>
+  </ul>
+
+</section>
+
+<section id="support" class="tab">
+  <h1>Экспертное сопровождение</h1>
+  <p>Разбор ошибок, подбор химии, оптимизация процессов.</p>
+  <textarea placeholder="Опишите ситуацию..."></textarea>
+  <button class="send-btn">Отправить запрос</button>
+</section>
+
+</main>
+
+<script src="app.js"></script>
 </body>
 </html>
