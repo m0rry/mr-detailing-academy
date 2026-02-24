@@ -23,7 +23,7 @@ export function Courses({ t, state }){
       <TopBar
         title={t.tabs.courses}
         right={
-          <div className="row" style={{ gap: 8 }}>
+          <div className="grid grid2" style={{ gap: 10 }}>
             <button className="btn" onClick={()=>nav('/courses', { filter:'free' })}>{t.free}</button>
             <button className="btn" onClick={()=>nav('/courses', { filter:'pro' })}>{t.pro}</button>
             <button className="btn" onClick={()=>nav('/courses')}>{state.lang==='ru' ? 'Все' : 'הכל'}</button>
