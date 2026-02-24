@@ -43,7 +43,7 @@ export function Wiki({ t, state }){
       </div>
 
       {!special ? (
-        <div className="row" style={{ marginTop: 12, flexWrap:'wrap' }}>
+        <div className="grid grid2" style={{ marginTop: 12 }}>
           <div className="col">
             <div className="card">
               <div className="cardHeader">
@@ -99,9 +99,9 @@ export function Wiki({ t, state }){
 
       {!special ? (
         <>
-          <div className="row" style={{ marginTop: 12, flexWrap:'wrap' }}>
+          <div className="grid grid2" style={{ marginTop: 12 }}>
             {cats.map(c => (
-              <div key={c.id} className="col">
+              <div key={c.id}>
                 <div className="item" onClick={()=>nav('/wiki-cat', { id: c.id })} role="button" tabIndex={0}>
                   <div style={{ fontWeight: 800 }}>{c.icon} {c.title[state.lang]}</div>
                   <div className="small" style={{ marginTop: 6 }}>{state.lang==='ru' ? 'Открыть раздел' : 'פתח קטגוריה'}</div>
