@@ -14,7 +14,7 @@ export function AppLayout() {
       {/* Top bar */}
       <header className="sticky top-0 z-40 glass border-b border-border px-4 py-3 flex items-center justify-between">
         <button onClick={() => navigate('/')} className="text-lg font-bold tracking-tight text-foreground">
-          <span className="text-primary">GLOSS</span> Academy
+            <span className="text-primary">​MR</span> Detailing Academy
         </button>
         <div className="flex items-center gap-2">
           {isAdmin && (
